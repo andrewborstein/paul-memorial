@@ -111,7 +111,7 @@ export default function TributeForm({ onCreated }: { onCreated: (t: any) => void
       let media: any[] = []
       if (files && files.length) media = await uploadToCloudinary(files)
 
-      const res = await fetch('/api/submit-tribute', {
+      const res = await fetch('/api/submit-memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, body, youtube, media, 'cf-turnstile-response': turnstileToken })
