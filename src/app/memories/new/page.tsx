@@ -1,41 +1,164 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { v4 as uuidv4 } from 'uuid'
+import imageCompression from 'browser-image-compression'
 
 export default function NewMemoryPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+  const [files, setFiles] = useState<FileList | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [turnstileLoaded, setTurnstileLoaded] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; message: string } | null>(null)
+  const turnstileId = useRef(`turnstile-${Math.random().toString(36).substr(2, 9)}`)
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    setSelectedFiles(prev => [...prev, ...files])
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+    
+    // Manually render Turnstile widget when script loads
+    const renderTurnstile = () => {
+      if ((window as any).turnstile) {
+        setTurnstileLoaded(true)
+        console.log('Turnstile loaded successfully')
+        // Manually render the widget with unique ID
+        const widgetId = (window as any).turnstile.render(`#${turnstileId.current}`, {
+          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+          callback: (token: string) => {
+            console.log('Turnstile token:', token)
+            setTurnstileToken(token)
+          }
+        })
+      } else {
+        console.log('Turnstile not loaded yet')
+        setTimeout(renderTurnstile, 1000)
+      }
+    }
+    renderTurnstile()
+  }, [isClient])
+
+  async function uploadToCloudinary(files: FileList) {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+    const urls: { type: 'image'|'video', publicId: string }[] = []
+    const fileArray = Array.from(files)
+    
+    setUploadProgress({ current: 0, total: fileArray.length, message: 'Starting uploads...' })
+    
+    for (let i = 0; i < fileArray.length; i++) {
+      const f = fileArray[i]
+      let fileToUpload = f
+      
+      // Compress images if they're too large
+      if (f.type.startsWith('image/') && f.size > 5 * 1024 * 1024) { // 5MB threshold
+        try {
+          console.log(`Compressing ${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB)`)
+          fileToUpload = await imageCompression(f, {
+            maxSizeMB: 4, // Target 4MB max
+            maxWidthOrHeight: 1920, // Max dimension
+            useWebWorker: true
+          })
+          console.log(`Compressed to ${(fileToUpload.size / 1024 / 1024).toFixed(1)}MB`)
+        } catch (error) {
+          console.warn('Compression failed, using original file:', error)
+          fileToUpload = f
+        }
+      }
+      
+      // Update progress for upload
+      setUploadProgress({ 
+        current: i + 1, 
+        total: fileArray.length, 
+        message: `Uploading ${f.name}...` 
+      })
+      
+      const fd = new FormData()
+      fd.append('file', fileToUpload)
+      fd.append('upload_preset', preset)
+      // Let Cloudinary determine resource_type automatically
+      fd.append('resource_type', 'auto')
+      
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, { method: 'POST', body: fd })
+      const json = await res.json()
+      
+      if (json.error) {
+        throw new Error(`Upload failed: ${json.error.message}`)
+      }
+      
+      const kind = json.resource_type === 'video' ? 'video' : 'image'
+      // Store just the public ID instead of full URL
+      const publicId = json.public_id
+      urls.push({ type: kind, publicId })
+    }
+    
+    setUploadProgress(null)
+    return urls
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError(null)
     
-    const formData = new FormData(e.target as HTMLFormElement)
-    const body = formData.get('body') as string
     const hasText = body && body.trim().length > 0
-    const hasPhotos = selectedFiles.length > 0
+    const hasPhotos = files && files.length > 0
     
     if (!hasText && !hasPhotos) {
-      alert('Please provide either text or photos for your memory.')
+      setError('Please provide either text or photos for your memory.')
       return
     }
     
-    setIsSubmitting(true)
+    // Warn if too many files are selected (increased limit)
+    if (files && files.length > 150) {
+      setError('Please select 150 or fewer photos/videos. You can create multiple memories if needed.')
+      return
+    }
     
-    // TODO: Implement actual submission logic
-    // This would typically involve:
-    // 1. Upload photos to Cloudinary or similar service
-    // 2. Create a new memory with the form data
-    // 3. Redirect to the new memory
-    
-    setTimeout(() => {
-      setIsSubmitting(false)
-      alert('Memory creation coming soon!')
-    }, 2000)
+    setSubmitting(true)
+    try {
+      let media: { type: 'image'|'video', publicId: string }[] = []
+      if (files && files.length) media = await uploadToCloudinary(files)
+
+      const res = await fetch('/api/submit-memory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          title: title || undefined,
+          body: hasText ? body : '', 
+          media, 
+          'cf-turnstile-response': turnstileToken 
+        })
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      
+      // Reset form
+      setName(''); setEmail(''); setTitle(''); setBody(''); setTurnstileToken(null); setUploadProgress(null)
+      if ((document.getElementById('file') as HTMLInputElement)) {
+        (document.getElementById('file') as HTMLInputElement).value = ''
+      }
+      // Reset Turnstile widget
+      if ((window as any).turnstile) {
+        (window as any).turnstile.reset(`#${turnstileId.current}`)
+      }
+      
+      // Redirect to the new memory
+      window.location.href = `/memories/${data.item.id}`
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -59,6 +182,26 @@ export default function NewMemoryPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {error && <div className="text-red-600 text-sm">{error}</div>}
+        {uploadProgress && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-blue-800">
+                {uploadProgress.message}
+              </span>
+              <span className="text-sm text-blue-600">
+                {uploadProgress.current} of {uploadProgress.total}
+              </span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+        
         <div>
           <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
             Your Name *
@@ -66,7 +209,8 @@ export default function NewMemoryPage() {
           <input
             type="text"
             id="name"
-            name="name"
+            value={name}
+            onChange={e => setName(e.target.value)}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your name"
@@ -83,7 +227,8 @@ export default function NewMemoryPage() {
           <input
             type="email"
             id="email"
-            name="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your email"
@@ -100,7 +245,8 @@ export default function NewMemoryPage() {
           <input
             type="text"
             id="title"
-            name="title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
             maxLength={100}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Give your memory a title"
@@ -116,7 +262,8 @@ export default function NewMemoryPage() {
           </p>
           <textarea
             id="body"
-            name="body"
+            value={body}
+            onChange={e => setBody(e.target.value)}
             rows={6}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Share your memory, story, or message"
@@ -124,40 +271,34 @@ export default function NewMemoryPage() {
         </div>
 
         <div>
-          <label htmlFor="photos" className="block text-sm font-semibold text-gray-700 mb-2">
-            Photos (Optional)
+          <label htmlFor="file" className="block text-sm font-semibold text-gray-700 mb-2">
+            Photos / videos (Optional)
           </label>
           <input
+            id="file"
             type="file"
-            id="photos"
-            name="photos"
             multiple
-            accept="image/*"
-            onChange={handleFileSelect}
+            accept="image/*,video/*"
+            onChange={e => setFiles(e.target.files)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+          <p className="text-xs text-gray-500 mt-1">Large images are automatically compressed. Videos must be under 10MB. You can upload up to 150 photos/videos per memory.</p>
         </div>
 
-        {selectedFiles.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Selected Files:</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="text-xs text-gray-600">
-                  {file.name}
-                </div>
-              ))}
-            </div>
+        {/* Turnstile */}
+        {isClient && (
+          <div className="flex justify-start">
+            <div id={turnstileId.current} data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} />
           </div>
         )}
 
         <div className="pt-4">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={submitting}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Sharing Memory...' : 'Share Memory'}
+            {submitting ? 'Sharing Memory...' : 'Share Memory'}
           </button>
         </div>
       </form>

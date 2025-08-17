@@ -1,6 +1,7 @@
 import { listTributes } from './notion'
 import fs from 'fs/promises'
 import path from 'path'
+import { publicIdToUrl } from './cloudinary'
 
 export interface Memory {
   id: string
@@ -45,17 +46,22 @@ export async function getAllMemories(): Promise<Memory[]> {
   
   return data.map((item) => {
     const photos = (item.media || [])
-      .filter((m: any) => m.type === 'image')
-      .map((media: any, index: number) => ({
-        id: `${item.id}-${index}`,
-        url: media.url,
-        caption: media.caption,
-        type: 'image' as const,
-        memoryId: item.id,
-        memoryName: item.name,
-        memoryIndex: index + 1,
-        totalInMemory: (item.media || []).filter((m: any) => m.type === 'image').length
-      }))
+      .filter((m: any) => m.type === 'image' || m.type === 'video')
+      .map((media: any, index: number) => {
+        // Convert public ID to URL if needed
+        const url = media.url || (media.publicId ? publicIdToUrl(media.publicId, media.type) : '')
+        
+        return {
+          id: `${item.id}-${index}`,
+          url,
+          caption: media.caption,
+          type: media.type as 'image' | 'video',
+          memoryId: item.id,
+          memoryName: item.name,
+          memoryIndex: index + 1,
+          totalInMemory: (item.media || []).filter((m: any) => m.type === 'image' || m.type === 'video').length
+        }
+      })
     
     return {
       id: item.id,

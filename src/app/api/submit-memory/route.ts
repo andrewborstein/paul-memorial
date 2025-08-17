@@ -30,24 +30,36 @@ export async function POST(req: Request) {
       ...(body.youtube ? [{ type: 'youtube', url: body.youtube }] : [])
     ]
 
-    const item = {
+    // Truncate body text if it's too long for Notion's 2000 character limit
+    // Leave some room for the JSON structure and other fields
+    const maxBodyLength = 1500
+    const truncatedBody = body.body && body.body.length > maxBodyLength 
+      ? body.body.substring(0, maxBodyLength) + '...'
+      : body.body
+
+    // Create tribute without media to keep JSON small
+    const tributeWithoutMedia = {
       id,
       createdAt,
       name: body.name,
+      title: body.title,
       emailHash: body.email ? emailHash(body.email) : undefined,
-      body: body.body,
-      media,
+      body: truncatedBody,
+      media: [], // Empty array to keep JSON small
       comments: [],
       editToken
     }
 
+    // Store media separately if there are any
+    const mediaData = media.length > 0 ? JSON.stringify(media) : null
+
     if ((process.env.DATA_SOURCE||'notion') === 'file') {
       // In file mode, write is not supported in serverless without FS write to repo; you can wire GitHub commits later.
-      return NextResponse.json({ item }, { status: 201 })
+      return NextResponse.json({ item: tributeWithoutMedia }, { status: 201 })
     }
 
-    await createTribute(item)
-    return NextResponse.json({ item }, { status: 201 })
+    await createTribute(tributeWithoutMedia, mediaData || undefined)
+    return NextResponse.json({ item: tributeWithoutMedia }, { status: 201 })
   } catch (e: any) {
     return new Response(e?.message || 'Error', { status: 500 })
   }

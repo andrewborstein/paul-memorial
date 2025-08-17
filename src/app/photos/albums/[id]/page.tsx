@@ -73,7 +73,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {album.photos.map((photo) => (
+          {album.photos.map((photo: any) => (
             <Link 
               key={photo.id} 
               href={`/photos/${photo.id}?from=/photos/albums/${album.id}`}

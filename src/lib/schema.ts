@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 export const mediaItem = z.object({
   type: z.enum(['image', 'youtube', 'video']).default('image'),
-  url: z.string().url(),
+  url: z.string().url().optional(),
+  publicId: z.string().optional(),
   caption: z.string().optional()
 })
 
