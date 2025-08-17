@@ -13,7 +13,6 @@ const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   ...compat.extends('prettier'),
   {
-    plugins: ['prettier'],
     rules: {
       // Relax TypeScript rules for development
       '@typescript-eslint/no-explicit-any': 'off',
