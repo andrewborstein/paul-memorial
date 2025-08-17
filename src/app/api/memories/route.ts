@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const source = process.env.DATA_SOURCE || 'notion'
     if (source === 'file') {
-      const dir = path.join(process.cwd(), 'data', 'tributes')
+      const dir = path.join(process.cwd(), 'data', 'memories')
       const files = await fs.readdir(dir)
       const items = [] as any[]
       for (const f of files.filter(f=>f.endsWith('.json'))) {
