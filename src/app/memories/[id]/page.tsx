@@ -35,10 +35,6 @@ export default function MemoryPage({ params }: MemoryPageProps) {
     loadMemory()
   }, [params])
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
-
   const MessageDisplay = ({ message }: { message: string }) => {
     const [isExpanded, setIsExpanded] = useState(false)
     const maxLength = 300
@@ -64,7 +60,7 @@ export default function MemoryPage({ params }: MemoryPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-2">
       {/* Breadcrumbs and Navigation */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -77,12 +73,14 @@ export default function MemoryPage({ params }: MemoryPageProps) {
                 </Link>
               </li>
               <li className="text-gray-400">/</li>
-              <li className="text-gray-600 font-medium">{memory.name}</li>
+              <li className="text-gray-600 font-medium">
+                {loading ? 'Loading...' : memory?.title || memory?.name || 'Memory'}
+              </li>
             </ol>
           </nav>
 
           {/* Navigation Controls */}
-          {(prevMemory || nextMemory) && (
+          {!loading && (prevMemory || nextMemory) && (
             <div className="flex items-center space-x-2">
               {prevMemory && (
                 <Link
@@ -105,56 +103,62 @@ export default function MemoryPage({ params }: MemoryPageProps) {
         </div>
       </div>
 
-      {/* Memory Content */}
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-semibold">{memory.name}</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {new Date(memory.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </p>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-gray-500">Loading memory...</div>
         </div>
-
-        {/* Text Content */}
-        {memory.hasText && (
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <MessageDisplay message={memory.body!} />
-          </div>
-        )}
-
-        {/* Photos */}
-        {memory.hasPhotos && (
+      ) : (
+        /* Memory Content */
+        <div className="space-y-6">
+          {/* Header */}
           <div>
-            <h2 className="text-lg font-medium mb-4">
-              Photos ({memory.photos.length})
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {memory.photos.map((photo) => (
-                <Link 
-                  key={photo.id} 
-                  href={`/memories/photos/${photo.id}?from=/memories/${memory.id}`}
-                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
-                >
-                  <img 
-                    src={photo.url} 
-                    alt={photo.caption || 'Photo'} 
-                    className="w-full h-full object-cover"
-                  />
-                  {photo.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      {photo.caption}
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
+            <h1 className="text-2xl font-semibold mb-3">{memory.title || memory.name}</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {new Date(memory.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
           </div>
-        )}
-      </div>
+
+          {/* Text Content */}
+          {memory.hasText && (
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <MessageDisplay message={memory.body!} />
+            </div>
+          )}
+
+          {/* Photos */}
+          {memory.hasPhotos && (
+            <div>
+              <h2 className="text-lg font-medium mb-4">
+                Photos ({memory.photos.length})
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {memory.photos.map((photo: any) => (
+                  <Link 
+                    key={photo.id} 
+                    href={`/memories/photos/${photo.id}?from=/memories/${memory.id}`}
+                    className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
+                  >
+                    <img 
+                      src={photo.url} 
+                      alt={photo.caption || 'Photo'} 
+                      className="w-full h-full object-cover"
+                    />
+                    {photo.caption && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                        {photo.caption}
+                      </div>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

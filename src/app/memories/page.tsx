@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getAllMemories } from '@/lib/memories'
+import { optimizeImageUrl } from '@/lib/cloudinary'
 
 export default async function MemoriesPage() {
   const memories = await getAllMemories()
@@ -8,7 +9,7 @@ export default async function MemoriesPage() {
     <section className="max-w-4xl mx-auto px-2">
       <div className="flex items-center justify-between mb-8 gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold mb-2">Memories</h1>
+          <h1 className="text-2xl font-semibold mb-3">Memories</h1>
           <p className="text-gray-600">Read memories shared by friends and family.</p>
         </div>
         <Link 
@@ -30,7 +31,7 @@ export default async function MemoriesPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {memories.map((memory) => (
             <Link 
               key={memory.id} 
@@ -38,16 +39,16 @@ export default async function MemoriesPage() {
               className="block"
             >
               <article 
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group"
               >
                 <div className="flex gap-6">
                 {/* Text Content */}
                 <div className="flex-1 min-w-0">
-                  <header className="mb-3">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1 hover:text-blue-600 transition-colors">
-                      {memory.name}
+                                      <header className="mb-2">
+                                          <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                      {memory.title || memory.name}
                     </h2>
-                  </header>
+                    </header>
                   
                   {memory.hasText && (
                     <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
@@ -81,7 +82,7 @@ export default async function MemoriesPage() {
                   <div className="flex-shrink-0">
                     <div className="w-24 h-24 rounded-lg overflow-hidden relative">
                       <img 
-                        src={memory.photos[0].url} 
+                        src={optimizeImageUrl(memory.photos[0].url, 96)} 
                         alt="Memory preview" 
                         className="w-full h-full object-cover"
                       />

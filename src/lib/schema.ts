@@ -10,6 +10,7 @@ export const tribute = z.object({
   id: z.string(),
   createdAt: z.string(),
   name: z.string().min(1),
+  title: z.string().optional(),
   emailHash: z.string().optional(),
   body: z.string().min(1),
   media: z.array(mediaItem).default([]),

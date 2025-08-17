@@ -62,7 +62,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
         >
           ← Back to Albums
         </Link>
-        <h1 className="text-2xl font-semibold">{album.name}</h1>
+        <h1 className="text-2xl font-semibold mb-3">{album.name}</h1>
         <p className="text-sm text-gray-500 mt-1 font-medium">{album.photoCount} photos</p>
         {album.message && <MessageDisplay message={album.message} />}
       </div>

@@ -20,7 +20,7 @@ export default async function AllPhotosPage() {
       </nav>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">All photos</h1>
+        <h1 className="text-2xl font-semibold mb-3">All photos</h1>
         <p className="text-gray-600 mt-2">Browse all photos shared in memories</p>
       </div>
 

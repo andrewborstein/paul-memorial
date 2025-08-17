@@ -36,7 +36,7 @@ export default function UploadPage() {
         >
           ← Back to Photos
         </Link>
-        <h1 className="text-2xl font-semibold">Upload Photos</h1>
+        <h1 className="text-2xl font-semibold mb-3">Upload Photos</h1>
         <p className="text-gray-600 mt-2">Share photos with your memories</p>
       </div>
 

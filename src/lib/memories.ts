@@ -5,6 +5,7 @@ import path from 'path'
 export interface Memory {
   id: string
   name: string
+  title?: string
   body?: string
   createdAt: string
   photos: Photo[]
@@ -59,6 +60,7 @@ export async function getAllMemories(): Promise<Memory[]> {
     return {
       id: item.id,
       name: item.name,
+      title: item.title,
       body: item.body,
       createdAt: item.createdAt,
       photos,

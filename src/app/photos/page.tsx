@@ -1,15 +1,17 @@
 import Link from 'next/link'
 import { getAllPhotos, getMemoriesWithPhotos } from '@/lib/memories'
+import { optimizeImageUrl } from '@/lib/cloudinary'
 
 export default async function PhotosPage() {
   const allPhotos = await getAllPhotos()
   const memoriesWithPhotos = await getMemoriesWithPhotos()
 
   return (
-    <section className="space-y-8">
+    <section className="max-w-4xl mx-auto px-2">
+      <div className="space-y-8">
       <div className="flex items-center justify-between mb-6 gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold mb-2">Photos</h1>
+          <h1 className="text-2xl font-semibold mb-3">Photos</h1>
           <p className="text-gray-600">Browse photos shared in memories.</p>
         </div>
         <Link 
@@ -42,7 +44,7 @@ export default async function PhotosPage() {
               className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
             >
               <img 
-                src={photo.url} 
+                src={optimizeImageUrl(photo.url, 200)} 
                 alt={photo.caption || 'Photo'} 
                 className="w-full h-full object-cover"
               />
@@ -72,19 +74,24 @@ export default async function PhotosPage() {
               href={`/memories/${memory.id}`}
               className="group block"
             >
-              <div className="aspect-square overflow-hidden rounded-lg mb-2">
-                <img 
-                  src={memory.photos[0].url} 
-                  alt={memory.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div className="p-4">
+                  <h3 className="font-medium text-sm mb-1">{memory.title || memory.name}</h3>
+                  <p className="text-xs text-gray-500">{memory.photos.length} photos</p>
+                </div>
+                <div className="aspect-square overflow-hidden">
+                  <img 
+                    src={optimizeImageUrl(memory.photos[0].url, 300)} 
+                    alt={memory.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
               </div>
-              <h3 className="font-medium text-sm">{memory.name}</h3>
-              <p className="text-xs text-gray-500">{memory.photos.length} photos</p>
             </Link>
           ))}
         </div>
       </div>
+    </div>
     </section>
   )
 }

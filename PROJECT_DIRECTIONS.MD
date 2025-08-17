@@ -437,7 +437,7 @@ export default function TributesPage() {
   return (
     <div className="grid gap-6">
       <section>
-        <h1 className="text-2xl font-semibold mb-2">Share a Tribute</h1>
+        <h1 className="text-2xl font-semibold mb-3">Share a Tribute</h1>
         <p className="text-gray-600 mb-4">Write a note or story; add photos or a YouTube link. Email is used only to send you an edit link.</p>
         <TributeForm onCreated={(t) => mutate({ items: [t, ...(data?.items||[])] }, { revalidate: true })} />
       </section>
@@ -1013,7 +1013,7 @@ export default function AlbumsPage(){
   const items = data?.items||[]
   return (
     <section className="grid gap-4">
-      <h1 className="text-2xl font-semibold">Albums</h1>
+      <h1 className="text-2xl font-semibold mb-3">Albums</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((a:any)=>(
           <Link key={a.slug} href={`/albums/${a.slug}`} className="card hover:bg-gray-50">
@@ -1074,7 +1074,7 @@ export default function AlbumDetail({ params }: { params: { slug: string }}){
   return (
     <section className="grid gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{album.title}</h1>
+        <h1 className="text-2xl font-semibold mb-3">{album.title}</h1>
         <button className="btn" onClick={saveOrder}>Save order</button>
       </div>
       <p className="text-gray-600">{album.description}</p>

@@ -26,7 +26,7 @@ export default async function PhotosByMemoryPage() {
       </nav>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Photos by memory</h1>
+        <h1 className="text-2xl font-semibold mb-3">Photos by memory</h1>
         <p className="text-gray-600 mt-2">Photos organized by the memories they were shared in</p>
       </div>
 
@@ -49,7 +49,7 @@ export default async function PhotosByMemoryPage() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
               </div>
-              <h3 className="font-medium text-sm mb-1">{memory.name}</h3>
+              <h3 className="font-medium text-sm mb-1">{memory.title || memory.name}</h3>
               <p className="text-xs text-gray-500 mb-2">{memory.photos.length} photos</p>
               {memory.hasText && (
                 <p className="text-xs text-gray-600 line-clamp-2">
