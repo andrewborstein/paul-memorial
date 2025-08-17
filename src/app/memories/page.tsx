@@ -81,11 +81,11 @@ export default async function MemoriesPage() {
                 {memory.hasPhotos && (
                   <div className="flex-shrink-0">
                     <div className="w-24 h-24 rounded-lg overflow-hidden relative">
-                      <img 
-                        src={optimizeImageUrl(memory.photos[0].url, 96)} 
-                        alt="Memory preview" 
-                        className="w-full h-full object-cover"
-                      />
+                                              <img
+                          src={optimizeImageUrl(memory.photos[0].url, 96, 50)}
+                          alt="Memory preview"
+                          className="w-full h-full object-cover"
+                        />
                       <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
                         {memory.photos.length > 1 && (
                           <span className="text-white text-xs font-medium">

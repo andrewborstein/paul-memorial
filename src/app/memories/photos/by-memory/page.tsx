@@ -44,7 +44,7 @@ export default async function PhotosByMemoryPage() {
             >
               <div className="aspect-square overflow-hidden rounded-lg mb-3">
                 <img 
-                  src={memory.photos[0].url} 
+                  src={optimizeImageUrl(memory.photos[0].url, 300, 60)} 
                   alt={memory.name} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />

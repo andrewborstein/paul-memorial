@@ -80,11 +80,11 @@ export default async function PhotosPage() {
                   <p className="text-xs text-gray-500">{memory.photos.length} photos</p>
                 </div>
                 <div className="aspect-square overflow-hidden">
-                  <img 
-                    src={optimizeImageUrl(memory.photos[0].url, 300)} 
-                    alt={memory.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
+                                        <img
+                        src={optimizeImageUrl(memory.photos[0].url, 300, 60)}
+                        alt={memory.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
                 </div>
               </div>
             </Link>

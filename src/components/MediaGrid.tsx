@@ -1,6 +1,9 @@
 'use client'
 import useSWR from 'swr'
+import { optimizeImageUrl } from '@/lib/cloudinary'
+
 const fetcher = (u:string)=>fetch(u).then(r=>r.json())
+
 export default function MediaGrid(){
   const { data } = useSWR('/api/memories', fetcher)
   const media = (data?.items||[]).flatMap((t:any)=>t.media||[])
@@ -8,7 +11,7 @@ export default function MediaGrid(){
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {media.map((m:any,i:number)=> m.type==='image' ? (
-        <img key={i} src={m.url} className="rounded-lg" />
+        <img key={i} src={optimizeImageUrl(m.url, 400, 70)} className="rounded-lg" />
       ) : m.type==='video' ? (
         <video key={i} src={m.url} controls className="rounded-lg" />
       ) : null)}

@@ -46,10 +46,9 @@ export default function NewMemoryPage() {
     renderTurnstile()
   }, [isClient])
 
-  async function uploadToCloudinary(files: FileList) {
+  async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
     const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-    const urls: { type: 'image'|'video', publicId: string }[] = []
     const fileArray = Array.from(files)
     
     setUploadProgress({ current: 0, total: fileArray.length, message: 'Starting uploads...' })
@@ -95,13 +94,32 @@ export default function NewMemoryPage() {
       }
       
       const kind = json.resource_type === 'video' ? 'video' : 'image'
-      // Store just the public ID instead of full URL
       const publicId = json.public_id
-      urls.push({ type: kind, publicId })
+      
+      // Create Notion record immediately after successful upload
+      setUploadProgress({ 
+        current: i + 1, 
+        total: fileArray.length, 
+        message: `Creating record for ${f.name}...` 
+      })
+      
+      const photoRes = await fetch('/api/create-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memoryId,
+          publicId,
+          type: kind,
+          caption: undefined // We can add caption support later
+        })
+      })
+      
+      if (!photoRes.ok) {
+        throw new Error(`Failed to create photo record: ${await photoRes.text()}`)
+      }
     }
     
     setUploadProgress(null)
-    return urls
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -124,9 +142,7 @@ export default function NewMemoryPage() {
     
     setSubmitting(true)
     try {
-      let media: { type: 'image'|'video', publicId: string }[] = []
-      if (files && files.length) media = await uploadToCloudinary(files)
-
+      // Create memory first
       const res = await fetch('/api/submit-memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,12 +151,16 @@ export default function NewMemoryPage() {
           email, 
           title: title || undefined,
           body: hasText ? body : '', 
-          media, 
           'cf-turnstile-response': turnstileToken 
         })
       })
       if (!res.ok) throw new Error(await res.text())
       const data = await res.json()
+      
+      // Upload photos and create Notion records
+      if (files && files.length) {
+        await uploadToCloudinary(files, data.memoryId)
+      }
       
       // Reset form
       setName(''); setEmail(''); setTitle(''); setBody(''); setTurnstileToken(null); setUploadProgress(null)
