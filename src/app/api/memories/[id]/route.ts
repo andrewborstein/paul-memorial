@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const memory = await getMemoryById(id)
     
     if (!memory) {
