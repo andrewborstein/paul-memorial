@@ -27,18 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Home
               </Link>
               <Link 
-                href="/about" 
-                className={isActive('/about') ? 'text-blue-600 font-medium' : 'hover:text-blue-600'}
-              >
-                About
-              </Link>
-              <Link 
-                href="/events" 
-                className={isActive('/events') ? 'text-blue-600 font-medium' : 'hover:text-blue-600'}
-              >
-                Events
-              </Link>
-              <Link 
                 href="/memories" 
                 className={isActive('/memories') ? 'text-blue-600 font-medium' : 'hover:text-blue-600'}
               >
@@ -60,7 +48,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main className="max-w-7xl mx-auto py-8 px-2">{children}</main>
-        <footer className="max-w-4xl mx-auto py-12 text-sm text-gray-500 px-2">Made with love by friends & family</footer>
+        <footer className="max-w-4xl mx-auto py-12 text-sm text-gray-500 px-2">
+          Made with love by friends & family • Send feedback or questions to <a href="mailto:contact@paulbedrosian.com" className="text-blue-600 hover:text-blue-800">contact@paulbedrosian.com</a>
+        </footer>
         <script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           async defer
