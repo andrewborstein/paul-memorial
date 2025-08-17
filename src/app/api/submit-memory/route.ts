@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ item: tributeWithoutMedia }, { status: 201 })
     }
 
-    await createTribute(tributeWithoutMedia, mediaData || undefined)
+    const tributePage = await createTribute(tributeWithoutMedia, mediaData || undefined)
     return NextResponse.json({ item: tributeWithoutMedia }, { status: 201 })
   } catch (e: any) {
     return new Response(e?.message || 'Error', { status: 500 })
