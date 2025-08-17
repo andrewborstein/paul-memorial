@@ -5,6 +5,11 @@ import { emailHash } from '@/lib/utils'
 import { createMemory } from '@/lib/notion'
 
 async function verifyTurnstile(token: string | undefined) {
+  // Skip verification in development/test environments
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
+    return true
+  }
+  
   if (!process.env.TURNSTILE_SECRET_KEY) return true
   if (!token) return false
   const formData = new FormData()

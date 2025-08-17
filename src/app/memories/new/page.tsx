@@ -289,7 +289,7 @@ export default function NewMemoryPage() {
         </div>
 
         {/* Turnstile */}
-        {isClient && (
+        {isClient && process.env.NODE_ENV === 'production' && (
           <div className="flex justify-start">
             <div id={turnstileId.current} data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} />
           </div>
