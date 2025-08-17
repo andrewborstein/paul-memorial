@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { getPhotoById, getAllPhotos } from '@/lib/memories'
 
 interface PhotoPageProps {
-  params: { id: string }
-  searchParams: { from?: string }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
 }
 
 export default async function PhotoPage({ params, searchParams }: PhotoPageProps) {

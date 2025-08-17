@@ -3,10 +3,10 @@ import { getMemoryById } from '@/lib/memories'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const memory = await getMemoryById(id)
     
     if (!memory) {

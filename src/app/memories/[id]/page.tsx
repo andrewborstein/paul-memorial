@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 interface MemoryPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default function MemoryPage({ params }: MemoryPageProps) {

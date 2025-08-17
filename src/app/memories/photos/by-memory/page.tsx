@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getMemoriesWithPhotos } from '@/lib/memories'
+import { optimizeImageUrl } from '@/lib/cloudinary'
 
 export default async function PhotosByMemoryPage() {
   const memoriesWithPhotos = await getMemoriesWithPhotos()
