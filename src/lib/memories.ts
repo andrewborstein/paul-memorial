@@ -1,4 +1,4 @@
-import { listTributes } from './notion'
+import { listMemories } from './notion'
 import fs from 'fs/promises'
 import path from 'path'
 import { publicIdToUrl } from './cloudinary'
@@ -38,7 +38,7 @@ async function getMemoriesData() {
     items.sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
     return items
   }
-  return await listTributes()
+  return await listMemories()
 }
 
 export async function getAllMemories(): Promise<Memory[]> {

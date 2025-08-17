@@ -1,21 +1,21 @@
 import { Client } from '@notionhq/client'
-import { tribute, type Tribute } from './schema'
+import { memory, type Memory } from './schema'
 
 const token = process.env.NOTION_TOKEN!
-const dbId = process.env.NOTION_TRIBUTES_DB_ID!
+const dbId = process.env.NOTION_MEMORIES_DB_ID!
 const photosDbId = process.env.NOTION_PHOTOS_DB_ID!
 
 export const notion = new Client({ auth: token })
 
-export async function listTributes(): Promise<Tribute[]> {
+export async function listMemories(): Promise<Memory[]> {
   const res = await notion.databases.query({ database_id: dbId, sorts: [{ property: 'Date', direction: 'descending' }] })
-  const items: Tribute[] = []
+  const items: Memory[] = []
   
   for (const p of res.results) {
     if (p.object !== 'page' || !('properties' in p)) continue
     
     // Read from native Notion fields
-    const name = (p.properties['Name'] as any)?.title?.[0]?.plain_text || 'Tribute'
+    const name = (p.properties['Name'] as any)?.title?.[0]?.plain_text || 'Memory'
     const body = (p.properties['Body'] as any)?.rich_text?.[0]?.plain_text || ''
     const title = (p.properties['Title'] as any)?.rich_text?.[0]?.plain_text
     const emailHash = (p.properties['EmailHash'] as any)?.rich_text?.[0]?.plain_text
@@ -59,8 +59,8 @@ export async function listTributes(): Promise<Tribute[]> {
       }
     }
     
-    // Create tribute object from native fields
-    const tributeData = {
+    // Create memory object from native fields
+    const memoryData = {
       id: p.id,
       name,
       body,
@@ -73,16 +73,16 @@ export async function listTributes(): Promise<Tribute[]> {
     }
     
     try {
-      const t = tribute.parse(tributeData)
+      const t = memory.parse(memoryData)
       items.push(t)
     } catch (e) {
-      console.warn('Failed to parse tribute:', e)
+      console.warn('Failed to parse memory:', e)
     }
   }
   return items
 }
 
-export async function createTribute(t: Tribute) {
+export async function createMemory(t: Memory) {
   const properties: any = {
     Name: { title: [{ type: 'text', text: { content: t.name } }] },
     Body: { rich_text: [{ type: 'text', text: { content: t.body || '' } }] },
@@ -98,16 +98,16 @@ export async function createTribute(t: Tribute) {
     properties.EmailHash = { rich_text: [{ type: 'text', text: { content: t.emailHash } }] }
   }
   
-  // Create the main tribute
-  const tributePage = await notion.pages.create({
+  // Create the main memory
+  const memoryPage = await notion.pages.create({
     parent: { database_id: dbId },
     properties
   })
   
-  return tributePage
+  return memoryPage
 }
 
-export async function updateTributeJSON(pageId: string, json: any) {
+export async function updateMemoryJSON(pageId: string, json: any) {
   await notion.pages.update({ page_id: pageId, properties: { JSON: { rich_text: [{ type: 'text', text: { content: JSON.stringify(json) } }] } } })
 }
 

@@ -1,4 +1,4 @@
-import { listTributes } from './notion'
+import { listMemories } from './notion'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -37,7 +37,7 @@ async function getMemories() {
     items.sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())
     return items
   }
-  return await listTributes()
+  return await listMemories()
 }
 
 export async function getAllPhotos(): Promise<Photo[]> {

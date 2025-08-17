@@ -1,11 +1,11 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { listTributes } from '../src/lib/notion'
+import { listMemories } from '../src/lib/notion'
 
 async function main(){
   const outDir = path.join(process.cwd(), 'data', 'memories')
   await fs.mkdir(outDir, { recursive: true })
-  const items = await listTributes()
+  const items = await listMemories()
   for (const t of items) {
     const fname = `${t.createdAt.replace(/[:.]/g,'-')}_${t.id}.json`
     await fs.writeFile(path.join(outDir, fname), JSON.stringify(t, null, 2), 'utf8')

@@ -7,7 +7,7 @@ export const mediaItem = z.object({
   caption: z.string().optional()
 })
 
-export const tribute = z.object({
+export const memory = z.object({
   id: z.string(),
   createdAt: z.string(),
   name: z.string().min(1),
@@ -24,5 +24,5 @@ export const tribute = z.object({
   editToken: z.string()
 })
 
-export type Tribute = z.infer<typeof tribute>
+export type Memory = z.infer<typeof memory>
 export type MediaItem = z.infer<typeof mediaItem>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs from 'dayjs'
 import { emailHash } from '@/lib/utils'
-import { createTribute } from '@/lib/notion'
+import { createMemory } from '@/lib/notion'
 
 async function verifyTurnstile(token: string | undefined) {
   if (!process.env.TURNSTILE_SECRET_KEY) return true
@@ -31,8 +31,8 @@ export async function POST(req: Request) {
       ? body.body.substring(0, maxBodyLength) + '...'
       : body.body
 
-    // Create tribute
-    const tributeData = {
+    // Create memory
+    const memoryData = {
       id,
       createdAt,
       name: body.name,
@@ -46,13 +46,13 @@ export async function POST(req: Request) {
 
     if ((process.env.DATA_SOURCE||'notion') === 'file') {
       // In file mode, write is not supported in serverless without FS write to repo; you can wire GitHub commits later.
-      return NextResponse.json({ item: tributeData }, { status: 201 })
+      return NextResponse.json({ item: memoryData }, { status: 201 })
     }
 
-    const tributePage = await createTribute(tributeData)
+    const memoryPage = await createMemory(memoryData)
     return NextResponse.json({ 
-      item: { ...tributeData, id: tributePage.id },
-      memoryId: tributePage.id
+      item: { ...memoryData, id: memoryPage.id },
+      memoryId: memoryPage.id
     }, { status: 201 })
   } catch (e: any) {
     return new Response(e?.message || 'Error', { status: 500 })

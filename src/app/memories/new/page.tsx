@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { v4 as uuidv4 } from 'uuid'
 import imageCompression from 'browser-image-compression'
 
 export default function NewMemoryPage() {
@@ -12,7 +11,6 @@ export default function NewMemoryPage() {
   const [files, setFiles] = useState<FileList | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [turnstileLoaded, setTurnstileLoaded] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; message: string } | null>(null)
@@ -28,16 +26,7 @@ export default function NewMemoryPage() {
     // Manually render Turnstile widget when script loads
     const renderTurnstile = () => {
       if ((window as any).turnstile) {
-        setTurnstileLoaded(true)
         console.log('Turnstile loaded successfully')
-        // Manually render the widget with unique ID
-        const widgetId = (window as any).turnstile.render(`#${turnstileId.current}`, {
-          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-          callback: (token: string) => {
-            console.log('Turnstile token:', token)
-            setTurnstileToken(token)
-          }
-        })
       } else {
         console.log('Turnstile not loaded yet')
         setTimeout(renderTurnstile, 1000)

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { notion } from '@/lib/notion'
 
 const photosDbId = process.env.NOTION_PHOTOS_DB_ID!
-const memoriesDbId = process.env.NOTION_TRIBUTES_DB_ID!
+const memoriesDbId = process.env.NOTION_MEMORIES_DB_ID!
 
 export async function POST(req: Request) {
   try {
