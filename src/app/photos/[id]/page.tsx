@@ -1,41 +1,51 @@
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { getPhotoById, getAlbumById, getAllPhotos, getAlbums } from '@/lib/photos'
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import {
+  getPhotoById,
+  getAlbumById,
+  getAllPhotos,
+  getAlbums,
+} from '@/lib/photos';
 
 interface PhotoPageProps {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ from?: string }>
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
-export default async function PhotoPage({ params, searchParams }: PhotoPageProps) {
-  const { id } = await params
-  const { from } = await searchParams
-  const photo = await getPhotoById(id)
-  
+export default async function PhotoPage({
+  params,
+  searchParams,
+}: PhotoPageProps) {
+  const { id } = await params;
+  const { from } = await searchParams;
+  const photo = await getPhotoById(id);
+
   if (!photo) {
-    notFound()
+    notFound();
   }
 
   // Get navigation context
-  let allPhotos: any[] = []
-  let currentIndex = -1
-  let prevPhoto: any = null
-  let nextPhoto: any = null
+  let allPhotos: any[] = [];
+  let currentIndex = -1;
+  let prevPhoto: any = null;
+  let nextPhoto: any = null;
 
   if (from?.includes('/photos/all')) {
     // Navigation within all photos
-    allPhotos = await getAllPhotos()
-    currentIndex = allPhotos.findIndex(p => p.id === id)
-    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1]
-    if (currentIndex < allPhotos.length - 1) nextPhoto = allPhotos[currentIndex + 1]
+    allPhotos = await getAllPhotos();
+    currentIndex = allPhotos.findIndex((p) => p.id === id);
+    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
+    if (currentIndex < allPhotos.length - 1)
+      nextPhoto = allPhotos[currentIndex + 1];
   } else if (photo.albumId) {
     // Navigation within album
-    const album = await getAlbumById(photo.albumId)
+    const album = await getAlbumById(photo.albumId);
     if (album) {
-      allPhotos = album.photos
-      currentIndex = allPhotos.findIndex(p => p.id === id)
-      if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1]
-      if (currentIndex < allPhotos.length - 1) nextPhoto = allPhotos[currentIndex + 1]
+      allPhotos = album.photos;
+      currentIndex = allPhotos.findIndex((p) => p.id === id);
+      if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
+      if (currentIndex < allPhotos.length - 1)
+        nextPhoto = allPhotos[currentIndex + 1];
     }
   }
 
@@ -48,7 +58,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
           <nav>
             <ol className="flex items-center space-x-2 text-sm">
               <li>
-                <Link href="/photos" className="text-blue-600 hover:text-blue-800">
+                <Link
+                  href="/photos"
+                  className="text-blue-600 hover:text-blue-800"
+                >
                   Photos
                 </Link>
               </li>
@@ -56,7 +69,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
               {from?.includes('/photos/all') ? (
                 <>
                   <li>
-                    <Link href="/photos/all" className="text-blue-600 hover:text-blue-800">
+                    <Link
+                      href="/photos/all"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       All Photos
                     </Link>
                   </li>
@@ -65,13 +81,19 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
               ) : photo.albumId ? (
                 <>
                   <li>
-                    <Link href="/photos/albums" className="text-blue-600 hover:text-blue-800">
+                    <Link
+                      href="/photos/albums"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       Albums
                     </Link>
                   </li>
                   <li className="text-gray-400">/</li>
                   <li>
-                    <Link href={`/photos/albums/${photo.albumId}`} className="text-blue-600 hover:text-blue-800">
+                    <Link
+                      href={`/photos/albums/${photo.albumId}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       {photo.albumName}
                     </Link>
                   </li>
@@ -79,7 +101,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
                 </>
               ) : null}
               <li className="text-gray-600 font-medium">
-                Photo {photo.albumIndex && photo.totalInAlbum ? `${photo.albumIndex} of ${photo.totalInAlbum}` : ''}
+                Photo{' '}
+                {photo.albumIndex && photo.totalInAlbum
+                  ? `${photo.albumIndex} of ${photo.totalInAlbum}`
+                  : ''}
               </li>
             </ol>
           </nav>
@@ -110,12 +135,12 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
 
       {/* Photo Display */}
       <div className="aspect-auto max-h-[70vh] overflow-hidden rounded-lg">
-        <img 
-          src={photo.url} 
-          alt={photo.caption || 'Photo'} 
+        <img
+          src={photo.url}
+          alt={photo.caption || 'Photo'}
           className="w-full h-full object-contain"
         />
       </div>
     </div>
-  )
+  );
 }

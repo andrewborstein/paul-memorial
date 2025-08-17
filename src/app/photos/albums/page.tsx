@@ -1,13 +1,13 @@
-import Link from 'next/link'
-import { getAlbums } from '@/lib/photos'
+import Link from 'next/link';
+import { getAlbums } from '@/lib/photos';
 
 export default async function AlbumsPage() {
-  const albums = await getAlbums()
+  const albums = await getAlbums();
 
   return (
     <div>
       <div className="mb-6">
-        <Link 
+        <Link
           href="/photos"
           className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
         >
@@ -24,16 +24,16 @@ export default async function AlbumsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {albums.map((album) => (
-            <Link 
-              key={album.id} 
+            <Link
+              key={album.id}
               href={`/photos/albums/${album.id}`}
               className="group block"
             >
               <div className="aspect-square overflow-hidden rounded-lg mb-3">
                 {album.thumbnail ? (
-                  <img 
-                    src={album.thumbnail} 
-                    alt={album.name} 
+                  <img
+                    src={album.thumbnail}
+                    alt={album.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                 ) : (
@@ -49,5 +49,5 @@ export default async function AlbumsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

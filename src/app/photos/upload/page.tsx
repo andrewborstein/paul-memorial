@@ -1,36 +1,36 @@
-'use client'
-import { useState } from 'react'
-import Link from 'next/link'
+'use client';
+import { useState } from 'react';
+import Link from 'next/link';
 
 export default function UploadPage() {
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    setUploadedFiles(prev => [...prev, ...files])
-  }
+    const files = Array.from(e.target.files || []);
+    setUploadedFiles((prev) => [...prev, ...files]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsUploading(true)
-    
+    e.preventDefault();
+    setIsUploading(true);
+
     // TODO: Implement actual upload logic
     // This would typically involve:
     // 1. Upload to Cloudinary or similar service
     // 2. Create a new memory/tribute with the photos
     // 3. Redirect to the new album
-    
+
     setTimeout(() => {
-      setIsUploading(false)
-      alert('Upload functionality coming soon!')
-    }, 2000)
-  }
+      setIsUploading(false);
+      alert('Upload functionality coming soon!');
+    }, 2000);
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <Link 
+        <Link
           href="/photos"
           className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
         >
@@ -42,7 +42,10 @@ export default function UploadPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your Name
           </label>
           <input
@@ -56,7 +59,10 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label htmlFor="photos" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="photos"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Select Photos
           </label>
           <input
@@ -72,7 +78,9 @@ export default function UploadPage() {
 
         {uploadedFiles.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              Selected Files:
+            </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {uploadedFiles.map((file, index) => (
                 <div key={index} className="text-xs text-gray-600">
@@ -84,7 +92,10 @@ export default function UploadPage() {
         )}
 
         <div>
-          <label htmlFor="caption" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="caption"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Caption (Optional)
           </label>
           <textarea
@@ -105,5 +116,5 @@ export default function UploadPage() {
         </button>
       </form>
     </div>
-  )
+  );
 }

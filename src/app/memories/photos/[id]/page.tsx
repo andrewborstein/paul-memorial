@@ -1,41 +1,48 @@
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { getPhotoById, getAllPhotos } from '@/lib/memories'
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { getPhotoById, getAllPhotos } from '@/lib/memories';
 
 interface PhotoPageProps {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ from?: string }>
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
-export default async function PhotoPage({ params, searchParams }: PhotoPageProps) {
-  const { id } = await params
-  const { from } = await searchParams
-  const photo = await getPhotoById(id)
-  
+export default async function PhotoPage({
+  params,
+  searchParams,
+}: PhotoPageProps) {
+  const { id } = await params;
+  const { from } = await searchParams;
+  const photo = await getPhotoById(id);
+
   if (!photo) {
-    notFound()
+    notFound();
   }
 
   // Get navigation context
-  let allPhotos: any[] = []
-  let currentIndex = -1
-  let prevPhoto: any = null
-  let nextPhoto: any = null
+  let allPhotos: any[] = [];
+  let currentIndex = -1;
+  let prevPhoto: any = null;
+  let nextPhoto: any = null;
 
   if (from?.includes('/memories/photos')) {
     // Navigation within all photos
-    allPhotos = await getAllPhotos()
-    currentIndex = allPhotos.findIndex(p => p.id === id)
-    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1]
-    if (currentIndex < allPhotos.length - 1) nextPhoto = allPhotos[currentIndex + 1]
+    allPhotos = await getAllPhotos();
+    currentIndex = allPhotos.findIndex((p) => p.id === id);
+    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
+    if (currentIndex < allPhotos.length - 1)
+      nextPhoto = allPhotos[currentIndex + 1];
   } else {
     // Navigation within memory
-    const memoryResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories/${photo.memoryId}`)
-    const memory = await memoryResponse.json()
-    allPhotos = memory.photos
-    currentIndex = allPhotos.findIndex(p => p.id === id)
-    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1]
-    if (currentIndex < allPhotos.length - 1) nextPhoto = allPhotos[currentIndex + 1]
+    const memoryResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories/${photo.memoryId}`
+    );
+    const memory = await memoryResponse.json();
+    allPhotos = memory.photos;
+    currentIndex = allPhotos.findIndex((p) => p.id === id);
+    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
+    if (currentIndex < allPhotos.length - 1)
+      nextPhoto = allPhotos[currentIndex + 1];
   }
 
   return (
@@ -47,7 +54,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
           <nav>
             <ol className="flex items-center space-x-2 text-sm">
               <li>
-                <Link href="/memories" className="text-blue-600 hover:text-blue-800">
+                <Link
+                  href="/memories"
+                  className="text-blue-600 hover:text-blue-800"
+                >
                   Memories
                 </Link>
               </li>
@@ -55,7 +65,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
               {from?.includes('/memories/photos') ? (
                 <>
                   <li>
-                    <Link href="/memories/photos" className="text-blue-600 hover:text-blue-800">
+                    <Link
+                      href="/memories/photos"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       Photos
                     </Link>
                   </li>
@@ -64,7 +77,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
               ) : (
                 <>
                   <li>
-                    <Link href={`/memories/${photo.memoryId}`} className="text-blue-600 hover:text-blue-800">
+                    <Link
+                      href={`/memories/${photo.memoryId}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       {photo.memoryName}
                     </Link>
                   </li>
@@ -72,7 +88,10 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
                 </>
               )}
               <li className="text-gray-600 font-medium">
-                Photo {photo.memoryIndex && photo.totalInMemory ? `${photo.memoryIndex} of ${photo.totalInMemory}` : ''}
+                Photo{' '}
+                {photo.memoryIndex && photo.totalInMemory
+                  ? `${photo.memoryIndex} of ${photo.totalInMemory}`
+                  : ''}
               </li>
             </ol>
           </nav>
@@ -103,12 +122,12 @@ export default async function PhotoPage({ params, searchParams }: PhotoPageProps
 
       {/* Photo Display */}
       <div className="aspect-auto max-h-[70vh] overflow-hidden rounded-lg">
-        <img 
-          src={photo.url} 
-          alt={photo.caption || 'Photo'} 
+        <img
+          src={photo.url}
+          alt={photo.caption || 'Photo'}
           className="w-full h-full object-contain"
         />
       </div>
     </div>
-  )
+  );
 }

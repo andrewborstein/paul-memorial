@@ -14,11 +14,13 @@ A ready-to-deploy memorial site that allows visitors to share tributes, photos, 
 ## Quick Start
 
 1. **Clone and install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp env.example .env.local
    # Edit .env.local with your actual values
@@ -31,6 +33,7 @@ A ready-to-deploy memorial site that allows visitors to share tributes, photos, 
    - Configure environment variables
 
 4. **Run development server**
+
    ```bash
    npm run dev
    ```

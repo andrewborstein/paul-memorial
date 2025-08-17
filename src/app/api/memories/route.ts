@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
-import { getAllMemories } from '@/lib/memories'
+import { NextResponse } from 'next/server';
+import { getAllMemories } from '@/lib/memories';
 
 export async function GET() {
   try {
-    const memories = await getAllMemories()
-    return NextResponse.json(memories)
+    const memories = await getAllMemories();
+    return NextResponse.json(memories);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch memories' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch memories' },
+      { status: 500 }
+    );
   }
 }

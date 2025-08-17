@@ -1,45 +1,61 @@
-'use client'
-import './globals.css'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+'use client';
+import './globals.css';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
 
   const isActive = (path: string) => {
     if (path === '/') {
-      return pathname === '/'
+      return pathname === '/';
     }
-    return pathname.startsWith(path)
-  }
+    return pathname.startsWith(path);
+  };
 
   return (
     <html lang="en">
       <body>
         <header className="border-b">
           <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="font-semibold hover:text-blue-600 transition-colors"
             >
               Paul Bedrosian
             </Link>
             <div className="space-x-4 text-sm">
-              <Link 
-                href="/memories" 
-                className={isActive('/memories') ? 'text-blue-600 border-b border-blue-600' : 'hover:text-blue-600'}
+              <Link
+                href="/memories"
+                className={
+                  isActive('/memories')
+                    ? 'text-blue-600 border-b border-blue-600'
+                    : 'hover:text-blue-600'
+                }
               >
                 Memories
               </Link>
-              <Link 
-                href="/photos" 
-                className={isActive('/photos') ? 'text-blue-600 border-b border-blue-600' : 'hover:text-blue-600'}
+              <Link
+                href="/photos"
+                className={
+                  isActive('/photos')
+                    ? 'text-blue-600 border-b border-blue-600'
+                    : 'hover:text-blue-600'
+                }
               >
                 Photos
               </Link>
-              <Link 
-                href="/donate" 
-                className={isActive('/donate') ? 'text-blue-600 border-b border-blue-600' : 'hover:text-blue-600'}
+              <Link
+                href="/donate"
+                className={
+                  isActive('/donate')
+                    ? 'text-blue-600 border-b border-blue-600'
+                    : 'hover:text-blue-600'
+                }
               >
                 Donate
               </Link>
@@ -51,14 +67,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
             <span>Made with love by friends & family.</span>
             <span className="hidden sm:inline text-gray-300">•</span>
-            <span>Send feedback or questions to <a href="mailto:contact@paulbedrosian.com" className="text-blue-600 hover:text-blue-800">contact@paulbedrosian.com</a></span>
+            <span>
+              Send feedback or questions to{' '}
+              <a
+                href="mailto:contact@paulbedrosian.com"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                contact@paulbedrosian.com
+              </a>
+            </span>
           </div>
         </footer>
         <script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-          async defer
+          async
+          defer
         />
       </body>
     </html>
-  )
+  );
 }

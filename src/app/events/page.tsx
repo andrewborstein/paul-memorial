@@ -4,5 +4,5 @@ export default function Events() {
       <h1>Events</h1>
       <p>Post past and upcoming memorial gatherings here.</p>
     </section>
-  )
+  );
 }

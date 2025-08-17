@@ -4,5 +4,5 @@ export default function About() {
       <h1>About Paul</h1>
       <p>Write obituary/bio here...</p>
     </article>
-  )
+  );
 }

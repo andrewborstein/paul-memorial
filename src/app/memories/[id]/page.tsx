@@ -1,49 +1,50 @@
-'use client'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { useState, useEffect } from 'react'
+'use client';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface MemoryPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default function MemoryPage({ params }: MemoryPageProps) {
-  const [memory, setMemory] = useState<any>(null)
-  const [prevMemory, setPrevMemory] = useState<any>(null)
-  const [nextMemory, setNextMemory] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [memory, setMemory] = useState<any>(null);
+  const [prevMemory, setPrevMemory] = useState<any>(null);
+  const [nextMemory, setNextMemory] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadMemory() {
-      const { id } = await params
-      const response = await fetch(`/api/memories/${id}`)
+      const { id } = await params;
+      const response = await fetch(`/api/memories/${id}`);
       if (!response.ok) {
-        notFound()
+        notFound();
       }
-      const memoryData = await response.json()
-      setMemory(memoryData)
-      
+      const memoryData = await response.json();
+      setMemory(memoryData);
+
       // Get navigation context
-      const allResponse = await fetch('/api/memories')
-      const allMemories = await allResponse.json()
-      const currentIndex = allMemories.findIndex((m: any) => m.id === id)
-      if (currentIndex > 0) setPrevMemory(allMemories[currentIndex - 1])
-      if (currentIndex < allMemories.length - 1) setNextMemory(allMemories[currentIndex + 1])
-      
-      setLoading(false)
+      const allResponse = await fetch('/api/memories');
+      const allMemories = await allResponse.json();
+      const currentIndex = allMemories.findIndex((m: any) => m.id === id);
+      if (currentIndex > 0) setPrevMemory(allMemories[currentIndex - 1]);
+      if (currentIndex < allMemories.length - 1)
+        setNextMemory(allMemories[currentIndex + 1]);
+
+      setLoading(false);
     }
-    loadMemory()
-  }, [params])
+    loadMemory();
+  }, [params]);
 
   const MessageDisplay = ({ message }: { message: string }) => {
-    const [isExpanded, setIsExpanded] = useState(false)
-    const maxLength = 300
-    const shouldTruncate = message.length > maxLength
-    
+    const [isExpanded, setIsExpanded] = useState(false);
+    const maxLength = 300;
+    const shouldTruncate = message.length > maxLength;
+
     if (!shouldTruncate) {
-      return <p className="text-gray-700 whitespace-pre-wrap">{message}</p>
+      return <p className="text-gray-700 whitespace-pre-wrap">{message}</p>;
     }
-    
+
     return (
       <div>
         <p className="text-gray-700 whitespace-pre-wrap">
@@ -56,8 +57,8 @@ export default function MemoryPage({ params }: MemoryPageProps) {
           {isExpanded ? 'Read less' : 'Read more'}
         </button>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-2">
@@ -68,13 +69,18 @@ export default function MemoryPage({ params }: MemoryPageProps) {
           <nav>
             <ol className="flex items-center space-x-2 text-sm">
               <li>
-                <Link href="/memories" className="text-blue-600 hover:text-blue-800">
+                <Link
+                  href="/memories"
+                  className="text-blue-600 hover:text-blue-800"
+                >
                   Memories
                 </Link>
               </li>
               <li className="text-gray-400">/</li>
               <li className="text-gray-600 font-medium">
-                {loading ? 'Loading...' : memory?.title || memory?.name || 'Memory'}
+                {loading
+                  ? 'Loading...'
+                  : memory?.title || memory?.name || 'Memory'}
               </li>
             </ol>
           </nav>
@@ -112,7 +118,9 @@ export default function MemoryPage({ params }: MemoryPageProps) {
         <div className="space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl font-semibold mb-3">{memory.title || memory.name}</h1>
+            <h1 className="text-2xl font-semibold mb-3">
+              {memory.title || memory.name}
+            </h1>
           </div>
 
           {/* Text Content */}
@@ -130,14 +138,14 @@ export default function MemoryPage({ params }: MemoryPageProps) {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {memory.photos.map((photo: any) => (
-                  <Link 
-                    key={photo.id} 
+                  <Link
+                    key={photo.id}
                     href={`/memories/photos/${photo.id}?from=/memories/${memory.id}`}
                     className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
                   >
-                    <img 
-                      src={photo.url} 
-                      alt={photo.caption || 'Photo'} 
+                    <img
+                      src={photo.url}
+                      alt={photo.caption || 'Photo'}
                       className="w-full h-full object-cover"
                     />
                     {photo.caption && (
@@ -153,5 +161,5 @@ export default function MemoryPage({ params }: MemoryPageProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

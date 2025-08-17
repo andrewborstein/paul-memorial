@@ -1,8 +1,8 @@
-import Link from 'next/link'
-import { getAllPhotos } from '@/lib/memories'
+import Link from 'next/link';
+import { getAllPhotos } from '@/lib/memories';
 
 export default async function AllPhotosPage() {
-  const photos = await getAllPhotos()
+  const photos = await getAllPhotos();
 
   return (
     <div>
@@ -10,7 +10,10 @@ export default async function AllPhotosPage() {
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">
           <li>
-            <Link href="/memories" className="text-blue-600 hover:text-blue-800">
+            <Link
+              href="/memories"
+              className="text-blue-600 hover:text-blue-800"
+            >
               Memories
             </Link>
           </li>
@@ -21,7 +24,9 @@ export default async function AllPhotosPage() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-semibold mb-3">All photos</h1>
-        <p className="text-gray-600 mt-2">Browse all photos shared in memories</p>
+        <p className="text-gray-600 mt-2">
+          Browse all photos shared in memories
+        </p>
       </div>
 
       {photos.length === 0 ? (
@@ -31,14 +36,14 @@ export default async function AllPhotosPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {photos.map((photo) => (
-            <Link 
-              key={photo.id} 
+            <Link
+              key={photo.id}
               href={`/memories/photos/${photo.id}?from=/memories/photos`}
               className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
             >
-              <img 
-                src={photo.url} 
-                alt={photo.caption || 'Photo'} 
+              <img
+                src={photo.url}
+                alt={photo.caption || 'Photo'}
                 className="w-full h-full object-cover"
               />
               {photo.caption && (
@@ -51,5 +56,5 @@ export default async function AllPhotosPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
