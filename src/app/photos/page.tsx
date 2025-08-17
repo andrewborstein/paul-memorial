@@ -1,44 +1,44 @@
 import Link from 'next/link'
-import { getRecentPhotos, getAlbums } from '@/lib/photos'
+import { getAllPhotos, getMemoriesWithPhotos } from '@/lib/memories'
 
-export default async function Photos() {
-  const recentPhotos = await getRecentPhotos(5)
-  const albums = await getAlbums()
+export default async function PhotosPage() {
+  const allPhotos = await getAllPhotos()
+  const memoriesWithPhotos = await getMemoriesWithPhotos()
 
   return (
     <section className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold mb-4">Photos</h1>
-          <p className="mb-6 text-gray-600">Browse photos & video links shared in memories.</p>
+      <div className="flex items-center justify-between mb-6 gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-semibold mb-2">Photos</h1>
+          <p className="text-gray-600">Browse photos shared in memories.</p>
         </div>
         <Link 
-          href="/photos/upload"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          href="/memories/new"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
         >
-          Upload Photos
+          Share memory
         </Link>
       </div>
 
-      {/* All Photos Section */}
+      {/* All Photos */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">All Photos</h2>
+          <h2 className="text-xl font-medium">All photos</h2>
           <Link 
-            href="/photos/all" 
+            href="/memories/photos" 
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             View all photos
           </Link>
         </div>
         <p className="text-sm text-gray-600 mb-4">
-          Browse all photos shared in memories, organized chronologically.
+          Browse all photos shared in memories.
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {recentPhotos.map((photo) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {allPhotos.slice(0, 10).map((photo) => (
             <Link 
               key={photo.id} 
-              href={`/photos/${photo.id}`}
+              href={`/memories/photos/${photo.id}`}
               className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
             >
               <img 
@@ -51,38 +51,36 @@ export default async function Photos() {
         </div>
       </div>
 
-      {/* Albums Section */}
+      {/* Photos by Memory */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">Albums</h2>
+          <h2 className="text-xl font-medium">Photos by memory</h2>
           <Link 
-            href="/photos/albums" 
+            href="/memories/photos/by-memory" 
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
-            View all albums
+            View all
           </Link>
         </div>
         <p className="text-sm text-gray-600 mb-4">
           Photos organized by the memories they were shared in.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {albums.slice(0, 6).map((album) => (
+          {memoriesWithPhotos.slice(0, 6).map((memory) => (
             <Link 
-              key={album.id} 
-              href={`/photos/albums/${album.id}`}
+              key={memory.id} 
+              href={`/memories/${memory.id}`}
               className="group block"
             >
               <div className="aspect-square overflow-hidden rounded-lg mb-2">
-                {album.thumbnail && (
-                  <img 
-                    src={album.thumbnail} 
-                    alt={album.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                )}
+                <img 
+                  src={memory.photos[0].url} 
+                  alt={memory.name} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
               </div>
-              <h3 className="font-medium text-sm">{album.name}</h3>
-              <p className="text-xs text-gray-500">{album.photoCount} photos</p>
+              <h3 className="font-medium text-sm">{memory.name}</h3>
+              <p className="text-xs text-gray-500">{memory.photos.length} photos</p>
             </Link>
           ))}
         </div>

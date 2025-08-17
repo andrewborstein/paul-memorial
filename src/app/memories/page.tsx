@@ -1,108 +1,106 @@
 import Link from 'next/link'
-import { getRecentMemories, getRecentPhotos } from '@/lib/memories'
+import { getAllMemories } from '@/lib/memories'
 
 export default async function MemoriesPage() {
-  const recentMemories = await getRecentMemories(6)
-  const recentPhotos = await getRecentPhotos(5)
+  const memories = await getAllMemories()
 
   return (
-    <section className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold mb-4">Memories</h1>
-          <p className="mb-6 text-gray-600">Browse memories and photos shared by friends and family.</p>
+    <section className="max-w-4xl mx-auto px-2">
+      <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-semibold mb-2">Memories</h1>
+          <p className="text-gray-600">Read memories shared by friends and family.</p>
         </div>
         <Link 
-          href="/memories/upload"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          href="/memories/new"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
         >
-          Share Memory
+          Share memory
         </Link>
       </div>
 
-      {/* Recent Memories */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">Recent Memories</h2>
+      {memories.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">No memories shared yet.</p>
           <Link 
-            href="/memories/all" 
+            href="/memories/new"
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
-            View all memories
+            Be the first to share a memory
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recentMemories.map((memory) => (
+      ) : (
+        <div className="space-y-6">
+          {memories.map((memory) => (
             <Link 
               key={memory.id} 
               href={`/memories/${memory.id}`}
-              className="block group"
+              className="block"
             >
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                {/* Photo Preview */}
-                {memory.hasPhotos && (
-                  <div className="aspect-video overflow-hidden">
-                    <img 
-                      src={memory.photos[0].url} 
-                      alt="Memory preview" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    {memory.photos.length > 1 && (
-                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                        +{memory.photos.length - 1}
-                      </div>
+              <article 
+                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex gap-6">
+                {/* Text Content */}
+                <div className="flex-1 min-w-0">
+                  <header className="mb-3">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1 hover:text-blue-600 transition-colors">
+                      {memory.name}
+                    </h2>
+                  </header>
+                  
+                  {memory.hasText && (
+                    <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                      {memory.body}
+                    </div>
+                  )}
+                  
+                  {/* Metadata */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 flex-wrap">
+                    <time>
+                      {new Date(memory.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </time>
+                    {memory.hasPhotos && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span>{memory.photos.length} image{memory.photos.length !== 1 ? 's' : ''}</span>
+                      </>
                     )}
+                    {/* TODO: Add comment count when available */}
+                    {/* <span className="text-gray-300">•</span> */}
+                    {/* <span>10 comments</span> */}
+                  </div>
+                </div>
+
+                {/* Photo Thumbnail */}
+                {memory.hasPhotos && (
+                  <div className="flex-shrink-0">
+                    <div className="w-24 h-24 rounded-lg overflow-hidden relative">
+                      <img 
+                        src={memory.photos[0].url} 
+                        alt="Memory preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                        {memory.photos.length > 1 && (
+                          <span className="text-white text-xs font-medium">
+                            +{memory.photos.length - 1}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
-                
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">{memory.name}</h3>
-                  {memory.hasText && (
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {memory.body}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-2">
-                    {new Date(memory.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Photos */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">Recent Photos</h2>
-          <Link 
-            href="/memories/photos" 
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            View all photos
+            </article>
           </Link>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Browse all photos shared in memories.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {recentPhotos.map((photo) => (
-            <Link 
-              key={photo.id} 
-              href={`/memories/photos/${photo.id}`}
-              className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
-            >
-              <img 
-                src={photo.url} 
-                alt={photo.caption || 'Photo'} 
-                className="w-full h-full object-cover"
-              />
-            </Link>
           ))}
         </div>
-      </div>
+      )}
     </section>
   )
 }

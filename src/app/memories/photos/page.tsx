@@ -6,14 +6,21 @@ export default async function AllPhotosPage() {
 
   return (
     <div>
+      {/* Breadcrumbs */}
+      <nav className="mb-6">
+        <ol className="flex items-center space-x-2 text-sm">
+          <li>
+            <Link href="/memories" className="text-blue-600 hover:text-blue-800">
+              Memories
+            </Link>
+          </li>
+          <li className="text-gray-400">/</li>
+          <li className="text-gray-600 font-medium">Photos</li>
+        </ol>
+      </nav>
+
       <div className="mb-6">
-        <Link 
-          href="/memories"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
-        >
-          ← Back to Memories
-        </Link>
-        <h1 className="text-2xl font-semibold">All Photos</h1>
+        <h1 className="text-2xl font-semibold">All photos</h1>
         <p className="text-gray-600 mt-2">Browse all photos shared in memories</p>
       </div>
 
