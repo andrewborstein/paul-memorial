@@ -57,24 +57,11 @@ export default async function MemoriesPage() {
                   )}
                   
                   {/* Metadata */}
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 flex-wrap">
-                    <time>
-                      {new Date(memory.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </time>
-                    {memory.hasPhotos && (
-                      <>
-                        <span className="text-gray-300">•</span>
-                        <span>{memory.photos.length} image{memory.photos.length !== 1 ? 's' : ''}</span>
-                      </>
-                    )}
-                    {/* TODO: Add comment count when available */}
-                    {/* <span className="text-gray-300">•</span> */}
-                    {/* <span>10 comments</span> */}
-                  </div>
+                  {memory.hasPhotos && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 flex-wrap">
+                      <span>{memory.photos.length} image{memory.photos.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Photo Thumbnail */}

@@ -8,7 +8,7 @@ const photosDbId = process.env.NOTION_PHOTOS_DB_ID!
 export const notion = new Client({ auth: token })
 
 export async function listTributes(): Promise<Tribute[]> {
-  const res = await notion.databases.query({ database_id: dbId, sorts: [{ property: 'CustomDate', direction: 'descending' }] })
+  const res = await notion.databases.query({ database_id: dbId, sorts: [{ property: 'Date', direction: 'descending' }] })
   const items: Tribute[] = []
   
   for (const p of res.results) {
@@ -19,7 +19,7 @@ export async function listTributes(): Promise<Tribute[]> {
     const body = (p.properties['Body'] as any)?.rich_text?.[0]?.plain_text || ''
     const title = (p.properties['Title'] as any)?.rich_text?.[0]?.plain_text
     const emailHash = (p.properties['EmailHash'] as any)?.rich_text?.[0]?.plain_text
-    const customDate = (p.properties['CustomDate'] as any)?.date?.start
+    const date = (p.properties['Date'] as any)?.date?.start
     const mediaCount = (p.properties['PhotoCount'] as any)?.number || 0
     
     // Skip hidden items (if we add a Hidden field later)
@@ -41,7 +41,7 @@ export async function listTributes(): Promise<Tribute[]> {
               contains: p.id
             }
           },
-          sorts: [{ property: 'UploadDate', direction: 'ascending' }]
+          sorts: [{ property: 'OrderIndex', direction: 'ascending' }]
         })
         
         console.log('Found photos:', photosRes.results.length)
@@ -66,7 +66,7 @@ export async function listTributes(): Promise<Tribute[]> {
       body,
       title,
       emailHash,
-      createdAt: customDate || new Date().toISOString(),
+      createdAt: date || new Date().toISOString(), // Use Date field or current time as fallback
       media: mediaItems,
       comments: [], // We can add comments later if needed
       editToken: '' // We can add edit tokens later if needed
@@ -86,7 +86,7 @@ export async function createTribute(t: Tribute) {
   const properties: any = {
     Name: { title: [{ type: 'text', text: { content: t.name } }] },
     Body: { rich_text: [{ type: 'text', text: { content: t.body || '' } }] },
-    CustomDate: { date: { start: t.createdAt } }
+    Date: { date: { start: new Date().toISOString() } } // Auto-filled with current time
   }
   
   // Add optional fields if they exist
@@ -114,7 +114,7 @@ export async function updateTributeJSON(pageId: string, json: any) {
 export async function getAllPhotos() {
   const res = await notion.databases.query({ 
     database_id: photosDbId, 
-    sorts: [{ property: 'UploadDate', direction: 'descending' }] 
+    sorts: [{ property: 'OrderIndex', direction: 'descending' }] 
   })
   
   return res.results.map((photoPage: any) => ({

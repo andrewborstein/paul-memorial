@@ -97,12 +97,6 @@ export default function NewMemoryPage() {
       const publicId = json.public_id
       
       // Create Notion record immediately after successful upload
-      setUploadProgress({ 
-        current: i + 1, 
-        total: fileArray.length, 
-        message: `Creating record for ${f.name}...` 
-      })
-      
       const photoRes = await fetch('/api/create-photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

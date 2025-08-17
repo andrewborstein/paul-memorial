@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { notion } from '@/lib/notion'
 
 const photosDbId = process.env.NOTION_PHOTOS_DB_ID!
+const memoriesDbId = process.env.NOTION_TRIBUTES_DB_ID!
 
 export async function POST(req: Request) {
   try {
@@ -20,9 +21,27 @@ export async function POST(req: Request) {
         Type: { select: { name: type } },
         PublicId: { rich_text: [{ type: 'text', text: { content: publicId } }] },
         Caption: caption ? { rich_text: [{ type: 'text', text: { content: caption } }] } : { rich_text: [] },
-        UploadDate: { date: { start: new Date().toISOString() } }
+        UploadDate: { date: { start: new Date().toISOString() } },
+        OrderIndex: { number: Date.now() } // Use timestamp as default order
       }
     })
+    
+    // Update the memory's PhotoCount
+    try {
+      // First, get the current photo count
+      const memoryPage = await notion.pages.retrieve({ page_id: memoryId })
+      const currentCount = (memoryPage as any).properties['PhotoCount']?.number || 0
+      
+      // Update with new count
+      await notion.pages.update({
+        page_id: memoryId,
+        properties: {
+          PhotoCount: { number: currentCount + 1 }
+        }
+      })
+    } catch (e) {
+      console.warn('Failed to update photo count:', e)
+    }
     
     return NextResponse.json({ success: true, photoId: photoPage.id })
   } catch (error: any) {

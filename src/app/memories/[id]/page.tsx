@@ -113,13 +113,6 @@ export default function MemoryPage({ params }: MemoryPageProps) {
           {/* Header */}
           <div>
             <h1 className="text-2xl font-semibold mb-3">{memory.title || memory.name}</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {new Date(memory.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </p>
           </div>
 
           {/* Text Content */}
