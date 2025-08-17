@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/events">Events</Link>
               <Link href="/tributes">Tributes</Link>
               <Link href="/memories">Memories</Link>
-              <Link href="/donate" className="text-brand-700">Donate</Link>
+              <Link href="/donate" className="text-blue-700">Donate</Link>
             </div>
           </nav>
         </header>
