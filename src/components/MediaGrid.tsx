@@ -2,7 +2,7 @@
 import useSWR from 'swr'
 const fetcher = (u:string)=>fetch(u).then(r=>r.json())
 export default function MediaGrid(){
-  const { data } = useSWR('/api/tributes', fetcher)
+  const { data } = useSWR('/api/memories', fetcher)
   const media = (data?.items||[]).flatMap((t:any)=>t.media||[])
   if (!media.length) return <div>No media yet.</div>
   return (
