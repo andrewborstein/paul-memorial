@@ -91,14 +91,18 @@ export default async function MemoriesPage() {
                       </div>
 
                       {/* Metadata */}
-                      {memory.photo_count > 0 && (
-                        <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                          <span>
-                            {memory.photo_count} image
-                            {memory.photo_count !== 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
+                        <span>{new Date(memory.date).toLocaleDateString()}</span>
+                        {memory.photo_count > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              {memory.photo_count} image
+                              {memory.photo_count !== 1 ? 's' : ''}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     {/* Photo Thumbnail */}
