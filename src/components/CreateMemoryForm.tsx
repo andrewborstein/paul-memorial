@@ -2,6 +2,25 @@
 import React from 'react';
 import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type PhotoState = {
   file: File;
@@ -14,6 +33,181 @@ type PhotoState = {
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+
+// Sortable photo item component
+function SortablePhotoItem({ 
+  photo, 
+  index, 
+  onReorder, 
+  onDelete, 
+  imageRefs,
+  totalPhotos
+}: { 
+  photo: PhotoState; 
+  index: number; 
+  onReorder: (from: number, to: number) => void;
+  onDelete: (photo: PhotoState) => void;
+  imageRefs: React.MutableRefObject<{ [key: string]: HTMLImageElement }>;
+  totalPhotos: number;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: photo.file.name });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className="border rounded-lg p-2 relative w-fit"
+    >
+      <div className="relative">
+        <img
+          ref={(el) => {
+            if (el) imageRefs.current[photo.file.name] = el;
+          }}
+          src={photo.preview}
+          alt=""
+          className={`w-24 h-24 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
+            photo.status === 'uploading' || photo.status === 'queued' ? 'opacity-50' : ''
+          }`}
+          {...attributes}
+          {...listeners}
+          onLoad={(e) => {
+            console.log('Image loaded successfully:', photo.file.name);
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'block';
+            target.nextElementSibling?.classList.add('hidden');
+          }}
+          onError={(e) => {
+            // Fallback for unsupported formats (HEIC, etc.)
+            const target = e.target as HTMLImageElement;
+            const img = target as HTMLImageElement;
+            
+            console.log('Image load failed:', img.src);
+            console.log('File name:', photo.file.name);
+            console.log('Is HEIC:', photo.file.name.toLowerCase().includes('.heic'));
+            console.log('Current display style:', img.style.display);
+            
+            // If this is a Cloudinary URL and it's a HEIC file, try multiple approaches
+            if (img.src.includes('cloudinary.com') && photo.file.name.toLowerCase().includes('.heic')) {
+              console.log('Retrying HEIC image with different formats...');
+              
+              // Try original format first (no conversion)
+              if (img.src.includes('f_jpg')) {
+                const originalUrl = img.src.replace('f_jpg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
+                console.log('Trying original format:', originalUrl);
+                img.src = originalUrl;
+                return;
+              }
+              
+              // If original format fails, try with delay
+              setTimeout(() => {
+                console.log('Retrying image load with cache bust:', img.src);
+                img.style.display = 'block';
+                img.src = img.src + '?t=' + Date.now(); // Force reload
+              }, 2000);
+              return;
+            }
+            
+            // Otherwise show fallback
+            console.log('Showing fallback for:', photo.file.name);
+            target.style.display = 'none';
+            const fallback = target.nextElementSibling;
+            if (fallback) {
+              fallback.classList.remove('hidden');
+              console.log('Fallback element found and shown');
+            } else {
+              console.log('No fallback element found!');
+            }
+          }}
+        />
+        
+        {/* Fallback for unsupported formats */}
+        <div className={`hidden w-24 h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+          <div className="text-center">
+            <div className="text-lg mb-1">📷</div>
+            <div className="truncate max-w-full px-1">{photo.file.name}</div>
+            <div className="text-xs text-gray-400">
+              {photo.file.type || 'Unknown format'}
+            </div>
+            {photo.status === 'uploading' && (
+              <div className="text-xs text-blue-600 mt-1">Converting...</div>
+            )}
+          </div>
+        </div>
+        
+        {photo.status === 'uploading' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+          </div>
+        )}
+      </div>
+      <div className="text-xs text-gray-600 mt-2 flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={index === 0}
+            onClick={() => onReorder(index, index - 1)}
+            className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+            title="Move image up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            disabled={index === totalPhotos - 1}
+            onClick={() => onReorder(index, index + 1)}
+            className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+            title="Move image down"
+          >
+            ↓
+          </button>
+        </div>
+        <span>
+          {photo.status === 'uploading' ? (
+            `${photo.progress}%`
+          ) : photo.status === 'error' ? (
+            <span className="text-red-600">✗ error</span>
+          ) : photo.status === 'done' ? (
+            <button
+              type="button"
+              onClick={() => onDelete(photo)}
+              className="inline-flex items-center justify-center w-6 h-6 bg-red-50 text-red-700 rounded-full text-xs hover:bg-red-100 border border-red-300"
+              title="Remove image"
+            >
+              <span className="text-sm font-bold">×</span>
+            </button>
+          ) : photo.status === 'queued' ? (
+            <span className="text-gray-400">...</span>
+          ) : (
+            photo.status
+          )}
+        </span>
+      </div>
+      {photo.status === 'uploading' && (
+        <div className="mt-2">
+          <div className="w-full bg-gray-200 rounded-full h-1">
+            <div
+              className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+              style={{ width: `${photo.progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CreateMemoryForm() {
   const [name, setName] = React.useState('');
@@ -28,6 +222,14 @@ export default function CreateMemoryForm() {
   const [errors, setErrors] = React.useState<string[]>([]);
   const errorRef = React.useRef<HTMLDivElement>(null);
   const imageRefs = React.useRef<{ [key: string]: HTMLImageElement }>({});
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   function onSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -159,6 +361,19 @@ export default function CreateMemoryForm() {
       next.splice(to, 0, m);
       return next;
     });
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setPhotos((items) => {
+        const oldIndex = items.findIndex(item => item.file.name === active.id);
+        const newIndex = items.findIndex(item => item.file.name === over?.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   }
 
   async function uploadOne(ps: PhotoState): Promise<string> {
@@ -485,144 +700,27 @@ export default function CreateMemoryForm() {
           <h3 className="text-sm font-semibold text-gray-700 mb-3">
             Photo Preview
           </h3>
-          <div className="flex flex-wrap gap-2">
-            {photos.map((p, i) => (
-              <div key={i} className="border rounded-lg p-2 relative w-fit">
-                <div className="relative">
-                  <img
-                    ref={(el) => {
-                      if (el) imageRefs.current[p.file.name] = el;
-                    }}
-                    src={p.preview}
-                    alt=""
-                    className={`w-24 h-24 object-cover rounded mb-2 ${
-                      p.status === 'uploading' || p.status === 'queued' ? 'opacity-50' : ''
-                    }`}
-                    onLoad={(e) => {
-                      console.log('Image loaded successfully:', p.file.name);
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'block';
-                      target.nextElementSibling?.classList.add('hidden');
-                    }}
-                    onError={(e) => {
-                      // Fallback for unsupported formats (HEIC, etc.)
-                      const target = e.target as HTMLImageElement;
-                      const img = target as HTMLImageElement;
-                      
-                      console.log('Image load failed:', img.src);
-                      console.log('File name:', p.file.name);
-                      console.log('Is HEIC:', p.file.name.toLowerCase().includes('.heic'));
-                      console.log('Current display style:', img.style.display);
-                      
-                      // If this is a Cloudinary URL and it's a HEIC file, try multiple approaches
-                      if (img.src.includes('cloudinary.com') && p.file.name.toLowerCase().includes('.heic')) {
-                        console.log('Retrying HEIC image with different formats...');
-                        
-                        // Try original format first (no conversion)
-                        if (img.src.includes('f_jpg')) {
-                          const originalUrl = img.src.replace('f_jpg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
-                          console.log('Trying original format:', originalUrl);
-                          img.src = originalUrl;
-                          return;
-                        }
-                        
-                        // If original format fails, try with delay
-                        setTimeout(() => {
-                          console.log('Retrying image load with cache bust:', img.src);
-                          img.style.display = 'block';
-                          img.src = img.src + '?t=' + Date.now(); // Force reload
-                        }, 2000);
-                        return;
-                      }
-                      
-                      // Otherwise show fallback
-                      console.log('Showing fallback for:', p.file.name);
-                      target.style.display = 'none';
-                      const fallback = target.nextElementSibling;
-                      if (fallback) {
-                        fallback.classList.remove('hidden');
-                        console.log('Fallback element found and shown');
-                      } else {
-                        console.log('No fallback element found!');
-                      }
-                    }}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={photos.map(p => p.file.name)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-wrap gap-2">
+                {photos.map((p, i) => (
+                  <SortablePhotoItem
+                    key={p.file.name}
+                    photo={p}
+                    index={i}
+                    onReorder={reorder}
+                    onDelete={deletePhoto}
+                    imageRefs={imageRefs}
+                    totalPhotos={photos.length}
                   />
-                  
-                  {/* Fallback for unsupported formats */}
-                  <div className={`hidden w-24 h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
-                    <div className="text-center">
-                      <div className="text-lg mb-1">📷</div>
-                      <div className="truncate max-w-full px-1">{p.file.name}</div>
-                      <div className="text-xs text-gray-400">
-                        {p.file.type || 'Unknown format'}
-                      </div>
-                      {p.status === 'uploading' && (
-                        <div className="text-xs text-blue-600 mt-1">Converting...</div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {p.status === 'uploading' && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-gray-600 mt-2 flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={i === 0}
-                      onClick={() => reorder(i, i - 1)}
-                      className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
-                      title="Move image up"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      disabled={i === photos.length - 1}
-                      onClick={() => reorder(i, i + 1)}
-                      className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
-                      title="Move image down"
-                    >
-                      ↓
-                    </button>
-                  </div>
-                  <span>
-                    {p.status === 'uploading' ? (
-                      `${p.progress}%`
-                    ) : p.status === 'error' ? (
-                      <span className="text-red-600">✗ error</span>
-                    ) : p.status === 'done' ? (
-                      <button
-                        type="button"
-                        onClick={() => deletePhoto(p)}
-                        className="inline-flex items-center justify-center w-6 h-6 bg-red-50 text-red-700 rounded-full text-xs hover:bg-red-100 border border-red-300"
-                        title="Remove image"
-                      >
-                        <span className="text-sm font-bold">×</span>
-                      </button>
-                    ) : p.status === 'queued' ? (
-                      <span className="text-gray-400">...</span>
-                    ) : (
-                      p.status
-                    )}
-                  </span>
-                </div>
-                {p.status === 'uploading' && (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-1">
-                      <div
-                        className="bg-blue-600 h-1 rounded-full transition-all duration-300"
-                        style={{ width: `${p.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
