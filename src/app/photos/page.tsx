@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
-import type { MemoryIndexItem } from '@/types/memory';
+import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
@@ -18,9 +18,44 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
   return res.json();
 }
 
+async function getMemoryDetail(id: string): Promise<MemoryDetail | null> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memory/${id}`,
+    {
+      next: { revalidate: 60 },
+    }
+  );
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export default async function PhotosPage() {
   const memories = await getMemories();
   const memoriesWithPhotos = memories.filter((m) => m.photo_count > 0);
+
+  // Get all photos from all memories
+  const allPhotos: Array<{
+    public_id: string;
+    memoryId: string;
+    memoryTitle: string;
+  }> = [];
+
+  for (const memory of memoriesWithPhotos) {
+    const detail = await getMemoryDetail(memory.id);
+    if (detail?.photos) {
+      detail.photos.forEach((photo) => {
+        allPhotos.push({
+          public_id: photo.public_id,
+          memoryId: memory.id,
+          memoryTitle: detail.title || detail.name,
+        });
+      });
+    }
+  }
+
+  // Show first 20 photos, then a "View all" link
+  const displayPhotos = allPhotos.slice(0, 20);
+  const hasMorePhotos = allPhotos.length > 20;
 
   return (
     <PageContainer>
@@ -44,20 +79,30 @@ export default async function PhotosPage() {
           <div>
             <h2 className="text-lg font-semibold mb-4">All photos</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {memoriesWithPhotos.map((memory) => (
+              {displayPhotos.map((photo) => (
                 <Link
-                  key={memory.id}
-                  href={`/memories/${memory.id}`}
+                  key={photo.public_id}
+                  href={`/memories/photos/${photo.public_id}`}
                   className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
                 >
                   <img
-                    src={memory.cover_url || ''}
-                    alt={memory.title}
+                    src={cldUrl(photo.public_id, { w: 400 })}
+                    alt={`Photo from ${photo.memoryTitle}`}
                     className="w-full h-full object-cover"
                   />
                 </Link>
               ))}
             </div>
+            {hasMorePhotos && (
+              <div className="text-center mt-6">
+                <Link
+                  href="/memories/photos"
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  View all {allPhotos.length} photos
+                </Link>
+              </div>
+            )}
           </div>
 
           <div>
