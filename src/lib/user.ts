@@ -94,8 +94,12 @@ export function clearSuperUser(): void {
 
 // Check if user can edit a memory
 export function canEditMemory(memoryEmail: string): boolean {
+  // Super users can edit any memory
+  if (isSuperUser()) return true;
+  
+  // Regular users can only edit their own memories
   const currentUser = getCurrentUser();
   if (!currentUser) return false;
 
-  return isSuperUser() || currentUser.email === memoryEmail;
+  return currentUser.email === memoryEmail;
 }
