@@ -7,12 +7,24 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const doc = await readMemory(id);
-  if (!doc) return new Response('Not found', { status: 404 });
-  return Response.json(doc, {
-    headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' },
-  });
+  try {
+    const { id } = await params;
+    console.log('Attempting to fetch memory:', id);
+
+    const doc = await readMemory(id);
+    if (!doc) {
+      console.log('Memory not found:', id);
+      return new Response('Not found', { status: 404 });
+    }
+
+    console.log('Successfully fetched memory:', id);
+    return Response.json(doc, {
+      headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' },
+    });
+  } catch (error) {
+    console.error('Error fetching memory:', error);
+    return new Response('Internal server error', { status: 500 });
+  }
 }
 
 export async function DELETE(
