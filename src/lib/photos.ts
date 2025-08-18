@@ -1,4 +1,5 @@
-import { listMemories } from './notion';
+import { listMemories, getAllPhotos as getNotionPhotos } from './notion';
+import { publicIdToUrl } from './cloudinary';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -44,6 +45,25 @@ async function getMemories() {
 }
 
 export async function getAllPhotos(): Promise<Photo[]> {
+  const source = process.env.DATA_SOURCE || 'notion';
+  
+  if (source === 'notion') {
+    // Use the new Notion-based approach
+    const notionPhotos = await getNotionPhotos();
+    return notionPhotos.map((photo: any) => ({
+      id: photo.id,
+      url: publicIdToUrl(photo.publicId),
+      caption: photo.caption,
+      type: photo.type,
+      createdAt: photo.uploadDate || new Date().toISOString(),
+      albumId: photo.memoryId,
+      albumName: photo.title,
+      albumIndex: photo.orderIndex,
+      totalInAlbum: 1, // We'll calculate this properly in getAlbums
+    }));
+  }
+
+  // Fallback to old file-based approach
   const memories = await getMemories();
   const photos: Photo[] = [];
 
@@ -77,11 +97,83 @@ export async function getRecentPhotos(limit: number): Promise<Photo[]> {
 }
 
 export async function getPhotoById(id: string): Promise<Photo | null> {
+  const source = process.env.DATA_SOURCE || 'notion';
+  
+  if (source === 'notion') {
+    // Use the new Notion-based approach
+    const notionPhotos = await getNotionPhotos();
+    const photo = notionPhotos.find((p: any) => p.id === id);
+    
+    if (!photo) return null;
+    
+    // Get the memory to get album info
+    const memories = await listMemories();
+    const memory = memories.find((m: any) => m.id === photo.memoryId);
+    const memoryPhotos = notionPhotos.filter((p: any) => p.memoryId === photo.memoryId);
+    const photoIndex = memoryPhotos.findIndex((p: any) => p.id === id);
+    
+    return {
+      id: photo.id,
+      url: publicIdToUrl(photo.publicId),
+      caption: photo.caption,
+      type: photo.type,
+      createdAt: photo.uploadDate || new Date().toISOString(),
+      albumId: photo.memoryId,
+      albumName: memory?.title || memory?.name || 'Unknown Memory',
+      albumIndex: photoIndex + 1,
+      totalInAlbum: memoryPhotos.length,
+    };
+  }
+
+  // Fallback to old file-based approach
   const photos = await getAllPhotos();
   return photos.find((photo) => photo.id === id) || null;
 }
 
 export async function getAlbums(): Promise<Album[]> {
+  const source = process.env.DATA_SOURCE || 'notion';
+  
+  if (source === 'notion') {
+    // Use the new Notion-based approach
+    const memories = await listMemories();
+    const notionPhotos = await getNotionPhotos();
+    
+    return memories
+      .filter((memory) => {
+        const memoryPhotos = notionPhotos.filter((photo: any) => photo.memoryId === memory.id);
+        return memoryPhotos.length > 0;
+      })
+      .map((memory) => {
+        const memoryPhotos = notionPhotos.filter((photo: any) => photo.memoryId === memory.id);
+        const photos: Photo[] = memoryPhotos.map((photo: any, index: number) => ({
+          id: photo.id,
+          url: publicIdToUrl(photo.publicId),
+          caption: photo.caption,
+          type: photo.type,
+          createdAt: photo.uploadDate || new Date().toISOString(),
+          albumId: memory.id,
+          albumName: memory.title || memory.name,
+          albumIndex: index + 1,
+          totalInAlbum: memoryPhotos.length,
+        }));
+
+        return {
+          id: memory.id,
+          name: memory.title || memory.name,
+          thumbnail: photos[0]?.url,
+          photoCount: photos.length,
+          createdAt: memory.createdAt,
+          photos,
+          message: memory.body,
+        };
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+  }
+
+  // Fallback to old file-based approach
   const memories = await getMemories();
 
   return memories
