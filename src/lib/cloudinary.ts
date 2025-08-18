@@ -5,7 +5,7 @@ export function optimizeImageUrl(
   quality: number = 70
 ): string {
   if (!url.includes('cloudinary.com')) return url;
-  
+
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   if (!cloudName) return url;
 
@@ -18,10 +18,13 @@ export function getCloudinaryUploadUrl(cloudName: string) {
   return `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
 }
 
-export function publicIdToUrl(publicId: string, type: string = 'image'): string {
+export function publicIdToUrl(
+  publicId: string,
+  type: string = 'image'
+): string {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   if (!cloudName) return '';
-  
+
   return `https://res.cloudinary.com/${cloudName}/${type}/upload/${publicId}`;
 }
 
@@ -32,15 +35,15 @@ export function cldUrl(
 ): string {
   const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const parts = ['f_auto'];
-  
+
   if (opts.q) parts.push(`q_${opts.q}`);
   else parts.push('q_auto');
-  
+
   if (opts.w) parts.push(`w_${opts.w}`);
   if (opts.h) parts.push(`h_${opts.h}`);
   if (opts.crop) parts.push(`c_${opts.crop}`);
   if (opts.dpr) parts.push(`dpr_${opts.dpr}`);
-  
+
   return `https://res.cloudinary.com/${cloud}/image/upload/${parts.join(',')}/${publicId}`;
 }
 
