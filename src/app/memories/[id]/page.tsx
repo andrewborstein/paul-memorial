@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 
@@ -10,7 +11,11 @@ export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
   console.log('getMemory: Fetching memory with ID:', id);
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const baseUrl = `${protocol}://${host}`;
+  
   const res = await fetch(`${baseUrl}/api/memory/${id}`, {
     next: { revalidate: 60 },
   });
