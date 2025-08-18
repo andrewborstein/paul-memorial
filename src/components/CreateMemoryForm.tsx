@@ -495,7 +495,7 @@ export default function CreateMemoryForm() {
                     }}
                     src={p.preview}
                     alt=""
-                    className={`w-full h-24 object-cover rounded mb-2 ${
+                    className={`w-24 h-24 object-cover rounded mb-2 ${
                       p.status === 'uploading' ? 'opacity-50' : ''
                     }`}
                     onLoad={(e) => {
@@ -549,7 +549,7 @@ export default function CreateMemoryForm() {
                   />
                   
                   {/* Fallback for unsupported formats */}
-                  <div className={`hidden w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+                  <div className={`hidden w-24 h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
                     <div className="text-center">
                       <div className="text-lg mb-1">📷</div>
                       <div className="truncate max-w-full px-1">{p.file.name}</div>
