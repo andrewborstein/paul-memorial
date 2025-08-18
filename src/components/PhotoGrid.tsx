@@ -24,7 +24,7 @@ export default function PhotoGrid({ photos }: PhotoGridProps) {
                       alt={photo.caption || 'Photo'}
                       className="w-full h-full object-cover"
                       width={400}
-                      quality={70}
+                      quality="auto"
                     />
                     {photo.caption && (
                       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity">

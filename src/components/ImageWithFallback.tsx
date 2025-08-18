@@ -9,7 +9,7 @@ interface ImageWithFallbackProps {
   alt: string;
   className?: string;
   width?: number;
-  quality?: number;
+  quality?: number | string;
   fallbackText?: string;
   onLoad?: () => void;
   onError?: () => void;
