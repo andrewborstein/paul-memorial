@@ -21,7 +21,26 @@ export default function NewMemoryPage() {
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Add global callback for Turnstile
+    (window as any).turnstileCallback = (token: string) => {
+      setTurnstileToken(token);
+    };
   }, []);
+
+  // Add Turnstile callback when component mounts
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).turnstile) {
+      (window as any).turnstile.ready(() => {
+        (window as any).turnstile.render('.cf-turnstile', {
+          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+          callback: (token: string) => {
+            setTurnstileToken(token);
+          },
+        });
+      });
+    }
+  }, [isClient]);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
@@ -331,6 +350,7 @@ export default function NewMemoryPage() {
             <div
               className="cf-turnstile"
               data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+              data-callback="turnstileCallback"
             />
           </div>
         )}

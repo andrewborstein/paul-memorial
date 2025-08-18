@@ -5,20 +5,21 @@ import { emailHash } from '@/lib/utils';
 import { createMemory } from '@/lib/notion';
 
 async function verifyTurnstile(token: string | undefined) {
-  // Skip verification if not on production domain or Vercel preview
-  const host =
-    process.env.VERCEL_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    'localhost:3000';
-  const isProduction = host.includes('paulbedrosian.com');
-  const isVercelPreview = host.includes('.vercel.app');
+  console.log('Turnstile verification:', {
+    hasSecretKey: !!process.env.TURNSTILE_SECRET_KEY,
+    hasToken: !!token,
+    tokenLength: token?.length,
+  });
 
-  if (!isProduction && !isVercelPreview) {
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    console.log('No secret key - skipping verification');
     return true;
   }
+  if (!token) {
+    console.log('No token provided');
+    return false;
+  }
 
-  if (!process.env.TURNSTILE_SECRET_KEY) return true;
-  if (!token) return false;
   const formData = new FormData();
   formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
   formData.append('response', token);
@@ -27,6 +28,7 @@ async function verifyTurnstile(token: string | undefined) {
     { method: 'POST', body: formData }
   );
   const data = await res.json();
+  console.log('Turnstile verification result:', data);
   return !!data.success;
 }
 
