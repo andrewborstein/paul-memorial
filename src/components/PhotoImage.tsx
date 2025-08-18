@@ -27,10 +27,8 @@ export default function PhotoImage({
 
   const handleLoad = () => {
     console.log('PhotoImage: Image loaded successfully');
-    // Add a small delay to make loading state visible
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    // Remove the artificial delay - cached images should load instantly
+    setIsLoading(false);
   };
 
   const handleError = () => {
@@ -55,6 +53,13 @@ export default function PhotoImage({
   return (
     <div className="relative">
       <img
+        ref={(img) => {
+          if (img && img.complete) {
+            // Image is already cached and loaded
+            console.log('PhotoImage: Image already cached');
+            setIsLoading(false);
+          }
+        }}
         src={cldUrl(publicId, { w: width })}
         alt={alt}
         className={`${className} transition-opacity duration-300`}
