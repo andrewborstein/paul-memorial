@@ -9,6 +9,10 @@ export async function POST(req: Request) {
     // Server-side password validation (not exposed to client)
     const validPasswords = process.env.SUPER_USER_PASSWORDS?.split(',') || [];
     
+    console.log('Debug - Valid passwords:', validPasswords);
+    console.log('Debug - Submitted password:', password);
+    console.log('Debug - Environment variable:', process.env.SUPER_USER_PASSWORDS);
+    
     if (validPasswords.includes(password)) {
       return Response.json({ 
         success: true, 
