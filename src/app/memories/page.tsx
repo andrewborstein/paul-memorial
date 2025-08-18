@@ -3,6 +3,7 @@ import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import { unstable_noStore } from 'next/cache';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -17,6 +18,9 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
 }
 
 export default async function MemoriesPage() {
+  // Disable caching to prevent stale data after deletions
+  unstable_noStore();
+  
   try {
     const memories = await getMemories();
 
@@ -98,12 +102,12 @@ export default async function MemoriesPage() {
                     {/* Photo Thumbnail */}
                     {memory.cover_public_id && (
                       <div className="flex-shrink-0">
-                        <div className="w-32 h-32 rounded-lg overflow-hidden relative">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden relative">
                           <ImageWithFallback
                             publicId={memory.cover_public_id}
                             alt="Memory preview"
                             className="w-full h-full object-cover"
-                            width={144}
+                            width={96}
                             quality="auto"
                           />
                           {memory.photo_count > 1 && (

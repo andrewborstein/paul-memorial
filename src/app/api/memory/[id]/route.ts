@@ -1,5 +1,5 @@
 import { readIndex, writeIndex, readMemory, writeMemory, deleteMemory } from '@/lib/data';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore } from 'next/cache';
 
 export const revalidate = 60;
 
