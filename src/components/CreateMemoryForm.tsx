@@ -472,6 +472,12 @@ export default function CreateMemoryForm() {
                     className={`w-full h-24 object-cover rounded mb-2 ${
                       p.status === 'uploading' ? 'opacity-50' : ''
                     }`}
+                    onLoad={(e) => {
+                      console.log('Image loaded successfully:', p.file.name);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'block';
+                      target.nextElementSibling?.classList.add('hidden');
+                    }}
                     onError={(e) => {
                       // Fallback for unsupported formats (HEIC, etc.)
                       const target = e.target as HTMLImageElement;
@@ -480,6 +486,7 @@ export default function CreateMemoryForm() {
                       console.log('Image load failed:', img.src);
                       console.log('File name:', p.file.name);
                       console.log('Is HEIC:', p.file.name.toLowerCase().includes('.heic'));
+                      console.log('Current display style:', img.style.display);
                       
                       // If this is a Cloudinary URL and it's a HEIC file, try multiple approaches
                       if (img.src.includes('cloudinary.com') && p.file.name.toLowerCase().includes('.heic')) {
@@ -505,7 +512,13 @@ export default function CreateMemoryForm() {
                       // Otherwise show fallback
                       console.log('Showing fallback for:', p.file.name);
                       target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
+                      const fallback = target.nextElementSibling;
+                      if (fallback) {
+                        fallback.classList.remove('hidden');
+                        console.log('Fallback element found and shown');
+                      } else {
+                        console.log('No fallback element found!');
+                      }
                     }}
                   />
                   
