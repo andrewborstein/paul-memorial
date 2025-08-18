@@ -1,4 +1,4 @@
-import { list, put } from '@vercel/blob';
+import { list, put, del } from '@vercel/blob';
 import type { MemoryDetail, MemoryIndexItem } from '@/types/memory';
 
 const INDEX_KEY = 'index.json';
@@ -84,4 +84,24 @@ export async function writeMemory(doc: MemoryDetail) {
   console.log('Writing memory to Blob:', `memories/${doc.id}.json`);
   await writeBlobJson(`memories/${doc.id}.json`, doc);
   console.log('Memory written successfully to Blob');
+}
+
+export async function deleteMemory(id: string) {
+  try {
+    // Prefer write token, fallback to read-write
+    const token =
+      process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      throw new Error('No Blob write token found');
+    }
+
+    const blobKey = getBlobKey(`memories/${id}.json`);
+    console.log('Deleting memory blob:', blobKey);
+    
+    await del(blobKey, { token });
+    console.log('Memory deleted successfully from Blob');
+  } catch (error) {
+    console.error('Failed to delete memory from Blob:', error);
+    // Don't throw - we want to continue even if blob deletion fails
+  }
 }

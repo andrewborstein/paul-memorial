@@ -1,4 +1,4 @@
-import { readIndex, writeIndex, readMemory, writeMemory } from '@/lib/data';
+import { readIndex, writeIndex, readMemory, writeMemory, deleteMemory } from '@/lib/data';
 import { revalidatePath } from 'next/cache';
 
 export const revalidate = 60;
@@ -117,15 +117,19 @@ export async function DELETE(
     const updatedIndex = index.filter(m => m.id !== id);
     await writeIndex(updatedIndex);
 
-    // TODO: Delete the memory detail file
-    // TODO: Delete photos from Cloudinary
-    // For now, just remove from index
+    // Delete the memory detail file
+    await deleteMemory(id);
 
-    // Invalidate cache
+    // TODO: Delete photos from Cloudinary
+    // For now, just remove from index and memory file
+
+    // Invalidate cache aggressively
     revalidatePath('/');
     revalidatePath('/memories');
     revalidatePath('/memories/[id]', 'page');
     revalidatePath('/photos');
+    revalidatePath('/api/memories');
+    revalidatePath('/api/memory/[id]', 'page');
 
     return new Response(null, { status: 204 });
   } catch (error) {
