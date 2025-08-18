@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { emailHash } from '@/lib/utils';
 import { createMemory } from '@/lib/notion';
+import { revalidatePath } from 'next/cache';
 
 async function verifyTurnstile(token: string | undefined) {
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
@@ -71,6 +72,16 @@ export async function POST(req: Request) {
     }
 
     const memoryPage = await createMemory(memoryData);
+
+    // Invalidate cache for all affected routes
+    revalidatePath('/');
+    revalidatePath('/memories');
+    revalidatePath('/memories/[id]', 'page');
+    revalidatePath('/photos');
+    revalidatePath('/photos/all');
+    revalidatePath('/memories/photos');
+    revalidatePath('/memories/photos/by-memory');
+
     return NextResponse.json(
       {
         item: { ...memoryData, id: memoryPage.id },

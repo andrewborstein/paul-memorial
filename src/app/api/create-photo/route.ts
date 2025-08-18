@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
-import { notion } from '@/lib/notion';
+import { NextResponse } from 'next/server'
+import { notion } from '@/lib/notion'
+import { revalidatePath } from 'next/cache'
 
 const photosDbId = process.env.NOTION_PHOTOS_DB_ID!;
 const memoriesDbId = process.env.NOTION_MEMORIES_DB_ID!;
@@ -47,6 +48,14 @@ export async function POST(req: Request) {
           PhotoCount: { number: currentCount + 1 },
         },
       });
+
+      // Invalidate cache for affected routes
+      revalidatePath('/memories');
+      revalidatePath('/memories/[id]', 'page');
+      revalidatePath('/photos');
+      revalidatePath('/photos/all');
+      revalidatePath('/memories/photos');
+      revalidatePath('/memories/photos/by-memory');
     } catch (e) {
       console.warn('Failed to update photo count:', e);
     }

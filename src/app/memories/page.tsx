@@ -4,6 +4,9 @@ import { optimizeImageUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 
+// Revalidate every 5 minutes
+export const revalidate = 300;
+
 export default async function MemoriesPage() {
   const memories = await getAllMemories();
 

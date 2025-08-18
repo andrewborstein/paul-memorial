@@ -1,6 +1,12 @@
+import Link from 'next/link';
+import { getAllMemories } from '@/lib/memories';
+import { optimizeImageUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 
-export default function Home() {
+// Revalidate every 5 minutes
+export const revalidate = 300;
+
+export default async function HomePage() {
   return (
     <PageContainer>
       <div className="prose max-w-none">

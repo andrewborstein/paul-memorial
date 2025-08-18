@@ -1,11 +1,15 @@
 import Link from 'next/link';
-import { getAllPhotos, getMemoriesWithPhotos } from '@/lib/memories';
+import { getAllPhotos, getAlbums } from '@/lib/photos';
 import { optimizeImageUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
+import PageHeader from '@/components/PageHeader';
+
+// Revalidate every 5 minutes
+export const revalidate = 300;
 
 export default async function PhotosPage() {
   const allPhotos = await getAllPhotos();
-  const memoriesWithPhotos = await getMemoriesWithPhotos();
+  const memoriesWithPhotos = await getAlbums();
 
   return (
     <PageContainer>
@@ -78,7 +82,7 @@ export default async function PhotosPage() {
                 <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                   <div className="p-4">
                     <h3 className="font-medium text-sm mb-1">
-                      {memory.title || memory.name}
+                      {memory.name}
                     </h3>
                     <p className="text-xs text-gray-500">
                       {memory.photos.length} photos
