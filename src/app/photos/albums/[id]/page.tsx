@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import PageContainer from '@/components/PageContainer';
 
 interface AlbumPageProps {
   params: Promise<{ id: string }>;
@@ -56,7 +57,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
   };
 
   return (
-    <div>
+    <PageContainer>
       <div className="mb-6">
         <Link
           href="/photos/albums"
@@ -97,6 +98,6 @@ export default function AlbumPage({ params }: AlbumPageProps) {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

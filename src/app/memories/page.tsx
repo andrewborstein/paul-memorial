@@ -1,18 +1,20 @@
 import Link from 'next/link';
 import { getAllMemories } from '@/lib/memories';
 import { optimizeImageUrl } from '@/lib/cloudinary';
+import PageContainer from '@/components/PageContainer';
+import PageHeader from '@/components/PageHeader';
 
 export default async function MemoriesPage() {
   const memories = await getAllMemories();
 
   return (
-    <section className="max-w-4xl mx-auto px-2">
+    <PageContainer>
       <div className="flex items-center justify-between mb-8 gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold mb-3">Memories</h1>
-          <p className="text-gray-600">
-            Read memories shared by friends and family.
-          </p>
+          <PageHeader
+            title="Memories"
+            description="Read memories shared by friends and family."
+          />
         </div>
         <Link
           href="/memories/new"
@@ -92,6 +94,6 @@ export default async function MemoriesPage() {
           ))}
         </div>
       )}
-    </section>
+    </PageContainer>
   );
 }

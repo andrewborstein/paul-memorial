@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { getMemoriesWithPhotos } from '@/lib/memories';
 import { optimizeImageUrl } from '@/lib/cloudinary';
+import PageContainer from '@/components/PageContainer';
 
 export default async function PhotosByMemoryPage() {
   const memoriesWithPhotos = await getMemoriesWithPhotos();
 
   return (
-    <div>
+    <PageContainer>
       {/* Breadcrumbs */}
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">
@@ -73,6 +74,6 @@ export default async function PhotosByMemoryPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

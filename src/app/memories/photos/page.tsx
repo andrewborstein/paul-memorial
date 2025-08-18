@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { getAllPhotos } from '@/lib/memories';
+import PageContainer from '@/components/PageContainer';
 
 export default async function AllPhotosPage() {
   const photos = await getAllPhotos();
 
   return (
-    <div>
+    <PageContainer>
       {/* Breadcrumbs */}
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">
@@ -55,6 +56,6 @@ export default async function AllPhotosPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

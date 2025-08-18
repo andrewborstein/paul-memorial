@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import PageContainer from '@/components/PageContainer';
 
 interface MemoryPageProps {
   params: Promise<{ id: string }>;
@@ -61,7 +62,7 @@ export default function MemoryPage({ params }: MemoryPageProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-2">
+    <PageContainer>
       {/* Breadcrumbs and Navigation */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -160,6 +161,6 @@ export default function MemoryPage({ params }: MemoryPageProps) {
           )}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

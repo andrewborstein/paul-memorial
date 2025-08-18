@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { getAllPhotos, getMemoriesWithPhotos } from '@/lib/memories';
 import { optimizeImageUrl } from '@/lib/cloudinary';
+import PageContainer from '@/components/PageContainer';
 
 export default async function PhotosPage() {
   const allPhotos = await getAllPhotos();
   const memoriesWithPhotos = await getMemoriesWithPhotos();
 
   return (
-    <section className="max-w-4xl mx-auto px-2">
+    <PageContainer>
       <div className="space-y-8">
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="min-w-0 flex-1">
@@ -96,6 +97,6 @@ export default async function PhotosPage() {
           </div>
         </div>
       </div>
-    </section>
+    </PageContainer>
   );
 }

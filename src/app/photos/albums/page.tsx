@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { getAlbums } from '@/lib/photos';
+import PageContainer from '@/components/PageContainer';
 
 export default async function AlbumsPage() {
   const albums = await getAlbums();
 
   return (
-    <div>
+    <PageContainer>
       <div className="mb-6">
         <Link
           href="/photos"
@@ -48,6 +49,6 @@ export default async function AlbumsPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

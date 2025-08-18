@@ -6,6 +6,7 @@ import {
   getAllPhotos,
   getAlbums,
 } from '@/lib/photos';
+import PageContainer from '@/components/PageContainer';
 
 interface PhotoPageProps {
   params: Promise<{ id: string }>;
@@ -50,7 +51,7 @@ export default async function PhotoPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <PageContainer>
       {/* Breadcrumbs and Navigation */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -141,6 +142,6 @@ export default async function PhotoPage({
           className="w-full h-full object-contain"
         />
       </div>
-    </div>
+    </PageContainer>
   );
 }
