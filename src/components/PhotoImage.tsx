@@ -23,18 +23,27 @@ export default function PhotoImage({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  console.log('PhotoImage: Component rendered, isLoading:', isLoading);
+
   const handleLoad = () => {
-    setIsLoading(false);
+    console.log('PhotoImage: Image loaded successfully');
+    // Add a small delay to make loading state visible
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
   };
 
   const handleError = () => {
+    console.log('PhotoImage: Image failed to load');
     setIsLoading(false);
     setHasError(true);
   };
 
   if (hasError) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}>
+      <div
+        className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}
+      >
         <div className="text-center">
           <div className="text-lg mb-1">📷</div>
           <div className="text-xs">Failed to load image</div>
