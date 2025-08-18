@@ -52,10 +52,22 @@ export default function ImageWithFallback({
     );
   }
 
+  // Convert old q_60 URLs to new q_auto URLs
+  const imageSrc = React.useMemo(() => {
+    if (src) {
+      // If it's an old q_60 URL, convert it to q_auto
+      if (src.includes('q_60')) {
+        return src.replace('q_60', 'q_auto');
+      }
+      return src;
+    }
+    return cldUrl(publicId!, { w: width, q: quality, dpr: 'auto' });
+  }, [src, publicId, width, quality]);
+
   return (
     <>
       <img
-        src={src || cldUrl(publicId!, { w: width, q: quality, dpr: 'auto' })}
+        src={imageSrc}
         alt={alt}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         onLoad={handleLoad}
