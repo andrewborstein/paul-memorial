@@ -31,7 +31,7 @@ export function publicIdToUrl(
 // New optimized URL builder
 export function cldUrl(
   publicId: string,
-  opts: { w?: number; h?: number; crop?: string; q?: number | string; dpr?: string } = {}
+  opts: { w?: number; h?: number; crop?: string; q?: number | string; dpr?: string | number } = {}
 ): string {
   const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const parts = ['f_auto'];
@@ -49,13 +49,13 @@ export function cldUrl(
 
 // Helper functions for different use cases
 export function getThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 200, q: 'auto', dpr: 'auto' });
+  return cldUrl(publicId, { w: 200, q: 'auto', dpr: 2 });
 }
 
 export function getSmallThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 96, q: 'auto', dpr: 'auto' });
+  return cldUrl(publicId, { w: 144, q: 'auto', dpr: 2 });
 }
 
 export function getFullSizeUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 1600, q: 'auto', dpr: 'auto' });
+  return cldUrl(publicId, { w: 1600, q: 'auto', dpr: 2 });
 }

@@ -10,6 +10,7 @@ interface ImageWithFallbackProps {
   className?: string;
   width?: number;
   quality?: number | string;
+  dpr?: number;
   fallbackText?: string;
   onLoad?: () => void;
   onError?: () => void;
@@ -22,6 +23,7 @@ export default function ImageWithFallback({
   className = '',
   width = 400,
   quality = 70,
+  dpr = 2,
   fallbackText = 'Loading...',
   onLoad,
   onError,
@@ -52,17 +54,21 @@ export default function ImageWithFallback({
     );
   }
 
-  // Convert old q_60 URLs to new q_auto URLs
+  // Convert old URLs to better quality
   const imageSrc = React.useMemo(() => {
     if (src) {
       // If it's an old q_60 URL, convert it to q_auto
       if (src.includes('q_60')) {
         return src.replace('q_60', 'q_auto');
       }
+      // If it's an old w_96 URL, convert it to w_144 with dpr_2
+      if (src.includes('w_96') && src.includes('dpr_auto')) {
+        return src.replace('w_96,dpr_auto', 'w_144,dpr_2');
+      }
       return src;
     }
-    return cldUrl(publicId!, { w: width, q: quality, dpr: 'auto' });
-  }, [src, publicId, width, quality]);
+    return cldUrl(publicId!, { w: width, q: quality, dpr });
+  }, [src, publicId, width, quality, dpr]);
 
   return (
     <>
