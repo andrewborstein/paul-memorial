@@ -48,20 +48,13 @@ export default async function PhotosPage() {
                 <Link
                   key={memory.id}
                   href={`/memories/${memory.id}`}
-                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
+                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
                 >
                   <img
                     src={memory.cover_url || ''}
                     alt={memory.title}
                     className="w-full h-full object-cover"
                   />
-                  {memory.photo_count > 1 && (
-                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">
-                        +{memory.photo_count - 1}
-                      </span>
-                    </div>
-                  )}
                 </Link>
               ))}
             </div>
