@@ -54,9 +54,9 @@ export default async function PhotosPage() {
       }
     }
 
-    // Show first 20 photos, then a "View all" link
-    const displayPhotos = allPhotos.slice(0, 20);
-    const hasMorePhotos = allPhotos.length > 20;
+    // Show first 10 photos, then a "View all" link
+    const displayPhotos = allPhotos.slice(0, 10);
+    const hasMorePhotos = allPhotos.length > 10;
 
     return (
       <PageContainer>
@@ -111,7 +111,14 @@ export default async function PhotosPage() {
             <div>
               <h2 className="text-lg font-semibold mb-4">Photos by memory</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {memoriesWithPhotos.map((memory) => (
+                {memoriesWithPhotos.map((memory) => {
+                  console.log('Memory debug:', {
+                    id: memory.id,
+                    title: memory.title,
+                    cover_public_id: memory.cover_public_id,
+                    photo_count: memory.photo_count
+                  });
+                  return (
                   <Link
                     key={memory.id}
                     href={`/memories/${memory.id}`}
@@ -139,7 +146,8 @@ export default async function PhotosPage() {
                       </div>
                     )}
                   </Link>
-                ))}
+                );
+                })}
               </div>
             </div>
           </div>

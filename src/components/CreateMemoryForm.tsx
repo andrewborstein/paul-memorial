@@ -141,12 +141,14 @@ function SortablePhotoItem({
         />
         
         {/* Fallback for unsupported formats */}
-                            <div className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+        <div className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
           <div className="text-center">
             <div className="text-lg mb-1">📷</div>
-            <div className="truncate max-w-full px-1">{photo.file.name}</div>
+            <div className="truncate max-w-full px-1">
+              {photo.public_id ? photo.public_id.split('/').pop() : photo.file.name}
+            </div>
             <div className="text-xs text-gray-400">
-              {photo.file.type || 'Unknown format'}
+              {photo.status === 'done' ? 'Loading...' : (photo.file.type || 'Unknown format')}
             </div>
             {photo.status === 'uploading' && (
               <div className="text-xs text-blue-600 mt-1">Converting...</div>
@@ -227,7 +229,7 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
   const [photos, setPhotos] = React.useState<PhotoState[]>(
     memory?.photos.map(photo => ({
       file: new File([], photo.public_id), // Dummy file for existing photos
-      preview: `https://res.cloudinary.com/${CLOUD}/image/upload/w_200,h_200,c_fill,q_auto,dpr_2/${photo.public_id}`,
+      preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,fl_progressive,fl_force_strip,w_200,h_200,c_fill,q_auto,dpr_2/${photo.public_id}`,
       progress: 100,
       status: 'done' as const,
       public_id: photo.public_id,

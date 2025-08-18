@@ -10,9 +10,9 @@ interface MemoryActionsProps {
   creatorEmail: string;
 }
 
-export default function MemoryActions({ 
-  memoryId, 
-  creatorEmail
+export default function MemoryActions({
+  memoryId,
+  creatorEmail,
 }: MemoryActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -21,14 +21,14 @@ export default function MemoryActions({
   // Check if user can edit this memory
   const canEdit = canEditMemory(creatorEmail);
   const isSuper = isSuperUser();
-  
+
   // Debug logging
   console.log('MemoryActions Debug:', {
     memoryId,
     creatorEmail,
     canEdit,
     isSuper,
-    currentUser: getCurrentUser()
+    currentUser: getCurrentUser(),
   });
 
   if (!canEdit) {
@@ -70,7 +70,7 @@ export default function MemoryActions({
       >
         Edit
       </Link>
-      
+
       <button
         onClick={handleDelete}
         disabled={isDeleting}
@@ -80,14 +80,9 @@ export default function MemoryActions({
             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
         } ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        {isDeleting 
-          ? 'Deleting...' 
-          : showDeleteConfirm 
-            ? 'Confirm' 
-            : 'Delete'
-        }
+        {isDeleting ? 'Deleting...' : showDeleteConfirm ? 'Confirm' : 'Delete'}
       </button>
-      
+
       {showDeleteConfirm && (
         <button
           onClick={() => setShowDeleteConfirm(false)}
