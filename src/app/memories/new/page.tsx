@@ -186,7 +186,7 @@ export default function NewMemoryPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto" suppressHydrationWarning>
+    <div className="max-w-2xl mx-auto">
       {/* Breadcrumbs */}
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">

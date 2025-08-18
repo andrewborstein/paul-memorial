@@ -2,6 +2,7 @@
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Script from 'next/script';
 
 export default function RootLayout({
   children,
@@ -78,10 +79,9 @@ export default function RootLayout({
             </span>
           </div>
         </footer>
-        <script
+        <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-          async
-          defer
+          strategy="beforeInteractive"
         />
       </body>
     </html>
