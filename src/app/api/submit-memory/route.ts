@@ -37,12 +37,11 @@ async function verifyTurnstile(token: string | undefined) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // Temporarily disabled Turnstile verification to debug React error
-    // const ok = await verifyTurnstile(
-    //   (await req.headers).get('cf-turnstile-response') ||
-    //     body['cf-turnstile-response']
-    // );
-    // if (!ok) return new Response('Captcha failed', { status: 400 });
+    const ok = await verifyTurnstile(
+      (await req.headers).get('cf-turnstile-response') ||
+        body['cf-turnstile-response']
+    );
+    if (!ok) return new Response('Captcha failed', { status: 400 });
 
     const id = uuidv4().slice(0, 8);
     const editToken = uuidv4().replace(/-/g, '');

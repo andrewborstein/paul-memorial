@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function NewMemoryPage() {
   const [name, setName] = useState('');
@@ -16,16 +17,8 @@ export default function NewMemoryPage() {
     total: number;
     message: string;
   } | null>(null);
-
-  // Temporarily disabled Turnstile
-  // const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Temporarily disabled Turnstile
-    // (window as any).turnstileCallback = (token: string) => {
-    //   setTurnstileToken(token);
-    // };
-  }, []);
+  const [turnstileStatus, setTurnstileStatus] = useState<'required' | 'success' | 'error' | 'expired'>('required');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
@@ -142,7 +135,7 @@ export default function NewMemoryPage() {
           email,
           title: title || undefined,
           body: hasText ? body : '',
-          // 'cf-turnstile-response': turnstileToken, // Temporarily disabled
+          'cf-turnstile-response': turnstileToken,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -158,7 +151,7 @@ export default function NewMemoryPage() {
       setEmail('');
       setTitle('');
       setBody('');
-      // setTurnstileToken(null); // Temporarily disabled
+      setTurnstileToken(null);
       setUploadProgress(null);
       if (document.getElementById('file') as HTMLInputElement) {
         (document.getElementById('file') as HTMLInputElement).value = '';
@@ -330,21 +323,30 @@ export default function NewMemoryPage() {
         </div>
 
         {/* Turnstile */}
-        {/* Temporarily disabled to debug React error */}
-        {/* {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-          <div className="flex justify-start">
-            <div
-              className="cf-turnstile"
-              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-              data-callback="turnstileCallback"
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="space-y-2">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => {
+                setTurnstileToken(token);
+                setTurnstileStatus('success');
+              }}
+              onError={() => setTurnstileStatus('error')}
+              onExpire={() => setTurnstileStatus('expired')}
             />
+            {turnstileStatus === 'error' && (
+              <div className="text-red-600 text-sm">Security check failed. Please try again.</div>
+            )}
+            {turnstileStatus === 'expired' && (
+              <div className="text-red-600 text-sm">Security check expired. Please verify again.</div>
+            )}
           </div>
-        )} */}
+        )}
 
         <div className="pt-4">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || turnstileStatus !== 'success'}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Sharing Memory...' : 'Share Memory'}
