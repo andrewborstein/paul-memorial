@@ -457,36 +457,31 @@ export default function CreateMemoryForm() {
             {photos.map((p, i) => (
               <div key={i} className="border rounded-lg p-2 relative">
                 <div className="relative">
-                  {p.status === 'done' ? (
-                    <img
-                      src={p.preview}
-                      alt=""
-                      className="w-full h-24 object-cover rounded mb-2"
-                      onError={(e) => {
-                        // Fallback for unsupported formats
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={p.preview}
-                      alt=""
-                      className={`w-full h-24 object-cover rounded mb-2 ${
-                        p.status === 'uploading' ? 'opacity-50' : ''
-                      }`}
-                    />
-                  )}
+                  <img
+                    src={p.preview}
+                    alt=""
+                    className={`w-full h-24 object-cover rounded mb-2 ${
+                      p.status === 'uploading' ? 'opacity-50' : ''
+                    }`}
+                    onError={(e) => {
+                      // Fallback for unsupported formats (HEIC, etc.)
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
                   
                   {/* Fallback for unsupported formats */}
                   <div className={`hidden w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
                     <div className="text-center">
                       <div className="text-lg mb-1">📷</div>
-                      <div>{p.file.name}</div>
+                      <div className="truncate max-w-full px-1">{p.file.name}</div>
                       <div className="text-xs text-gray-400">
                         {p.file.type || 'Unknown format'}
                       </div>
+                      {p.status === 'uploading' && (
+                        <div className="text-xs text-blue-600 mt-1">Converting...</div>
+                      )}
                     </div>
                   </div>
                   
