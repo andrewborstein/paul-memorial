@@ -58,27 +58,37 @@ export default function CreateMemoryForm() {
           console.log('File type:', photo.file.type);
           console.log('File name:', photo.file.name);
           
-          setPhotos((prev) =>
-            prev.map((p) =>
+          setPhotos((prev) => {
+            const updated = prev.map((p) =>
               p === photo
                 ? { 
                     ...p, 
                     public_id: pid, 
                     progress: 100, 
-                    status: 'done',
+                    status: 'done' as const,
                     preview: cloudinaryUrl
                   }
                 : p
-            )
-          );
+            );
+            console.log('Updated photos state with Cloudinary URL:', updated.find(p => p.file.name === photo.file.name)?.preview);
+            return updated;
+          });
           
           // Force the image element to be visible for the new Cloudinary URL
           setTimeout(() => {
             const imgElement = imageRefs.current[photo.file.name];
             if (imgElement) {
               console.log('Found image element via ref, ensuring it\'s visible for Cloudinary URL');
+              console.log('Current image src:', imgElement.src);
+              console.log('Expected Cloudinary URL:', cloudinaryUrl);
               imgElement.style.display = 'block';
               imgElement.nextElementSibling?.classList.add('hidden');
+              
+              // Force update the src if it's still the blob URL
+              if (imgElement.src.startsWith('blob:')) {
+                console.log('Forcing src update to Cloudinary URL');
+                imgElement.src = cloudinaryUrl;
+              }
             } else {
               console.log('Image element not found in refs for:', photo.file.name);
             }
