@@ -51,12 +51,13 @@ export default async function MemoriesPage() {
       ) : (
         <div className="space-y-4 sm:space-y-6">
           {memories.map((memory) => {
-            const displayTitle = memory.title || memory.name;
+            const displayTitle = memory.title || memory.name || '';
+            const bodyText = memory.body || '';
             const truncatedBody =
-              memory.body.length > 200
-                ? memory.body.substring(0, 200).trim() + '...'
-                : memory.body;
-            const needsTruncation = memory.body.length > 200;
+              bodyText.length > 200
+                ? bodyText.substring(0, 200).trim() + '...'
+                : bodyText;
+            const needsTruncation = bodyText.length > 200;
 
             return (
               <article
