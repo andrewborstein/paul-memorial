@@ -64,11 +64,6 @@ export default function MemoryActions({
 
   return (
     <div className="flex gap-2 mt-4">
-      {isSuperUser() && (
-        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">
-          Super User Mode
-        </span>
-      )}
       <Link
         href={`/memories/${memoryId}/edit`}
         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
