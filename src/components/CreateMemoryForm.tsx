@@ -78,7 +78,7 @@ function SortablePhotoItem({
           }}
           src={photo.preview}
           alt=""
-          className={`w-24 h-24 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
+                                className={`w-32 h-32 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
             photo.status === 'uploading' || photo.status === 'queued' ? 'opacity-50' : ''
           }`}
           {...attributes}
@@ -134,7 +134,7 @@ function SortablePhotoItem({
         />
         
         {/* Fallback for unsupported formats */}
-        <div className={`hidden w-24 h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+                            <div className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
           <div className="text-center">
             <div className="text-lg mb-1">📷</div>
             <div className="truncate max-w-full px-1">{photo.file.name}</div>

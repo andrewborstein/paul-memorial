@@ -92,7 +92,7 @@ export default async function MemoriesPage() {
                     {/* Photo Thumbnail */}
                     {memory.cover_url && (
                       <div className="flex-shrink-0">
-                        <div className="w-24 h-24 rounded-lg overflow-hidden relative">
+                        <div className="w-32 h-32 rounded-lg overflow-hidden relative">
                           <ImageWithFallback
                             src={memory.cover_url}
                             alt="Memory preview"

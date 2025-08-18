@@ -90,8 +90,8 @@ export default async function PhotosPage() {
                       publicId={photo.public_id}
                       alt={`Photo from ${photo.memoryTitle}`}
                       className="w-full h-full object-cover"
-                      width={400}
-                      quality={70}
+                      width={300}
+                      quality="auto"
                     />
                   </Link>
                 ))}

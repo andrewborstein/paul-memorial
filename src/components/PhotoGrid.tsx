@@ -11,9 +11,12 @@ interface PhotoGridProps {
 }
 
 export default function PhotoGrid({ photos }: PhotoGridProps) {
+  // Limit to last 10 photos
+  const limitedPhotos = photos.slice(-10);
+  
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {photos.map((photo) => (
+      {limitedPhotos.map((photo) => (
                           <Link
                     key={photo.public_id}
                     href={`/memories/photos/${photo.public_id}`}
@@ -23,7 +26,7 @@ export default function PhotoGrid({ photos }: PhotoGridProps) {
                       publicId={photo.public_id}
                       alt={photo.caption || 'Photo'}
                       className="w-full h-full object-cover"
-                      width={400}
+                      width={300}
                       quality="auto"
                     />
                     {photo.caption && (
