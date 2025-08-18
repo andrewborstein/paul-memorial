@@ -359,6 +359,14 @@ export default function NewMemoryPage() {
             </div>
           )}
 
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-gray-500 mt-2">
+            Debug: isClient={isClient.toString()}, hasSiteKey=
+            {!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+          </div>
+        )}
+
         <div className="pt-4">
           <button
             type="submit"
