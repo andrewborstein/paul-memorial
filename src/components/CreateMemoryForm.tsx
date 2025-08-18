@@ -51,7 +51,7 @@ export default function CreateMemoryForm() {
           // For HEIC files, force JPEG conversion
           const isHeic = photo.file.name.toLowerCase().includes('.heic') || photo.file.name.toLowerCase().includes('.heif');
           const cloudinaryUrl = isHeic 
-            ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpeg,fl_progressive,fl_force_strip,q_auto,w_400/${pid}`
+            ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,fl_progressive,fl_force_strip,q_auto,w_400/${pid}`
             : `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`;
           console.log('Generated Cloudinary URL:', cloudinaryUrl);
           console.log('File type:', photo.file.type);
@@ -486,8 +486,8 @@ export default function CreateMemoryForm() {
                         console.log('Retrying HEIC image with different formats...');
                         
                         // Try original format first (no conversion)
-                        if (img.src.includes('f_jpeg')) {
-                          const originalUrl = img.src.replace('f_jpeg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
+                        if (img.src.includes('f_jpg')) {
+                          const originalUrl = img.src.replace('f_jpg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
                           console.log('Trying original format:', originalUrl);
                           img.src = originalUrl;
                           return;
