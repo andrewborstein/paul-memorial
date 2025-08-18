@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // Create signature for Cloudinary destroy API
     const timestamp = Math.round(new Date().getTime() / 1000);
-    const signature = require('crypto')
+    const signature = crypto
       .createHash('sha1')
       .update(`public_id=${public_id}&timestamp=${timestamp}${apiSecret}`)
       .digest('hex');
