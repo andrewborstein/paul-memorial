@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { canEditMemory, isSuperUser } from '@/lib/user';
+import { canEditMemory, isSuperUser, getCurrentUser } from '@/lib/user';
 
 interface MemoryActionsProps {
   memoryId: string;
@@ -20,6 +20,16 @@ export default function MemoryActions({
 
   // Check if user can edit this memory
   const canEdit = canEditMemory(creatorEmail);
+  const isSuper = isSuperUser();
+  
+  // Debug logging
+  console.log('MemoryActions Debug:', {
+    memoryId,
+    creatorEmail,
+    canEdit,
+    isSuper,
+    currentUser: getCurrentUser()
+  });
 
   if (!canEdit) {
     return null;
