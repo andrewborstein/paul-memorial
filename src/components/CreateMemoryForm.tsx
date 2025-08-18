@@ -48,6 +48,15 @@ export default function CreateMemoryForm() {
       limit(async () => {
         try {
           const pid = await uploadOne(photo);
+          // For HEIC files, try multiple formats to ensure compatibility
+          const isHeic = photo.file.name.toLowerCase().includes('.heic') || photo.file.name.toLowerCase().includes('.heif');
+          const cloudinaryUrl = isHeic 
+            ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,q_auto,w_400/${pid}`
+            : `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`;
+          console.log('Generated Cloudinary URL:', cloudinaryUrl);
+          console.log('File type:', photo.file.type);
+          console.log('File name:', photo.file.name);
+          
           setPhotos((prev) =>
             prev.map((p) =>
               p === photo
@@ -56,7 +65,7 @@ export default function CreateMemoryForm() {
                     public_id: pid, 
                     progress: 100, 
                     status: 'done',
-                    preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_webp,q_auto,w_400/${pid}`
+                    preview: cloudinaryUrl
                   }
                 : p
             )
@@ -468,10 +477,16 @@ export default function CreateMemoryForm() {
                       const target = e.target as HTMLImageElement;
                       const img = target as HTMLImageElement;
                       
+                      console.log('Image load failed:', img.src);
+                      console.log('File name:', p.file.name);
+                      console.log('Is HEIC:', p.file.name.toLowerCase().includes('.heic'));
+                      
                       // If this is a Cloudinary URL and it's a HEIC file, try with a delay
                       if (img.src.includes('cloudinary.com') && p.file.name.toLowerCase().includes('.heic')) {
+                        console.log('Retrying HEIC image after 2 seconds...');
                         // Retry after 2 seconds - Cloudinary might need time to process
                         setTimeout(() => {
+                          console.log('Retrying image load:', img.src);
                           img.style.display = 'block';
                           img.src = img.src + '?t=' + Date.now(); // Force reload
                         }, 2000);
@@ -479,6 +494,7 @@ export default function CreateMemoryForm() {
                       }
                       
                       // Otherwise show fallback
+                      console.log('Showing fallback for:', p.file.name);
                       target.style.display = 'none';
                       target.nextElementSibling?.classList.remove('hidden');
                     }}
