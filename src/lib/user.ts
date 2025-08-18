@@ -17,11 +17,17 @@ export interface UserInfo {
   email: string;
   emailHash: string;
   name: string;
+  signedInAt: string;
 }
 
 export function setCurrentUser(email: string, name: string): UserInfo {
   const emailHash = hashEmail(email);
-  const userInfo: UserInfo = { email, emailHash, name };
+  const userInfo: UserInfo = { 
+    email, 
+    emailHash, 
+    name, 
+    signedInAt: new Date().toISOString() 
+  };
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
@@ -45,6 +51,10 @@ export function clearCurrentUser(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(USER_STORAGE_KEY);
   }
+}
+
+export function isSignedIn(): boolean {
+  return getCurrentUser() !== null;
 }
 
 // Super user management

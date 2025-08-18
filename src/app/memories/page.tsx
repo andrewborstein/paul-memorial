@@ -22,7 +22,7 @@ export default async function MemoriesPage() {
 
     return (
       <PageContainer>
-        <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="flex items-start justify-between mb-8 gap-4">
           <div className="min-w-0 flex-1">
             <PageHeader
               title="Memories"
@@ -68,7 +68,7 @@ export default async function MemoriesPage() {
     console.error('Error loading memories page:', error);
     return (
       <PageContainer>
-        <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="flex items-start justify-between mb-8 gap-4">
           <div className="min-w-0 flex-1">
             <PageHeader
               title="Memories"

@@ -2,9 +2,10 @@
 import React from 'react';
 import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
+import SignInModal from './SignInModal';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
-import { setCurrentUser } from '@/lib/user';
+import { setCurrentUser, getCurrentUser, isSignedIn } from '@/lib/user';
 import {
   DndContext,
   closestCenter,
@@ -20,9 +21,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 type PhotoState = {
@@ -42,16 +41,16 @@ const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
 // Sortable photo item component
-function SortablePhotoItem({ 
-  photo, 
-  index, 
-  onReorder, 
-  onDelete, 
+function SortablePhotoItem({
+  photo,
+  index,
+  onReorder,
+  onDelete,
   imageRefs,
-  totalPhotos
-}: { 
-  photo: PhotoState; 
-  index: number; 
+  totalPhotos,
+}: {
+  photo: PhotoState;
+  index: number;
   onReorder: (from: number, to: number) => void;
   onDelete: (photo: PhotoState) => void;
   imageRefs: React.MutableRefObject<{ [key: string]: HTMLImageElement }>;
@@ -73,8 +72,8 @@ function SortablePhotoItem({
   };
 
   return (
-    <div 
-      ref={setNodeRef} 
+    <div
+      ref={setNodeRef}
       style={style}
       className="border rounded-lg p-2 relative w-fit"
     >
@@ -85,8 +84,10 @@ function SortablePhotoItem({
           }}
           src={photo.preview}
           alt=""
-                                className={`w-32 h-32 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
-            photo.status === 'uploading' || photo.status === 'queued' ? 'opacity-50' : ''
+          className={`w-32 h-32 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
+            photo.status === 'uploading' || photo.status === 'queued'
+              ? 'opacity-50'
+              : ''
           }`}
           {...attributes}
           {...listeners}
@@ -100,24 +101,33 @@ function SortablePhotoItem({
             // Fallback for unsupported formats (HEIC, etc.)
             const target = e.target as HTMLImageElement;
             const img = target as HTMLImageElement;
-            
+
             console.log('Image load failed:', img.src);
             console.log('File name:', photo.file.name);
-            console.log('Is HEIC:', photo.file.name.toLowerCase().includes('.heic'));
+            console.log(
+              'Is HEIC:',
+              photo.file.name.toLowerCase().includes('.heic')
+            );
             console.log('Current display style:', img.style.display);
-            
+
             // If this is a Cloudinary URL and it's a HEIC file, try multiple approaches
-            if (img.src.includes('cloudinary.com') && photo.file.name.toLowerCase().includes('.heic')) {
+            if (
+              img.src.includes('cloudinary.com') &&
+              photo.file.name.toLowerCase().includes('.heic')
+            ) {
               console.log('Retrying HEIC image with different formats...');
-              
+
               // Try original format first (no conversion)
               if (img.src.includes('f_jpg')) {
-                const originalUrl = img.src.replace('f_jpg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
+                const originalUrl = img.src.replace(
+                  'f_jpg,fl_progressive,fl_force_strip,q_auto,w_400',
+                  'f_auto,q_auto,w_400'
+                );
                 console.log('Trying original format:', originalUrl);
                 img.src = originalUrl;
                 return;
               }
-              
+
               // If original format fails, try with delay
               setTimeout(() => {
                 console.log('Retrying image load with cache bust:', img.src);
@@ -126,7 +136,7 @@ function SortablePhotoItem({
               }, 2000);
               return;
             }
-            
+
             // Otherwise show fallback
             console.log('Showing fallback for:', photo.file.name);
             target.style.display = 'none';
@@ -139,23 +149,29 @@ function SortablePhotoItem({
             }
           }}
         />
-        
+
         {/* Fallback for unsupported formats */}
-        <div className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+        <div
+          className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}
+        >
           <div className="text-center">
             <div className="text-lg mb-1">📷</div>
             <div className="truncate max-w-full px-1">
-              {photo.public_id ? photo.public_id.split('/').pop() : photo.file.name}
+              {photo.public_id
+                ? photo.public_id.split('/').pop()
+                : photo.file.name}
             </div>
             <div className="text-xs text-gray-400">
-              {photo.status === 'done' ? 'Loading...' : (photo.file.type || 'Unknown format')}
+              {photo.status === 'done'
+                ? 'Loading...'
+                : photo.file.type || 'Unknown format'}
             </div>
             {photo.status === 'uploading' && (
               <div className="text-xs text-blue-600 mt-1">Converting...</div>
             )}
           </div>
         </div>
-        
+
         {photo.status === 'uploading' && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
@@ -218,16 +234,18 @@ function SortablePhotoItem({
   );
 }
 
-export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {}) {
+export default function CreateMemoryForm({
+  memory,
+}: CreateMemoryFormProps = {}) {
   const router = useRouter();
   const isEditMode = !!memory;
-  
+
   const [name, setName] = React.useState(memory?.name || '');
   const [email, setEmail] = React.useState(memory?.email || '');
   const [title, setTitle] = React.useState(memory?.title || '');
   const [body, setBody] = React.useState(memory?.body || '');
   const [photos, setPhotos] = React.useState<PhotoState[]>(
-    memory?.photos.map(photo => ({
+    memory?.photos.map((photo) => ({
       file: new File([], photo.public_id), // Dummy file for existing photos
       preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,fl_progressive,fl_force_strip,w_200,h_200,c_fill,q_auto,dpr_2/${photo.public_id}`,
       progress: 100,
@@ -241,6 +259,32 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
     null
   );
   const [errors, setErrors] = React.useState<string[]>([]);
+  const [showSignInModal, setShowSignInModal] = React.useState(false);
+  const [pendingSubmission, setPendingSubmission] = React.useState<(() => void) | null>(null);
+
+  // Initialize form with current user data if signed in
+  React.useEffect(() => {
+    if (!isEditMode) {
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        setName(currentUser.name);
+        setEmail(currentUser.email);
+      }
+    }
+  }, [isEditMode]);
+
+  const handleSignIn = (name: string, email: string) => {
+    setCurrentUser(email, name);
+    setName(name);
+    setEmail(email);
+    setShowSignInModal(false);
+    
+    // Continue with the pending submission
+    if (pendingSubmission) {
+      pendingSubmission();
+      setPendingSubmission(null);
+    }
+  };
   const errorRef = React.useRef<HTMLDivElement>(null);
   const imageRefs = React.useRef<{ [key: string]: HTMLImageElement }>({});
 
@@ -273,47 +317,57 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
         try {
           const pid = await uploadOne(photo);
           // For HEIC files, force JPEG conversion
-          const isHeic = photo.file.name.toLowerCase().includes('.heic') || photo.file.name.toLowerCase().includes('.heif');
-          const cloudinaryUrl = isHeic 
+          const isHeic =
+            photo.file.name.toLowerCase().includes('.heic') ||
+            photo.file.name.toLowerCase().includes('.heif');
+          const cloudinaryUrl = isHeic
             ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,fl_progressive,fl_force_strip,q_auto,w_400/${pid}`
             : `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`;
           console.log('Generated Cloudinary URL:', cloudinaryUrl);
           console.log('File type:', photo.file.type);
           console.log('File name:', photo.file.name);
-          
+
           setPhotos((prev) => {
             const updated = prev.map((p) =>
               p === photo
-                ? { 
-                    ...p, 
-                    public_id: pid, 
-                    progress: 100, 
+                ? {
+                    ...p,
+                    public_id: pid,
+                    progress: 100,
                     status: 'done' as const,
-                    preview: cloudinaryUrl
+                    preview: cloudinaryUrl,
                   }
                 : p
             );
-            console.log('Updated photos state with Cloudinary URL:', updated.find(p => p.file.name === photo.file.name)?.preview);
+            console.log(
+              'Updated photos state with Cloudinary URL:',
+              updated.find((p) => p.file.name === photo.file.name)?.preview
+            );
             return updated;
           });
-          
+
           // Force the image element to be visible for the new Cloudinary URL
           setTimeout(() => {
             const imgElement = imageRefs.current[photo.file.name];
             if (imgElement) {
-              console.log('Found image element via ref, ensuring it\'s visible for Cloudinary URL');
+              console.log(
+                "Found image element via ref, ensuring it's visible for Cloudinary URL"
+              );
               console.log('Current image src:', imgElement.src);
               console.log('Expected Cloudinary URL:', cloudinaryUrl);
               imgElement.style.display = 'block';
               imgElement.nextElementSibling?.classList.add('hidden');
-              
+
               // Force update the src if it's still the blob URL
               if (imgElement.src.startsWith('blob:')) {
                 console.log('Forcing src update to Cloudinary URL');
                 imgElement.src = cloudinaryUrl;
               }
             } else {
-              console.log('Image element not found in refs for:', photo.file.name);
+              console.log(
+                'Image element not found in refs for:',
+                photo.file.name
+              );
             }
           }, 100);
         } catch {
@@ -389,8 +443,10 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
 
     if (active.id !== over?.id) {
       setPhotos((items) => {
-        const oldIndex = items.findIndex(item => item.file.name === active.id);
-        const newIndex = items.findIndex(item => item.file.name === over?.id);
+        const oldIndex = items.findIndex(
+          (item) => item.file.name === active.id
+        );
+        const newIndex = items.findIndex((item) => item.file.name === over?.id);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -525,6 +581,13 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
   }
 
   async function onPublish() {
+    // Check if user is signed in
+    if (!isSignedIn()) {
+      setShowSignInModal(true);
+      setPendingSubmission(() => onPublish);
+      return;
+    }
+
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
@@ -583,7 +646,9 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
 
     if (!r.ok) {
       const errorText = await r.text();
-      setErrors([errorText || `Failed to ${isEditMode ? 'update' : 'publish'} memory`]);
+      setErrors([
+        errorText || `Failed to ${isEditMode ? 'update' : 'publish'} memory`,
+      ]);
       setIsPublishing(false);
       // Scroll to errors after state update
       setTimeout(scrollToErrors, 100);
@@ -591,12 +656,12 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
     }
 
     const { id } = await r.json();
-    
+
     // Set current user in localStorage when creating a new memory
     if (!isEditMode) {
       setCurrentUser(email, name);
     }
-    
+
     if (isEditMode) {
       router.push(`/memories/${id}`);
       router.refresh();
@@ -626,44 +691,43 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
         </div>
       )}
 
+      {/* User Status */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-semibold text-gray-700 mb-2"
-        >
-          Your Name *
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Signed in as
         </label>
-        <input
-          id="name"
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-semibold text-gray-700 mb-2"
-        >
-          Email *
-        </label>
-        <p className="text-xs text-gray-500 mb-2">
-          Your email will only be used to generate a link to your contribution
-          and will not be displayed publicly.
-        </p>
-        <input
-          id="email"
-          type="email"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        {isSignedIn() ? (
+          <div className="flex items-center gap-3">
+            <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700">
+              <span className="font-medium">{name}</span>
+              <span className="text-blue-600 ml-2">({email})</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSignInModal(true);
+                setPendingSubmission(null);
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+              Edit
+            </button>
+          </div>
+        ) : (
+          <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600">
+            <span>Not signed in</span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSignInModal(true);
+                setPendingSubmission(null);
+              }}
+              className="ml-2 text-blue-600 hover:text-blue-800 underline"
+            >
+              Sign in
+            </button>
+          </div>
+        )}
       </div>
 
       <div>
@@ -726,7 +790,8 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
         </button>
         <p className="text-xs text-gray-500 mt-1">
           Large images are automatically compressed. Videos must be under 10MB.
-          You can upload up to 150 photos/videos per memory. HEIC files are supported and will be converted automatically.
+          You can upload up to 150 photos/videos per memory. HEIC files are
+          supported and will be converted automatically.
         </p>
       </div>
 
@@ -741,7 +806,10 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext items={photos.map(p => p.file.name)} strategy={verticalListSortingStrategy}>
+            <SortableContext
+              items={photos.map((p) => p.file.name)}
+              strategy={verticalListSortingStrategy}
+            >
               <div className="flex flex-wrap gap-2">
                 {photos.map((p, i) => (
                   <SortablePhotoItem
@@ -757,16 +825,6 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
               </div>
             </SortableContext>
           </DndContext>
-        </div>
-      )}
-
-      {/* Turnstile - only show in create mode */}
-      {!isEditMode && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-        <div className="flex justify-start">
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-            onSuccess={(token) => setTurnstileToken(token)}
-          />
         </div>
       )}
 
@@ -786,14 +844,18 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
           onClick={onPublish}
         >
           {isPublishing
-            ? (isEditMode ? 'Updating...' : 'Publishing...')
+            ? isEditMode
+              ? 'Updating...'
+              : 'Publishing...'
             : photos.some(
                   (p) => p.status === 'uploading' || p.status === 'queued'
                 )
               ? 'Uploading photos...'
-              : (isEditMode ? 'Update Memory' : 'Publish Memory')}
+              : isEditMode
+                ? 'Update Memory'
+                : 'Publish memory'}
         </button>
-        
+
         {isEditMode && (
           <button
             type="button"
@@ -804,6 +866,28 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
           </button>
         )}
       </div>
+
+      {/* Turnstile - only show in create mode */}
+      {!isEditMode && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+        <div className="flex justify-start">
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            onSuccess={(token) => setTurnstileToken(token)}
+          />
+        </div>
+      )}
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => {
+          setShowSignInModal(false);
+          setPendingSubmission(null);
+        }}
+        onSubmit={handleSignIn}
+        title="Sign in to share your memory"
+        description="Please enter your name and email to share this memory. Your email will not be displayed publicly."
+      />
     </form>
   );
 }

@@ -23,7 +23,7 @@ export default async function PhotosPage() {
 
   return (
     <PageContainer>
-      <div className="flex items-center justify-between mb-8 gap-4">
+      <div className="flex items-start justify-between mb-8 gap-4">
         <div className="min-w-0 flex-1">
           <PageHeader
             title="Photos"
