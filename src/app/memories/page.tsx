@@ -85,20 +85,26 @@ export default async function MemoriesPage() {
 
                       {/* Metadata */}
                       <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                        <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
+                        <span>
+                          {new Date(memory.date).toLocaleDateString('en-US', {
+                            month: 'numeric',
+                            day: 'numeric',
+                            year: '2-digit',
+                          })}
+                        </span>
                       </div>
                     </div>
 
                     {/* Photo Thumbnail */}
-                                          {memory.cover_public_id && (
-                        <div className="flex-shrink-0">
-                          <div className="w-32 h-32 rounded-lg overflow-hidden relative">
-                            <ImageWithFallback
-                              publicId={memory.cover_public_id}
-                                                          alt="Memory preview"
-                              className="w-full h-full object-cover"
-                              width={144}
-                              quality="auto"
+                    {memory.cover_public_id && (
+                      <div className="flex-shrink-0">
+                        <div className="w-32 h-32 rounded-lg overflow-hidden relative">
+                          <ImageWithFallback
+                            publicId={memory.cover_public_id}
+                            alt="Memory preview"
+                            className="w-full h-full object-cover"
+                            width={144}
+                            quality="auto"
                           />
                           {memory.photo_count > 1 && (
                             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">

@@ -4,6 +4,7 @@ import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoGrid from '@/components/PhotoGrid';
+import MemoryActions from '@/components/MemoryActions';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -66,6 +67,13 @@ export default async function MemoryPage({
               <span>•</span>
               <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
             </div>
+            
+            {/* Edit/Delete Actions */}
+            <MemoryActions 
+              memoryId={memory.id}
+              creatorEmail={memory.email}
+              isSuperUser={process.env.SUPER_USER_EMAIL === memory.email}
+            />
           </div>
 
           {/* Text Content */}

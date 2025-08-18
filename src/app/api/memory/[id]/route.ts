@@ -1,5 +1,5 @@
-import { readMemory, writeMemory } from '@/lib/data';
-import { readIndex, writeIndex } from '@/lib/data';
+import { readIndex, writeIndex, readMemory, writeMemory } from '@/lib/data';
+import { revalidatePath } from 'next/cache';
 
 export const revalidate = 60;
 
@@ -27,47 +27,109 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  _req: Request,
+export async function PUT(
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const doc = await readMemory(id);
-  if (!doc) return new Response('Not found', { status: 404 });
+  try {
+    const { id } = await params;
+    const body = await req.json().catch(() => null);
 
-  // Delete photos from Cloudinary
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!body) {
+      return new Response('Invalid request body', { status: 400 });
+    }
 
-  if (cloudName && preset && doc.photos.length > 0) {
-    const deletePromises = doc.photos.map(async (photo) => {
-      try {
-        const formData = new FormData();
-        formData.append('public_id', photo.public_id);
-        formData.append('upload_preset', preset);
+    // Read existing memory
+    const existingMemory = await readMemory(id);
+    if (!existingMemory) {
+      return new Response('Memory not found', { status: 404 });
+    }
 
-        await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`,
-          {
-            method: 'POST',
-            body: formData,
+    // TODO: Add authentication/authorization here
+    // For now, allow editing (we'll add proper auth later)
+
+    // Update memory with new data
+    const updatedMemory = {
+      ...existingMemory,
+      name: String(body.name).slice(0, 100),
+      email: String(body.email).slice(0, 100),
+      title: body.title?.trim() ? String(body.title).slice(0, 200) : undefined,
+      date: body.date ?? existingMemory.date,
+      body: String(body.body).slice(0, 5000),
+      photos: (body.photos || []).map((p: any, i: number) => ({
+        public_id: p.public_id,
+        caption: p.caption ?? '',
+        taken_at: p.taken_at ?? null,
+        sort_index: i,
+      })),
+    };
+
+    // Write updated memory
+    await writeMemory(updatedMemory);
+
+    // Update index
+    const index = await readIndex();
+    const coverPublicId = updatedMemory.photos[0]?.public_id;
+    const updatedIndex = index.map(item => 
+      item.id === id 
+        ? {
+            id: updatedMemory.id,
+            title: updatedMemory.title || updatedMemory.name,
+            date: updatedMemory.date,
+            cover_public_id: coverPublicId,
+            photo_count: updatedMemory.photos.length,
           }
-        );
-      } catch (error) {
-        console.warn(`Failed to delete photo ${photo.public_id}:`, error);
-      }
-    });
+        : item
+    );
+    await writeIndex(updatedIndex);
 
-    await Promise.all(deletePromises);
+    // Invalidate cache
+    revalidatePath('/');
+    revalidatePath('/memories');
+    revalidatePath('/memories/[id]', 'page');
+    revalidatePath('/photos');
+
+    return Response.json({ id: updatedMemory.id });
+  } catch (error) {
+    console.error('Error updating memory:', error);
+    return new Response('Internal server error', { status: 500 });
   }
+}
 
-  // Remove from index
-  const index = await readIndex();
-  const updatedIndex = index.filter((item) => item.id !== id);
-  await writeIndex(updatedIndex);
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    
+    // Read the memory to verify it exists
+    const memory = await readMemory(id);
+    if (!memory) {
+      return new Response('Memory not found', { status: 404 });
+    }
 
-  // Delete memory file (optional - could keep for audit)
-  // For now, we'll just remove from index
+    // TODO: Add authentication/authorization here
+    // For now, allow deletion (we'll add proper auth later)
 
-  return new Response('Deleted', { status: 200 });
+    // Remove from index
+    const index = await readIndex();
+    const updatedIndex = index.filter(m => m.id !== id);
+    await writeIndex(updatedIndex);
+
+    // TODO: Delete the memory detail file
+    // TODO: Delete photos from Cloudinary
+    // For now, just remove from index
+
+    // Invalidate cache
+    revalidatePath('/');
+    revalidatePath('/memories');
+    revalidatePath('/memories/[id]', 'page');
+    revalidatePath('/photos');
+
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    console.error('Error deleting memory:', error);
+    return new Response('Internal server error', { status: 500 });
+  }
 }
