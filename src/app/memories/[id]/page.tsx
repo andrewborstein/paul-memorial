@@ -61,20 +61,21 @@ export default async function MemoryPage({
           {/* Header */}
           <div>
             <h1 className="text-2xl font-semibold">{displayTitle}</h1>
-            <p className="text-gray-600 mt-1">Shared by {memory.name}</p>
+            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+              <span>Shared by {memory.name}</span>
+              <span>•</span>
+              <span>{new Date(memory.date).toLocaleDateString()}</span>
+            </div>
           </div>
 
           {/* Text Content */}
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <p className="text-gray-700 whitespace-pre-wrap">{memory.body}</p>
+          <div>
+            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{memory.body}</p>
           </div>
 
           {/* Photos */}
           {memory.photos.length > 0 && (
             <div>
-              <h2 className="text-lg font-medium mb-4">
-                Photos ({memory.photos.length})
-              </h2>
               <PhotoGrid photos={memory.photos} />
             </div>
           )}
