@@ -69,7 +69,7 @@ export async function POST(req: Request) {
         title: detail.title || detail.name, // Use title if provided, otherwise use name
         date: detail.date,
         cover_url: coverPublicId
-          ? cldUrl(coverPublicId, { w: 1200 })
+          ? cldUrl(coverPublicId, { w: 96, q: 60 })
           : undefined,
         photo_count: detail.photos.length,
       },

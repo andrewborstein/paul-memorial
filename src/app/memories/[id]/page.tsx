@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
+import PhotoGrid from '@/components/PhotoGrid';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -74,26 +75,7 @@ export default async function MemoryPage({
               <h2 className="text-lg font-medium mb-4">
                 Photos ({memory.photos.length})
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {memory.photos.map((photo) => (
-                  <Link
-                    key={photo.public_id}
-                    href={`/memories/photos/${photo.public_id}`}
-                    className="aspect-square overflow-hidden rounded-lg group cursor-pointer"
-                  >
-                    <img
-                      src={cldUrl(photo.public_id, { w: 1200 })}
-                      alt={photo.caption || 'Photo'}
-                      className="w-full h-full object-cover"
-                    />
-                    {photo.caption && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                        {photo.caption}
-                      </div>
-                    )}
-                  </Link>
-                ))}
-              </div>
+              <PhotoGrid photos={memory.photos} />
             </div>
           )}
         </div>
