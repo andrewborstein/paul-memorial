@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
   console.log('getMemory: Fetching memory with ID:', id);
-  const res = await fetch(`/api/memory/${id}`, {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/memory/${id}`, {
     next: { revalidate: 60 },
   });
   console.log('getMemory: Response status:', res.status);

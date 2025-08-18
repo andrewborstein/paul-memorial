@@ -8,7 +8,8 @@ import type { MemoryDetail } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getPhotoData(photoId: string) {
-  const res = await fetch(`/api/photo/${photoId}`, {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/photo/${photoId}`, {
     next: { revalidate: 60 },
   });
   if (!res.ok) throw new Error('Not found');
