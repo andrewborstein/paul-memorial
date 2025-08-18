@@ -12,61 +12,64 @@ export async function listMemories(): Promise<Memory[]> {
     database_id: dbId,
     sorts: [{ property: 'Date', direction: 'descending' }],
   });
+  
+  // Get all memory IDs that have photos
+  const memoryIdsWithPhotos = res.results
+    .filter((p: any) => (p.properties['PhotoCount'] as any)?.number > 0)
+    .map((p: any) => p.id);
+
+  // Fetch all photos in a single query if there are any memories with photos
+  let allPhotos: any[] = [];
+  if (memoryIdsWithPhotos.length > 0) {
+    try {
+      const photosRes = await notion.databases.query({
+        database_id: photosDbId,
+        filter: {
+          or: memoryIdsWithPhotos.map((memoryId) => ({
+            property: 'Memory',
+            relation: {
+              contains: memoryId,
+            },
+          })),
+        },
+        sorts: [{ property: 'OrderIndex', direction: 'ascending' }],
+      });
+
+      allPhotos = photosRes.results.map((photoPage: any) => ({
+        memoryId: (photoPage.properties['Memory'] as any)?.relation?.[0]?.id,
+        type: (photoPage.properties['Type'] as any)?.select?.name || 'image',
+        publicId: (photoPage.properties['PublicId'] as any)?.rich_text?.[0]?.plain_text || '',
+        caption: (photoPage.properties['Caption'] as any)?.rich_text?.[0]?.plain_text,
+      }));
+    } catch (e: any) {
+      console.warn('Failed to load photo data:', e);
+    }
+  }
+
   const items: Memory[] = [];
 
   for (const p of res.results) {
     if (p.object !== 'page' || !('properties' in p)) continue;
 
     // Read from native Notion fields
-    const name =
-      (p.properties['Name'] as any)?.title?.[0]?.plain_text || 'Memory';
-    const body =
-      (p.properties['Body'] as any)?.rich_text?.[0]?.plain_text || '';
+    const name = (p.properties['Name'] as any)?.title?.[0]?.plain_text || 'Memory';
+    const body = (p.properties['Body'] as any)?.rich_text?.[0]?.plain_text || '';
     const title = (p.properties['Title'] as any)?.rich_text?.[0]?.plain_text;
-    const emailHash = (p.properties['EmailHash'] as any)?.rich_text?.[0]
-      ?.plain_text;
+    const emailHash = (p.properties['EmailHash'] as any)?.rich_text?.[0]?.plain_text;
     const date = (p.properties['Date'] as any)?.date?.start;
-    const mediaCount = (p.properties['PhotoCount'] as any)?.number || 0;
 
     // Skip hidden items (if we add a Hidden field later)
     const hidden = (p.properties['Hidden'] as any)?.checkbox || false;
     if (hidden) continue;
 
-    // Load photos from Photos database if count > 0
-    let mediaItems: any[] = [];
-    if (mediaCount > 0) {
-      try {
-        console.log('Loading photos for memory:', p.id, 'count:', mediaCount);
-        console.log('Photos database ID:', photosDbId);
-
-        const photosRes = await notion.databases.query({
-          database_id: photosDbId,
-          filter: {
-            property: 'Memory',
-            relation: {
-              contains: p.id,
-            },
-          },
-          sorts: [{ property: 'OrderIndex', direction: 'ascending' }],
-        });
-
-        console.log('Found photos:', photosRes.results.length);
-
-        mediaItems = photosRes.results.map((photoPage: any) => ({
-          type: (photoPage.properties['Type'] as any)?.select?.name || 'image',
-          publicId:
-            (photoPage.properties['PublicId'] as any)?.rich_text?.[0]
-              ?.plain_text || '',
-          caption: (photoPage.properties['Caption'] as any)?.rich_text?.[0]
-            ?.plain_text,
-        }));
-
-        console.log('Processed media items:', mediaItems.length);
-      } catch (e: any) {
-        console.warn('Failed to load photo data:', e);
-        console.warn('Error details:', e.message, e.stack);
-      }
-    }
+    // Get photos for this memory from the pre-fetched data
+    const mediaItems = allPhotos
+      .filter((photo) => photo.memoryId === p.id)
+      .map((photo) => ({
+        type: photo.type,
+        publicId: photo.publicId,
+        caption: photo.caption,
+      }));
 
     // Create memory object from native fields
     const memoryData = {
@@ -75,10 +78,10 @@ export async function listMemories(): Promise<Memory[]> {
       body,
       title,
       emailHash,
-      createdAt: date || new Date().toISOString(), // Use Date field or current time as fallback
+      createdAt: date || new Date().toISOString(),
       media: mediaItems,
-      comments: [], // We can add comments later if needed
-      editToken: '', // We can add edit tokens later if needed
+      comments: [],
+      editToken: '',
     };
 
     try {
