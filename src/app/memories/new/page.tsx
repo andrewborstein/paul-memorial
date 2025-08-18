@@ -11,7 +11,6 @@ export default function NewMemoryPage() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{
     current: number;
@@ -20,8 +19,6 @@ export default function NewMemoryPage() {
   } | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
-
     // Add global callback for Turnstile
     (window as any).turnstileCallback = (token: string) => {
       setTurnstileToken(token);
@@ -40,7 +37,7 @@ export default function NewMemoryPage() {
         });
       });
     }
-  }, [isClient]);
+  }, []);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
@@ -189,7 +186,7 @@ export default function NewMemoryPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto" suppressHydrationWarning>
       {/* Breadcrumbs */}
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">
@@ -352,14 +349,6 @@ export default function NewMemoryPage() {
               data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
               data-callback="turnstileCallback"
             />
-          </div>
-        )}
-
-        {/* Debug info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-gray-500 mt-2">
-            Debug: isClient={isClient.toString()}, hasSiteKey=
-            {!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
           </div>
         )}
 
