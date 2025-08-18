@@ -70,7 +70,7 @@ export default async function PhotosPage() {
               </div>
 
               {memory.cover_url && (
-                <div className="aspect-video overflow-hidden rounded-lg">
+                <div className="aspect-square overflow-hidden rounded-lg">
                   <img
                     src={memory.cover_url}
                     alt={`Preview of ${memory.title}`}

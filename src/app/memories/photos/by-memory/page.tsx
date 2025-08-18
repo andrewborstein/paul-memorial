@@ -60,7 +60,7 @@ export default async function PhotosByMemoryPage() {
               </div>
 
               {memory.cover_url && (
-                <div className="aspect-video">
+                <div className="aspect-square">
                   <img
                     src={memory.cover_url}
                     alt={`Preview of ${memory.title}`}
