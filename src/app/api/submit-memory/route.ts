@@ -62,8 +62,6 @@ export async function POST(req: Request) {
       title: body.title,
       emailHash: body.email ? emailHash(body.email) : undefined,
       body: truncatedBody,
-      media: [],
-      comments: [],
       editToken,
     };
 
