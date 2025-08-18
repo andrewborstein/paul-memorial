@@ -65,6 +65,22 @@ export default function ImageWithFallback({
       if (src.includes('w_96') && src.includes('dpr_auto')) {
         return src.replace('w_96,dpr_auto', 'w_144,dpr_2');
       }
+      // If it's an old URL without proper cropping, add it
+      if (src.includes('w_144') && !src.includes('c_fill')) {
+        return src.replace('w_144', 'w_144,h_144,c_fill');
+      }
+      // If it's a Cloudinary URL but doesn't have proper square cropping, add it
+      if (src.includes('cloudinary.com') && !src.includes('c_fill')) {
+        // Add height and crop parameters to make it square
+        const baseUrl = src.split('/upload/')[0] + '/upload/';
+        const transformations = src.split('/upload/')[1];
+        const parts = transformations.split('/');
+        const publicId = parts[parts.length - 1];
+        
+        // Build new transformations with square cropping
+        const newTransformations = `w_${width},h_${width},c_fill,q_auto,dpr_2`;
+        return `${baseUrl}${newTransformations}/${publicId}`;
+      }
       return src;
     }
     // All thumbnails are square, use fill cropping
