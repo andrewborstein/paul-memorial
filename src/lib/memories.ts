@@ -48,27 +48,35 @@ export async function getAllMemories(): Promise<Memory[]> {
   const data = await getMemoriesData();
 
   return data.map((item) => {
-    const photos = (item.media || [])
-      .filter((m: any) => m.type === 'image' || m.type === 'video')
-      .map((media: any, index: number) => {
-        // Convert public ID to URL if needed
-        const url =
-          media.url ||
-          (media.publicId ? publicIdToUrl(media.publicId, media.type) : '');
+    // Handle both old and new data structures
+    let photos: Photo[] = [];
+    
+    if (item.media) {
+      // Old structure - convert media array to photos
+      photos = (item.media || [])
+        .filter((m: any) => m.type === 'image' || m.type === 'video')
+        .map((media: any, index: number) => {
+          const url =
+            media.url ||
+            (media.publicId ? publicIdToUrl(media.publicId, media.type) : '');
 
-        return {
-          id: `${item.id}-${index}`,
-          url,
-          caption: media.caption,
-          type: media.type as 'image' | 'video',
-          memoryId: item.id,
-          memoryName: item.name,
-          memoryIndex: index + 1,
-          totalInMemory: (item.media || []).filter(
-            (m: any) => m.type === 'image' || m.type === 'video'
-          ).length,
-        };
-      });
+          return {
+            id: `${item.id}-${index}`,
+            url,
+            caption: media.caption,
+            type: media.type as 'image' | 'video',
+            memoryId: item.id,
+            memoryName: item.name,
+            memoryIndex: index + 1,
+            totalInMemory: (item.media || []).filter(
+              (m: any) => m.type === 'image' || m.type === 'video'
+            ).length,
+          };
+        });
+    } else if (item.photos) {
+      // New structure - photos are already processed
+      photos = item.photos;
+    }
 
     return {
       id: item.id,
