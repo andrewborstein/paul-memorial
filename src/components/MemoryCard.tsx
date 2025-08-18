@@ -10,8 +10,8 @@ interface MemoryCardProps {
   memory: {
     id: string;
     title?: string;
-    name?: string;
-    email?: string;
+    name: string;
+    email: string;
     date: string;
     body?: string;
     cover_public_id?: string;
@@ -68,8 +68,8 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
           {/* Metadata */}
           <MemoryMetadata
             date={memory.date}
-            creatorEmail={memory.email || ''}
-            creatorName={memory.name || ''}
+            creatorEmail={memory.email}
+            creatorName={memory.name}
           />
         </div>
 
