@@ -55,7 +55,7 @@ export default function PhotoImage({
   return (
     <div className="relative">
       <img
-        src={cldUrl(publicId, { w: width, q: quality, dpr })}
+        src={cldUrl(publicId, { w: width })}
         alt={alt}
         className={`${className} transition-opacity duration-300`}
         onLoad={handleLoad}
