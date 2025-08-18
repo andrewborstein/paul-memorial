@@ -1,15 +1,10 @@
 import { readIndex, writeIndex, readMemory, writeMemory, deleteMemory } from '@/lib/data';
-import { revalidatePath, unstable_noStore } from 'next/cache';
-
-export const revalidate = 60;
+import { revalidatePath } from 'next/cache';
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Disable caching to prevent stale data
-  unstable_noStore();
-  
   try {
     const { id } = await params;
     console.log('Attempting to fetch memory:', id);
@@ -21,9 +16,7 @@ export async function GET(
     }
 
     console.log('Successfully fetched memory:', id);
-    return Response.json(doc, {
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
-    });
+    return Response.json(doc);
   } catch (error) {
     console.error('Error fetching memory:', error);
     return new Response('Internal server error', { status: 500 });

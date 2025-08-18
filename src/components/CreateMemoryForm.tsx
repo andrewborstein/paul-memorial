@@ -601,7 +601,8 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
       router.push(`/memories/${id}`);
       router.refresh();
     } else {
-      window.location.href = `/memories/${id}`;
+      // Force a full page reload to ensure the index is updated
+      window.location.href = '/memories';
     }
   }
 

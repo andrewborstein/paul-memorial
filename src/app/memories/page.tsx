@@ -3,7 +3,6 @@ import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
-import { unstable_noStore } from 'next/cache';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -18,9 +17,6 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
 }
 
 export default async function MemoriesPage() {
-  // Disable caching to prevent stale data after deletions
-  unstable_noStore();
-  
   try {
     const memories = await getMemories();
 

@@ -1,12 +1,6 @@
 import { readIndex, readMemory } from '@/lib/data';
-import { unstable_noStore } from 'next/cache';
-
-export const revalidate = 60; // Next's ISR hint
 
 export async function GET() {
-  // Disable caching to prevent stale data
-  unstable_noStore();
-  
   try {
     console.log('Starting /api/memories request');
     const list = await readIndex();
@@ -47,9 +41,7 @@ export async function GET() {
     const validMemories = memoriesWithBody.filter(Boolean);
 
     console.log('Successfully processed', validMemories.length, 'memories');
-    return Response.json(validMemories, {
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
-    });
+    return Response.json(validMemories);
   } catch (error) {
     console.error('Error in /api/memories:', error);
     return new Response('Internal Server Error', { status: 500 });

@@ -5,7 +5,6 @@ import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
-import { unstable_noStore } from 'next/cache';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -32,9 +31,6 @@ export default async function MemoryPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Disable caching for this page to prevent stale data
-  unstable_noStore();
-  
   const { id } = await params;
   console.log('MemoryPage: Attempting to load memory with ID:', id);
 
