@@ -496,7 +496,7 @@ export default function CreateMemoryForm() {
                     src={p.preview}
                     alt=""
                     className={`w-24 h-24 object-cover rounded mb-2 ${
-                      p.status === 'uploading' ? 'opacity-50' : ''
+                      p.status === 'uploading' || p.status === 'queued' ? 'opacity-50' : ''
                     }`}
                     onLoad={(e) => {
                       console.log('Image loaded successfully:', p.file.name);
@@ -603,6 +603,8 @@ export default function CreateMemoryForm() {
                       >
                         <span className="text-sm font-bold">×</span>
                       </button>
+                    ) : p.status === 'queued' ? (
+                      <span className="text-gray-400">...</span>
                     ) : (
                       p.status
                     )}
