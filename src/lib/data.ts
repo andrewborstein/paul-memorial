@@ -74,9 +74,14 @@ export async function writeIndex(items: MemoryIndexItem[]) {
 }
 
 export async function readMemory(id: string): Promise<MemoryDetail | null> {
-  return await readBlobJson<MemoryDetail>(`memories/${id}.json`);
+  console.log('Attempting to read memory file:', `memories/${id}.json`);
+  const result = await readBlobJson<MemoryDetail>(`memories/${id}.json`);
+  console.log('Memory read result:', result ? 'found' : 'not found');
+  return result;
 }
 
 export async function writeMemory(doc: MemoryDetail) {
+  console.log('Writing memory to Blob:', `memories/${doc.id}.json`);
   await writeBlobJson(`memories/${doc.id}.json`, doc);
+  console.log('Memory written successfully to Blob');
 }
