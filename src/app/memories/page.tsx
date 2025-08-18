@@ -94,11 +94,9 @@ export default async function MemoriesPage() {
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 rounded-lg overflow-hidden relative">
                           <ImageWithFallback
-                            publicId={memory.cover_url.split('/').pop() || ''}
+                            src={memory.cover_url}
                             alt="Memory preview"
                             className="w-full h-full object-cover"
-                            width={96}
-                            quality={60}
                           />
                           {memory.photo_count > 1 && (
                             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">

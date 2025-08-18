@@ -4,7 +4,8 @@ import React from 'react';
 import { cldUrl } from '@/lib/cloudinary';
 
 interface ImageWithFallbackProps {
-  publicId: string;
+  publicId?: string;
+  src?: string;
   alt: string;
   className?: string;
   width?: number;
@@ -16,6 +17,7 @@ interface ImageWithFallbackProps {
 
 export default function ImageWithFallback({
   publicId,
+  src,
   alt,
   className = '',
   width = 400,
@@ -53,7 +55,7 @@ export default function ImageWithFallback({
   return (
     <>
       <img
-        src={cldUrl(publicId, { w: width, q: quality, dpr: 'auto' })}
+        src={src || cldUrl(publicId!, { w: width, q: quality, dpr: 'auto' })}
         alt={alt}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
         onLoad={handleLoad}

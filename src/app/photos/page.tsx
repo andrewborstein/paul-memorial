@@ -130,11 +130,9 @@ export default async function PhotosPage() {
                     {memory.cover_url && (
                       <div className="aspect-video">
                         <ImageWithFallback
-                          publicId={memory.cover_url.split('/').pop() || ''}
+                          src={memory.cover_url}
                           alt={`Preview of ${memory.title}`}
                           className="w-full h-full object-cover"
-                          width={400}
-                          quality={70}
                         />
                       </div>
                     )}
