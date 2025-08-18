@@ -1,14 +1,25 @@
 import Link from 'next/link';
-import { getAllMemories } from '@/lib/memories';
-import { optimizeImageUrl } from '@/lib/cloudinary';
+import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
+import type { MemoryIndexItem } from '@/types/memory';
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Make this page dynamic to avoid build-time API calls
+export const dynamic = 'force-dynamic';
+
+async function getMemories(): Promise<MemoryIndexItem[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories`,
+    {
+      next: { revalidate: 60 },
+    }
+  );
+  if (!res.ok) return [];
+  return res.json();
+}
 
 export default async function MemoriesPage() {
-  const memories = await getAllMemories();
+  const memories = await getMemories();
 
   return (
     <PageContainer>
@@ -51,43 +62,37 @@ export default async function MemoriesPage() {
                   <div className="flex-1 min-w-0">
                     <header className="mb-2">
                       <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                        {memory.title || memory.name}
+                        {memory.title}
                       </h2>
                     </header>
 
-                    {memory.hasText && (
-                      <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {memory.body}
-                      </div>
-                    )}
-
                     {/* Metadata */}
-                    {memory.hasPhotos && (
+                    {memory.photo_count > 0 && (
                       <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 flex-wrap">
                         <span>
-                          {memory.photos.length} image
-                          {memory.photos.length !== 1 ? 's' : ''}
+                          {memory.photo_count} image
+                          {memory.photo_count !== 1 ? 's' : ''}
                         </span>
                       </div>
                     )}
                   </div>
 
                   {/* Photo Thumbnail */}
-                  {memory.hasPhotos && (
+                  {memory.cover_url && (
                     <div className="flex-shrink-0">
                       <div className="w-24 h-24 rounded-lg overflow-hidden relative">
                         <img
-                          src={optimizeImageUrl(memory.photos[0].url, 96, 50)}
+                          src={memory.cover_url}
                           alt="Memory preview"
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                          {memory.photos.length > 1 && (
+                        {memory.photo_count > 1 && (
+                          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
                             <span className="text-white text-xs font-medium">
-                              +{memory.photos.length - 1}
+                              +{memory.photo_count - 1}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

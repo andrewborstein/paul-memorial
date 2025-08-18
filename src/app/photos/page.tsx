@@ -1,106 +1,110 @@
 import Link from 'next/link';
-import { getAllPhotos, getAlbums } from '@/lib/photos';
-import { optimizeImageUrl } from '@/lib/cloudinary';
+import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
+import type { MemoryIndexItem } from '@/types/memory';
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Make this page dynamic to avoid build-time API calls
+export const dynamic = 'force-dynamic';
+
+async function getMemories(): Promise<MemoryIndexItem[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories`,
+    {
+      next: { revalidate: 60 },
+    }
+  );
+  if (!res.ok) return [];
+  return res.json();
+}
 
 export default async function PhotosPage() {
-  const allPhotos = await getAllPhotos();
-  const memoriesWithPhotos = await getAlbums();
+  const memories = await getMemories();
+  const memoriesWithPhotos = memories.filter((m) => m.photo_count > 0);
 
   return (
     <PageContainer>
-      <div className="space-y-8">
-        <div className="flex items-center justify-between mb-6 gap-4">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-semibold mb-3">Photos</h1>
-            <p className="text-gray-600">Browse photos shared in memories.</p>
-          </div>
+      <PageHeader
+        title="Photos"
+        description="Browse all photos shared in memories."
+      />
+
+      {memoriesWithPhotos.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">No photos shared yet.</p>
           <Link
             href="/memories/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
+            className="text-blue-600 hover:text-blue-800 font-medium"
           >
-            Share memory
+            Be the first to share photos
           </Link>
         </div>
+      ) : (
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-lg font-semibold mb-4">All photos</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {memoriesWithPhotos.map((memory) => (
+                <Link
+                  key={memory.id}
+                  href={`/memories/${memory.id}`}
+                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
+                >
+                  <img
+                    src={memory.cover_url || ''}
+                    alt={memory.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {memory.photo_count > 1 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">
+                        +{memory.photo_count - 1}
+                      </span>
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-        {/* All Photos */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-medium">All photos</h2>
-            <Link
-              href="/memories/photos"
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View all photos
-            </Link>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Browse all photos shared in memories.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {allPhotos.slice(0, 10).map((photo) => (
-              <Link
-                key={photo.id}
-                href={`/memories/photos/${photo.id}`}
-                className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
-              >
-                <img
-                  src={optimizeImageUrl(photo.url, 200)}
-                  alt={photo.caption || 'Photo'}
-                  className="w-full h-full object-cover"
-                />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Photos by Memory */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-medium">Photos by memory</h2>
-            <Link
-              href="/memories/photos/by-memory"
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View all
-            </Link>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Photos organized by the memories they were shared in.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {memoriesWithPhotos.slice(0, 6).map((memory) => (
-              <Link
-                key={memory.id}
-                href={`/memories/${memory.id}`}
-                className="group block"
-              >
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Photos by memory</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {memoriesWithPhotos.map((memory) => (
+                <div
+                  key={memory.id}
+                  className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+                >
                   <div className="p-4">
                     <h3 className="font-medium text-sm mb-1">
-                      {memory.name}
+                      <Link
+                        href={`/memories/${memory.id}`}
+                        className="hover:text-blue-600 transition-colors"
+                      >
+                        {memory.title}
+                      </Link>
                     </h3>
                     <p className="text-xs text-gray-500">
-                      {memory.photos.length} photos
+                      {memory.photo_count} photo
+                      {memory.photo_count !== 1 ? 's' : ''}
                     </p>
                   </div>
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={optimizeImageUrl(memory.photos[0].url, 300, 60)}
-                      alt={memory.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
+
+                  {memory.cover_url && (
+                    <div className="aspect-video">
+                      <img
+                        src={memory.cover_url}
+                        alt={`Preview of ${memory.title}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
-              </Link>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </PageContainer>
   );
 }

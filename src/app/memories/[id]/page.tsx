@@ -1,151 +1,81 @@
-'use client';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 
-interface MemoryPageProps {
-  params: Promise<{ id: string }>;
+import type { MemoryDetail } from '@/types/memory';
+
+// Revalidate every 5 minutes
+export const revalidate = 300;
+
+async function getMemory(id: string): Promise<MemoryDetail> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memory/${id}`,
+    {
+      next: { revalidate: 60 },
+    }
+  );
+  if (!res.ok) throw new Error('Not found');
+  return res.json();
 }
 
-export default function MemoryPage({ params }: MemoryPageProps) {
-  const [memory, setMemory] = useState<any>(null);
-  const [prevMemory, setPrevMemory] = useState<any>(null);
-  const [nextMemory, setNextMemory] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default async function MemoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-  useEffect(() => {
-    async function loadMemory() {
-      const { id } = await params;
-      const response = await fetch(`/api/memories/${id}`);
-      if (!response.ok) {
-        notFound();
-      }
-      const memoryData = await response.json();
-      setMemory(memoryData);
-
-      // Get navigation context
-      const allResponse = await fetch('/api/memories');
-      const allMemories = await allResponse.json();
-      const currentIndex = allMemories.findIndex((m: any) => m.id === id);
-      if (currentIndex > 0) setPrevMemory(allMemories[currentIndex - 1]);
-      if (currentIndex < allMemories.length - 1)
-        setNextMemory(allMemories[currentIndex + 1]);
-
-      setLoading(false);
-    }
-    loadMemory();
-  }, [params]);
-
-  const MessageDisplay = ({ message }: { message: string }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const maxLength = 300;
-    const shouldTruncate = message.length > maxLength;
-
-    if (!shouldTruncate) {
-      return <p className="text-gray-700 whitespace-pre-wrap">{message}</p>;
-    }
+  try {
+    const memory = await getMemory(id);
+    const displayTitle = memory.title || memory.name;
 
     return (
-      <div>
-        <p className="text-gray-700 whitespace-pre-wrap">
-          {isExpanded ? message : `${message.slice(0, maxLength)}...`}
-        </p>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2"
-        >
-          {isExpanded ? 'Read less' : 'Read more'}
-        </button>
-      </div>
-    );
-  };
+      <PageContainer>
+        {/* Breadcrumbs */}
+        <nav className="mb-6">
+          <ol className="flex items-center space-x-2 text-sm">
+            <li>
+              <Link
+                href="/memories"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Memories
+              </Link>
+            </li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-600 font-medium">{displayTitle}</li>
+          </ol>
+        </nav>
 
-  return (
-    <PageContainer>
-      {/* Breadcrumbs and Navigation */}
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Breadcrumbs */}
-          <nav>
-            <ol className="flex items-center space-x-2 text-sm">
-              <li>
-                <Link
-                  href="/memories"
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Memories
-                </Link>
-              </li>
-              <li className="text-gray-400">/</li>
-              <li className="text-gray-600 font-medium">
-                {loading
-                  ? 'Loading...'
-                  : memory?.title || memory?.name || 'Memory'}
-              </li>
-            </ol>
-          </nav>
-
-          {/* Navigation Controls */}
-          {!loading && (prevMemory || nextMemory) && (
-            <div className="flex items-center space-x-2">
-              {prevMemory && (
-                <Link
-                  href={`/memories/${prevMemory.id}`}
-                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  ← Previous
-                </Link>
-              )}
-              {nextMemory && (
-                <Link
-                  href={`/memories/${nextMemory.id}`}
-                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Next →
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading memory...</div>
-        </div>
-      ) : (
-        /* Memory Content */
+        {/* Memory Content */}
         <div className="space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl font-semibold mb-3">
-              {memory.title || memory.name}
-            </h1>
+            <h1 className="text-2xl font-semibold">{displayTitle}</h1>
+            <p className="text-gray-600 mt-1">Shared by {memory.name}</p>
           </div>
 
           {/* Text Content */}
-          {memory.hasText && (
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <MessageDisplay message={memory.body!} />
-            </div>
-          )}
+          <div className="bg-gray-50 p-6 rounded-lg">
+            <p className="text-gray-700 whitespace-pre-wrap">{memory.body}</p>
+          </div>
 
           {/* Photos */}
-          {memory.hasPhotos && (
+          {memory.photos.length > 0 && (
             <div>
               <h2 className="text-lg font-medium mb-4">
                 Photos ({memory.photos.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {memory.photos.map((photo: any) => (
+                {memory.photos.map((photo) => (
                   <Link
-                    key={photo.id}
-                    href={`/memories/photos/${photo.id}?from=/memories/${memory.id}`}
-                    className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
+                    key={photo.public_id}
+                    href={`/memories/photos/${photo.public_id}`}
+                    className="aspect-square overflow-hidden rounded-lg group cursor-pointer"
                   >
                     <img
-                      src={photo.url}
+                      src={cldUrl(photo.public_id, { w: 1200 })}
                       alt={photo.caption || 'Photo'}
                       className="w-full h-full object-cover"
                     />
@@ -160,7 +90,9 @@ export default function MemoryPage({ params }: MemoryPageProps) {
             </div>
           )}
         </div>
-      )}
-    </PageContainer>
-  );
+      </PageContainer>
+    );
+  } catch (error) {
+    notFound();
+  }
 }

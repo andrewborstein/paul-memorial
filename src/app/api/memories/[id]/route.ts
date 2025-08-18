@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getMemoryById } from '@/lib/memories';
+import { readMemory } from '@/lib/data';
 
 export async function GET(
   request: Request,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const memory = await getMemoryById(id);
+    const memory = await readMemory(id);
 
     if (!memory) {
       return NextResponse.json({ error: 'Memory not found' }, { status: 404 });

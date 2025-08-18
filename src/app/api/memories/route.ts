@@ -1,14 +1,10 @@
-import { NextResponse } from 'next/server';
-import { getAllMemories } from '@/lib/memories';
+import { readIndex } from '@/lib/data';
+
+export const revalidate = 60; // Next's ISR hint
 
 export async function GET() {
-  try {
-    const memories = await getAllMemories();
-    return NextResponse.json(memories);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch memories' },
-      { status: 500 }
-    );
-  }
+  const list = await readIndex();
+  return Response.json(list, {
+    headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' },
+  });
 }

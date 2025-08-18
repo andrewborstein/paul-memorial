@@ -1,134 +1,129 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPhotoById, getAllPhotos } from '@/lib/memories';
+import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
+import type { MemoryDetail } from '@/types/memory';
 
-interface PhotoPageProps {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string }>;
+// Make this page dynamic to avoid build-time API calls
+export const dynamic = 'force-dynamic';
+
+async function getPhotoData(photoId: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/photo/${photoId}`,
+    {
+      next: { revalidate: 60 },
+    }
+  );
+  if (!res.ok) throw new Error('Not found');
+  return res.json();
 }
 
 export default async function PhotoPage({
   params,
-  searchParams,
-}: PhotoPageProps) {
+}: {
+  params: Promise<{ id: string[] }>;
+}) {
   const { id } = await params;
-  const { from } = await searchParams;
-  const photo = await getPhotoById(id);
+  const photoId = id.join('/'); // Join the segments back together
 
-  if (!photo) {
+  try {
+    const { memory, photo, photoIndex } = await getPhotoData(photoId);
+    const displayTitle = memory.title || memory.name;
+
+    const prevPhoto = photoIndex > 0 ? memory.photos[photoIndex - 1] : null;
+    const nextPhoto =
+      photoIndex < memory.photos.length - 1
+        ? memory.photos[photoIndex + 1]
+        : null;
+
+    return (
+      <PageContainer>
+        {/* Breadcrumbs */}
+        <nav className="mb-6">
+          <ol className="flex items-center space-x-2 text-sm">
+            <li>
+              <Link
+                href="/memories"
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Memories
+              </Link>
+            </li>
+            <li className="text-gray-400">/</li>
+            <li>
+              <Link
+                href={`/memories/${memory.id}`}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                {displayTitle}
+              </Link>
+            </li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-600 font-medium">
+              Photo {photoIndex + 1} of {memory.photos.length}
+            </li>
+          </ol>
+        </nav>
+
+        {/* Photo Display */}
+        <div className="space-y-6">
+          {/* Photo */}
+          <div className="flex justify-center">
+            <img
+              src={cldUrl(photo.public_id, { w: 1200 })}
+              alt={photo.caption || 'Photo'}
+              className="max-w-full h-auto rounded-lg shadow-lg"
+            />
+          </div>
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center">
+            {prevPhoto ? (
+              <Link
+                href={`/memories/photos/${prevPhoto.public_id}`}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              >
+                ← Previous
+              </Link>
+            ) : (
+              <div></div>
+            )}
+
+            <div className="text-center text-sm text-gray-600">
+              Photo {photoIndex + 1} of {memory.photos.length}
+            </div>
+
+            {nextPhoto ? (
+              <Link
+                href={`/memories/photos/${nextPhoto.public_id}`}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              >
+                Next →
+              </Link>
+            ) : (
+              <div></div>
+            )}
+          </div>
+
+          {/* Photo Info */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-lg font-medium mb-2">Photo Details</h2>
+            <p className="text-gray-600 mb-2">
+              <strong>Memory:</strong> {displayTitle}
+            </p>
+            <p className="text-gray-600 mb-2">
+              <strong>Shared by:</strong> {memory.name}
+            </p>
+            {photo.caption && (
+              <p className="text-gray-600">
+                <strong>Caption:</strong> {photo.caption}
+              </p>
+            )}
+          </div>
+        </div>
+      </PageContainer>
+    );
+  } catch (error) {
     notFound();
   }
-
-  // Get navigation context
-  let allPhotos: any[] = [];
-  let currentIndex = -1;
-  let prevPhoto: any = null;
-  let nextPhoto: any = null;
-
-  if (from?.includes('/memories/photos')) {
-    // Navigation within all photos
-    allPhotos = await getAllPhotos();
-    currentIndex = allPhotos.findIndex((p) => p.id === id);
-    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
-    if (currentIndex < allPhotos.length - 1)
-      nextPhoto = allPhotos[currentIndex + 1];
-  } else {
-    // Navigation within memory
-    const memoryResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories/${photo.memoryId}`
-    );
-    const memory = await memoryResponse.json();
-    allPhotos = memory.photos;
-    currentIndex = allPhotos.findIndex((p) => p.id === id);
-    if (currentIndex > 0) prevPhoto = allPhotos[currentIndex - 1];
-    if (currentIndex < allPhotos.length - 1)
-      nextPhoto = allPhotos[currentIndex + 1];
-  }
-
-  return (
-    <PageContainer>
-      {/* Breadcrumbs and Navigation */}
-      <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Breadcrumbs */}
-          <nav>
-            <ol className="flex items-center space-x-2 text-sm">
-              <li>
-                <Link
-                  href="/memories"
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Memories
-                </Link>
-              </li>
-              <li className="text-gray-400">/</li>
-              {from?.includes('/memories/photos') ? (
-                <>
-                  <li>
-                    <Link
-                      href="/memories/photos"
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Photos
-                    </Link>
-                  </li>
-                  <li className="text-gray-400">/</li>
-                </>
-              ) : (
-                <>
-                  <li>
-                    <Link
-                      href={`/memories/${photo.memoryId}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      {photo.memoryName}
-                    </Link>
-                  </li>
-                  <li className="text-gray-400">/</li>
-                </>
-              )}
-              <li className="text-gray-600 font-medium">
-                Photo{' '}
-                {photo.memoryIndex && photo.totalInMemory
-                  ? `${photo.memoryIndex} of ${photo.totalInMemory}`
-                  : ''}
-              </li>
-            </ol>
-          </nav>
-
-          {/* Navigation Controls */}
-          {(prevPhoto || nextPhoto) && (
-            <div className="flex items-center space-x-2">
-              {prevPhoto && (
-                <Link
-                  href={`/memories/photos/${prevPhoto.id}?from=${from || `/memories/${photo.memoryId}`}`}
-                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  ← Previous
-                </Link>
-              )}
-              {nextPhoto && (
-                <Link
-                  href={`/memories/photos/${nextPhoto.id}?from=${from || `/memories/${photo.memoryId}`}`}
-                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Next →
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Photo Display */}
-      <div className="aspect-auto max-h-[70vh] overflow-hidden rounded-lg">
-        <img
-          src={photo.url}
-          alt={photo.caption || 'Photo'}
-          className="w-full h-full object-contain"
-        />
-      </div>
-    </PageContainer>
-  );
 }
