@@ -5,13 +5,15 @@ import { emailHash } from '@/lib/utils';
 import { createMemory } from '@/lib/notion';
 
 async function verifyTurnstile(token: string | undefined) {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
   console.log('Turnstile verification:', {
-    hasSecretKey: !!process.env.TURNSTILE_SECRET_KEY,
+    hasSecretKey: !!secretKey,
     hasToken: !!token,
     tokenLength: token?.length,
   });
 
-  if (!process.env.TURNSTILE_SECRET_KEY) {
+  if (!secretKey) {
     console.log('No secret key - skipping verification');
     return true;
   }
@@ -21,7 +23,7 @@ async function verifyTurnstile(token: string | undefined) {
   }
 
   const formData = new FormData();
-  formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+  formData.append('secret', secretKey);
   formData.append('response', token);
   const res = await fetch(
     'https://challenges.cloudflare.com/turnstile/v0/siteverify',

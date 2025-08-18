@@ -21,7 +21,7 @@ export default function NewMemoryPage() {
 
   useEffect(() => {
     setIsClient(true);
-    
+
     // Add global callback for Turnstile
     (window as any).turnstileCallback = (token: string) => {
       setTurnstileToken(token);
