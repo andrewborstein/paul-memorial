@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
-import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
+import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
@@ -18,31 +18,8 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
   return res.json();
 }
 
-async function getMemoryDetail(id: string): Promise<MemoryDetail | null> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memory/${id}`,
-    {
-      next: { revalidate: 60 },
-    }
-  );
-  if (!res.ok) return null;
-  return res.json();
-}
-
 export default async function MemoriesPage() {
   const memories = await getMemories();
-
-  // Get full details for each memory to access body text
-  const memoriesWithDetails = await Promise.all(
-    memories.map(async (memory) => {
-      const detail = await getMemoryDetail(memory.id);
-      return {
-        ...memory,
-        body: detail?.body || '',
-        name: detail?.name || '',
-      };
-    })
-  );
 
   return (
     <PageContainer>
@@ -73,7 +50,7 @@ export default async function MemoriesPage() {
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6">
-          {memoriesWithDetails.map((memory) => {
+          {memories.map((memory) => {
             const displayTitle = memory.title || memory.name;
             const truncatedBody =
               memory.body.length > 200

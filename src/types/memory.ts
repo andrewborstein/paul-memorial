@@ -4,6 +4,8 @@ export type MemoryIndexItem = {
   date: string; // ISO
   cover_url?: string; // derived from first photo
   photo_count: number;
+  body?: string; // truncated body text
+  name?: string; // person's name
 };
 
 export type MemoryPhoto = {

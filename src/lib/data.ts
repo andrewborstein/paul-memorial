@@ -19,14 +19,31 @@ async function readBlobJson<T>(key: string): Promise<T | null> {
     }
 
     const blobKey = getBlobKey(key);
+    console.log('Attempting to read Blob with key:', blobKey);
+
     const { blobs } = await list({ prefix: blobKey, limit: 1, token });
-    if (blobs.length === 0) return null;
+    console.log('Found blobs:', blobs.length);
+
+    if (blobs.length === 0) {
+      console.log('No blobs found for key:', blobKey);
+      return null;
+    }
 
     const res = await fetch(blobs[0].downloadUrl);
-    if (!res.ok) return null;
-    return (await res.json()) as T;
+    if (!res.ok) {
+      console.error(
+        'Failed to fetch blob content:',
+        res.status,
+        res.statusText
+      );
+      return null;
+    }
+
+    const data = await res.json();
+    console.log('Successfully read blob data for key:', key);
+    return data as T;
   } catch (error) {
-    console.warn('Failed to read from Blob:', error);
+    console.error('Failed to read from Blob:', error);
     return null;
   }
 }
