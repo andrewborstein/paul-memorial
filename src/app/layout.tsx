@@ -3,6 +3,7 @@ import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import SuperUserManager from '@/components/SuperUserManager';
 
 export default function RootLayout({
   children,
@@ -64,6 +65,7 @@ export default function RootLayout({
           </nav>
         </header>
         <main className="max-w-7xl mx-auto py-8 px-2">{children}</main>
+        <SuperUserManager />
         <footer className="max-w-4xl mx-auto py-8 text-sm text-gray-500 px-5 md:px-2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
             <span>Made with love by friends & family.</span>

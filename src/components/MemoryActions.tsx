@@ -3,26 +3,23 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { canEditMemory } from '@/lib/user';
 
 interface MemoryActionsProps {
   memoryId: string;
   creatorEmail: string;
-  currentUserEmail?: string;
-  isSuperUser?: boolean;
 }
 
 export default function MemoryActions({ 
   memoryId, 
-  creatorEmail, 
-  currentUserEmail,
-  isSuperUser = false 
+  creatorEmail
 }: MemoryActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const router = useRouter();
 
   // Check if user can edit this memory
-  const canEdit = isSuperUser || currentUserEmail === creatorEmail;
+  const canEdit = canEditMemory(creatorEmail);
 
   if (!canEdit) {
     return null;

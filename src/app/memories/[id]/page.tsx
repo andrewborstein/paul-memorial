@@ -72,7 +72,6 @@ export default async function MemoryPage({
             <MemoryActions 
               memoryId={memory.id}
               creatorEmail={memory.email}
-              isSuperUser={process.env.SUPER_USER_EMAIL === memory.email}
             />
           </div>
 

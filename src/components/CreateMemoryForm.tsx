@@ -4,6 +4,7 @@ import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
+import { setCurrentUser } from '@/lib/user';
 import {
   DndContext,
   closestCenter,
@@ -588,6 +589,12 @@ export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {})
     }
 
     const { id } = await r.json();
+    
+    // Set current user in localStorage when creating a new memory
+    if (!isEditMode) {
+      setCurrentUser(email, name);
+    }
+    
     if (isEditMode) {
       router.push(`/memories/${id}`);
       router.refresh();
