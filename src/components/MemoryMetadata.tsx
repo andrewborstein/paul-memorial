@@ -35,7 +35,7 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
 
   return (
     <div className="flex items-center gap-2 text-xs flex-wrap">
-      <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
+      <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
         {isCurrentUser ? 'You' : creatorName}
       </span>
       <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
