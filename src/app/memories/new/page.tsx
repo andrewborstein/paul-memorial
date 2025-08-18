@@ -17,7 +17,9 @@ export default function NewMemoryPage() {
     total: number;
     message: string;
   } | null>(null);
-  const [turnstileStatus, setTurnstileStatus] = useState<'required' | 'success' | 'error' | 'expired'>('required');
+  const [turnstileStatus, setTurnstileStatus] = useState<
+    'required' | 'success' | 'error' | 'expired'
+  >('required');
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
@@ -335,10 +337,14 @@ export default function NewMemoryPage() {
               onExpire={() => setTurnstileStatus('expired')}
             />
             {turnstileStatus === 'error' && (
-              <div className="text-red-600 text-sm">Security check failed. Please try again.</div>
+              <div className="text-red-600 text-sm">
+                Security check failed. Please try again.
+              </div>
             )}
             {turnstileStatus === 'expired' && (
-              <div className="text-red-600 text-sm">Security check expired. Please verify again.</div>
+              <div className="text-red-600 text-sm">
+                Security check expired. Please verify again.
+              </div>
             )}
           </div>
         )}
