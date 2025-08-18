@@ -67,7 +67,8 @@ export default function ImageWithFallback({
       }
       return src;
     }
-    return cldUrl(publicId!, { w: width, q: quality, dpr });
+    // All thumbnails are square, use fill cropping
+    return cldUrl(publicId!, { w: width, h: width, crop: 'fill', q: quality, dpr });
   }, [src, publicId, width, quality, dpr]);
 
   return (
@@ -75,7 +76,7 @@ export default function ImageWithFallback({
       <img
         src={imageSrc}
         alt={alt}
-        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300 object-cover`}
         onLoad={handleLoad}
         onError={handleError}
         loading="lazy"

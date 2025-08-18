@@ -49,11 +49,11 @@ export function cldUrl(
 
 // Helper functions for different use cases
 export function getThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 200, q: 'auto', dpr: 2 });
+  return cldUrl(publicId, { w: 200, h: 200, crop: 'fill', q: 'auto', dpr: 2 });
 }
 
 export function getSmallThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 144, q: 'auto', dpr: 2 });
+  return cldUrl(publicId, { w: 144, h: 144, crop: 'fill', q: 'auto', dpr: 2 });
 }
 
 export function getFullSizeUrl(publicId: string): string {
