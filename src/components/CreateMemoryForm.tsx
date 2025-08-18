@@ -56,7 +56,7 @@ export default function CreateMemoryForm() {
                     public_id: pid, 
                     progress: 100, 
                     status: 'done',
-                    preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`
+                    preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_webp,q_auto,w_400/${pid}`
                   }
                 : p
             )
@@ -466,6 +466,19 @@ export default function CreateMemoryForm() {
                     onError={(e) => {
                       // Fallback for unsupported formats (HEIC, etc.)
                       const target = e.target as HTMLImageElement;
+                      const img = target as HTMLImageElement;
+                      
+                      // If this is a Cloudinary URL and it's a HEIC file, try with a delay
+                      if (img.src.includes('cloudinary.com') && p.file.name.toLowerCase().includes('.heic')) {
+                        // Retry after 2 seconds - Cloudinary might need time to process
+                        setTimeout(() => {
+                          img.style.display = 'block';
+                          img.src = img.src + '?t=' + Date.now(); // Force reload
+                        }, 2000);
+                        return;
+                      }
+                      
+                      // Otherwise show fallback
                       target.style.display = 'none';
                       target.nextElementSibling?.classList.remove('hidden');
                     }}
