@@ -80,13 +80,15 @@ export default async function HomePage() {
                         )}
                       </div>
 
-                      {memory.cover_url && (
+                      {memory.cover_public_id && (
                         <div className="flex-shrink-0">
                           <div className="w-24 h-24 rounded overflow-hidden">
                             <ImageWithFallback
-                              src={memory.cover_url}
+                              publicId={memory.cover_public_id}
                               alt="Memory preview"
                               className="w-full h-full object-cover"
+                              width={96}
+                              quality="auto"
                             />
                           </div>
                         </div>

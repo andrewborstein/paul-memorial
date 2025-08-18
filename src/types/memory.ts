@@ -2,7 +2,7 @@ export type MemoryIndexItem = {
   id: string;
   title: string;
   date: string; // ISO
-  cover_url?: string; // derived from first photo
+  cover_public_id?: string; // derived from first photo
   photo_count: number;
   body?: string; // truncated body text
   name?: string; // person's name

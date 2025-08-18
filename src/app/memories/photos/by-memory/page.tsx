@@ -3,6 +3,7 @@ import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -59,12 +60,14 @@ export default async function PhotosByMemoryPage() {
                 </p>
               </div>
 
-              {memory.cover_url && (
+              {memory.cover_public_id && (
                 <div className="aspect-square">
-                  <img
-                    src={memory.cover_url}
+                  <ImageWithFallback
+                    publicId={memory.cover_public_id}
                     alt={`Preview of ${memory.title}`}
                     className="w-full h-full object-cover"
+                    width={300}
+                    quality="auto"
                   />
                 </div>
               )}

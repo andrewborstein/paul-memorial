@@ -127,10 +127,10 @@ export default async function PhotosPage() {
                       </p>
                     </div>
 
-                    {memory.cover_url && (
+                    {memory.cover_public_id && (
                       <div className="aspect-square">
                         <ImageWithFallback
-                          src={memory.cover_url}
+                          publicId={memory.cover_public_id}
                           alt={`Preview of ${memory.title}`}
                           className="w-full h-full object-cover"
                           width={300}
