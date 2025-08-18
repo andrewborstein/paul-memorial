@@ -3,7 +3,7 @@ function hashEmail(email: string): string {
   let hash = 0;
   for (let i = 0; i < email.length; i++) {
     const char = email.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(36);
@@ -22,17 +22,17 @@ export interface UserInfo {
 export function setCurrentUser(email: string, name: string): UserInfo {
   const emailHash = hashEmail(email);
   const userInfo: UserInfo = { email, emailHash, name };
-  
+
   if (typeof window !== 'undefined') {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
   }
-  
+
   return userInfo;
 }
 
 export function getCurrentUser(): UserInfo | null {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const stored = localStorage.getItem(USER_STORAGE_KEY);
     return stored ? JSON.parse(stored) : null;
@@ -50,7 +50,7 @@ export function clearCurrentUser(): void {
 // Super user management
 export async function setSuperUser(password: string): Promise<boolean> {
   if (typeof window === 'undefined') return false;
-  
+
   try {
     const response = await fetch('/api/admin/super-user', {
       method: 'POST',
@@ -66,7 +66,7 @@ export async function setSuperUser(password: string): Promise<boolean> {
       localStorage.setItem(SUPER_USER_KEY, token);
       return true;
     }
-    
+
     return false;
   } catch (error) {
     console.error('Error setting super user:', error);
@@ -76,10 +76,10 @@ export async function setSuperUser(password: string): Promise<boolean> {
 
 export function isSuperUser(): boolean {
   if (typeof window === 'undefined') return false;
-  
+
   const storedToken = localStorage.getItem(SUPER_USER_KEY);
   if (!storedToken) return false;
-  
+
   // For now, we'll trust the token if it exists
   // In a more secure implementation, you'd validate the token server-side
   // But since this is just for UI display, it's acceptable
@@ -96,6 +96,6 @@ export function clearSuperUser(): void {
 export function canEditMemory(memoryEmail: string): boolean {
   const currentUser = getCurrentUser();
   if (!currentUser) return false;
-  
+
   return isSuperUser() || currentUser.email === memoryEmail;
 }
