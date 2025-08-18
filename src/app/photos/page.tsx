@@ -78,7 +78,7 @@ export default async function PhotosPage() {
         ) : (
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-semibold mb-4">All photos</h2>
+              <h2 className="text-lg font-semibold mb-4">All photos ({allPhotos.length})</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {displayPhotos.map((photo) => (
                   <Link
