@@ -17,8 +17,8 @@ export default function PhotoImage({
   alt,
   className = '',
   width = 1200,
-  quality = 'auto',
-  dpr = 2,
+  quality = 80,
+  dpr = 1,
 }: PhotoImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);

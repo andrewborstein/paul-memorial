@@ -92,13 +92,13 @@ export default async function PhotoPage({
 
         {/* Photo Display */}
         <div className="flex justify-center">
-          <PhotoImage
-            publicId={photo.public_id}
-            alt={photo.caption || 'Photo'}
-            className="max-w-full h-auto rounded-lg shadow-lg"
-            width={1200}
-            quality="auto"
-          />
+                      <PhotoImage
+              publicId={photo.public_id}
+              alt={photo.caption || 'Photo'}
+              className="max-w-full h-auto rounded-lg shadow-lg"
+              width={1200}
+              quality={80}
+            />
         </div>
       </PageContainer>
     );
