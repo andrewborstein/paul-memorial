@@ -54,7 +54,9 @@ export default function PhotoImage({
         loading="lazy"
       />
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg"></div>
+        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg">
+          <span className="text-sm">Loading...</span>
+        </div>
       )}
     </div>
   );
