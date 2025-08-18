@@ -71,7 +71,7 @@ export default function ImageWithFallback({
   }, [src, publicId, width, quality, dpr]);
 
   return (
-    <>
+    <div className="relative">
       <img
         src={imageSrc}
         alt={alt}
@@ -81,10 +81,10 @@ export default function ImageWithFallback({
         loading="lazy"
       />
       {isLoading && (
-        <div className={`absolute inset-0 bg-gray-200 animate-pulse ${className}`}>
+        <div className={`absolute inset-0 bg-gray-200 animate-pulse`}>
           <div className="w-full h-full bg-gray-300 rounded"></div>
         </div>
       )}
-    </>
+    </div>
   );
 }
