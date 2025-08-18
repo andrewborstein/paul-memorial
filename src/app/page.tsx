@@ -7,12 +7,9 @@ import type { MemoryIndexItem } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memories`,
-    {
-      next: { revalidate: 60 },
-    }
-  );
+  const res = await fetch(`/api/memories`, {
+    next: { revalidate: 60 },
+  });
   if (!res.ok) return [];
   return res.json();
 }

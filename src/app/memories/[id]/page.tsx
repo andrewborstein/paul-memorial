@@ -9,12 +9,9 @@ import type { MemoryDetail } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/memory/${id}`,
-    {
-      next: { revalidate: 60 },
-    }
-  );
+  const res = await fetch(`/api/memory/${id}`, {
+    next: { revalidate: 60 },
+  });
   if (!res.ok) throw new Error('Not found');
   return res.json();
 }
