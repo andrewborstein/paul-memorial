@@ -48,10 +48,10 @@ export default function CreateMemoryForm() {
       limit(async () => {
         try {
           const pid = await uploadOne(photo);
-          // For HEIC files, try multiple formats to ensure compatibility
+          // For HEIC files, force JPEG conversion
           const isHeic = photo.file.name.toLowerCase().includes('.heic') || photo.file.name.toLowerCase().includes('.heif');
           const cloudinaryUrl = isHeic 
-            ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,q_auto,w_400/${pid}`
+            ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpeg,fl_progressive,fl_force_strip,q_auto,w_400/${pid}`
             : `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`;
           console.log('Generated Cloudinary URL:', cloudinaryUrl);
           console.log('File type:', photo.file.type);
@@ -481,12 +481,21 @@ export default function CreateMemoryForm() {
                       console.log('File name:', p.file.name);
                       console.log('Is HEIC:', p.file.name.toLowerCase().includes('.heic'));
                       
-                      // If this is a Cloudinary URL and it's a HEIC file, try with a delay
+                      // If this is a Cloudinary URL and it's a HEIC file, try multiple approaches
                       if (img.src.includes('cloudinary.com') && p.file.name.toLowerCase().includes('.heic')) {
-                        console.log('Retrying HEIC image after 2 seconds...');
-                        // Retry after 2 seconds - Cloudinary might need time to process
+                        console.log('Retrying HEIC image with different formats...');
+                        
+                        // Try original format first (no conversion)
+                        if (img.src.includes('f_jpeg')) {
+                          const originalUrl = img.src.replace('f_jpeg,fl_progressive,fl_force_strip,q_auto,w_400', 'f_auto,q_auto,w_400');
+                          console.log('Trying original format:', originalUrl);
+                          img.src = originalUrl;
+                          return;
+                        }
+                        
+                        // If original format fails, try with delay
                         setTimeout(() => {
-                          console.log('Retrying image load:', img.src);
+                          console.log('Retrying image load with cache bust:', img.src);
                           img.style.display = 'block';
                           img.src = img.src + '?t=' + Date.now(); // Force reload
                         }, 2000);
