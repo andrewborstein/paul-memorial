@@ -31,30 +31,7 @@ export default function ImageWithFallback({
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasError, setHasError] = React.useState(false);
 
-  const handleLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
-    onLoad?.();
-  };
-
-  const handleError = () => {
-    setIsLoading(false);
-    setHasError(true);
-    onError?.();
-  };
-
-  if (hasError) {
-    return (
-      <div className={`bg-gray-100 flex items-center justify-center text-gray-500 ${className}`}>
-        <div className="text-center">
-          <div className="text-lg mb-1">📷</div>
-          <div className="text-xs">{fallbackText}</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Convert old URLs to better quality
+  // Convert old URLs to better quality - must be before any conditional returns
   const imageSrc = React.useMemo(() => {
     if (src) {
       // If it's an old q_60 URL, convert it to q_auto
@@ -76,7 +53,7 @@ export default function ImageWithFallback({
         const transformations = src.split('/upload/')[1];
         const parts = transformations.split('/');
         const publicId = parts[parts.length - 1];
-        
+
         // Build new transformations with square cropping
         const newTransformations = `w_${width},h_${width},c_fill,q_auto,dpr_2`;
         return `${baseUrl}${newTransformations}/${publicId}`;
@@ -84,8 +61,39 @@ export default function ImageWithFallback({
       return src;
     }
     // All thumbnails are square, use fill cropping
-    return cldUrl(publicId!, { w: width, h: width, crop: 'fill', q: quality, dpr });
+    return cldUrl(publicId!, {
+      w: width,
+      h: width,
+      crop: 'fill',
+      q: quality,
+      dpr,
+    });
   }, [src, publicId, width, quality, dpr]);
+
+  const handleLoad = () => {
+    setIsLoading(false);
+    setHasError(false);
+    onLoad?.();
+  };
+
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+    onError?.();
+  };
+
+  if (hasError) {
+    return (
+      <div
+        className={`bg-gray-100 flex items-center justify-center text-gray-500 ${className}`}
+      >
+        <div className="text-center">
+          <div className="text-lg mb-1">📷</div>
+          <div className="text-xs">{fallbackText}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
