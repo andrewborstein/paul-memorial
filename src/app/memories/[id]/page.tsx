@@ -60,12 +60,14 @@ export default async function MemoryPage({
         {/* Memory Content */}
         <div className="space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="text-2xl font-semibold">{displayTitle}</h1>
-            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-              <span>Shared by {memory.name}</span>
-              <span>•</span>
-              <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold">{displayTitle}</h1>
+              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                <span>Shared by {memory.name}</span>
+                <span>•</span>
+                <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
+              </div>
             </div>
             
             {/* Edit/Delete Actions */}

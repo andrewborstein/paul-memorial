@@ -63,18 +63,18 @@ export default function MemoryActions({
   };
 
   return (
-    <div className="flex gap-2 mt-4">
+    <div className="flex gap-2">
       <Link
         href={`/memories/${memoryId}/edit`}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm"
+        className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors text-sm"
       >
-        Edit Memory
+        Edit
       </Link>
       
       <button
         onClick={handleDelete}
         disabled={isDeleting}
-        className={`px-4 py-2 rounded-md text-sm transition-colors ${
+        className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
           showDeleteConfirm
             ? 'bg-red-600 text-white hover:bg-red-700'
             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -83,15 +83,15 @@ export default function MemoryActions({
         {isDeleting 
           ? 'Deleting...' 
           : showDeleteConfirm 
-            ? 'Click again to confirm' 
-            : 'Delete Memory'
+            ? 'Confirm' 
+            : 'Delete'
         }
       </button>
       
       {showDeleteConfirm && (
         <button
           onClick={() => setShowDeleteConfirm(false)}
-          className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors text-sm"
+          className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md hover:bg-gray-300 transition-colors text-sm"
         >
           Cancel
         </button>

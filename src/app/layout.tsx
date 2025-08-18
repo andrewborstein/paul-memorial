@@ -25,8 +25,12 @@ export default function RootLayout({
         {isSuperUser() && (
           <div className="bg-green-600 text-white text-center py-2 px-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center gap-2">
-              <span className="text-sm font-medium">🛡️ Super User Mode Active</span>
-              <span className="text-xs opacity-90">You can edit and delete any memory</span>
+              <span className="text-sm font-medium">
+                🛡️ Super User Mode Active
+              </span>
+              <span className="text-xs opacity-90">
+                You can edit and delete any memory
+              </span>
             </div>
           </div>
         )}
