@@ -27,6 +27,7 @@ export default function CreateMemoryForm() {
   );
   const [errors, setErrors] = React.useState<string[]>([]);
   const errorRef = React.useRef<HTMLDivElement>(null);
+  const imageRefs = React.useRef<{ [key: string]: HTMLImageElement }>({});
 
   function onSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -70,6 +71,18 @@ export default function CreateMemoryForm() {
                 : p
             )
           );
+          
+          // Force the image element to be visible for the new Cloudinary URL
+          setTimeout(() => {
+            const imgElement = imageRefs.current[photo.file.name];
+            if (imgElement) {
+              console.log('Found image element via ref, ensuring it\'s visible for Cloudinary URL');
+              imgElement.style.display = 'block';
+              imgElement.nextElementSibling?.classList.add('hidden');
+            } else {
+              console.log('Image element not found in refs for:', photo.file.name);
+            }
+          }, 100);
         } catch {
           setPhotos((prev) =>
             prev.map((p) => (p === photo ? { ...p, status: 'error' } : p))
@@ -467,6 +480,9 @@ export default function CreateMemoryForm() {
               <div key={i} className="border rounded-lg p-2 relative">
                 <div className="relative">
                   <img
+                    ref={(el) => {
+                      if (el) imageRefs.current[p.file.name] = el;
+                    }}
                     src={p.preview}
                     alt=""
                     className={`w-full h-24 object-cover rounded mb-2 ${
