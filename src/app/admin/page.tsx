@@ -10,8 +10,9 @@ export default function AdminPage() {
   const [isSuper, setIsSuper] = useState(isSuperUser());
   const currentUser = getCurrentUser();
 
-  const handleSetSuperUser = () => {
-    if (setSuperUser(password)) {
+  const handleSetSuperUser = async () => {
+    const success = await setSuperUser(password);
+    if (success) {
       setMessage('Super user mode activated!');
       setIsSuper(true);
       setPassword('');
