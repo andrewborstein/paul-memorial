@@ -18,28 +18,10 @@ export default function NewMemoryPage() {
     total: number;
     message: string;
   } | null>(null);
-  const turnstileId = useRef(
-    `turnstile-${Math.random().toString(36).substr(2, 9)}`
-  );
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    // Manually render Turnstile widget when script loads
-    const renderTurnstile = () => {
-      if ((window as any).turnstile) {
-        console.log('Turnstile loaded successfully');
-      } else {
-        console.log('Turnstile not loaded yet');
-        setTimeout(renderTurnstile, 1000);
-      }
-    };
-    renderTurnstile();
-  }, [isClient]);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
@@ -176,10 +158,6 @@ export default function NewMemoryPage() {
       setUploadProgress(null);
       if (document.getElementById('file') as HTMLInputElement) {
         (document.getElementById('file') as HTMLInputElement).value = '';
-      }
-      // Reset Turnstile widget
-      if ((window as any).turnstile) {
-        (window as any).turnstile.reset(`#${turnstileId.current}`);
       }
 
       // Redirect to the new memory
@@ -348,16 +326,14 @@ export default function NewMemoryPage() {
         </div>
 
         {/* Turnstile */}
-        {isClient &&
-          typeof window !== 'undefined' &&
-          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-            <div className="flex justify-start">
-              <div
-                id={turnstileId.current}
-                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-              />
-            </div>
-          )}
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="flex justify-start">
+            <div
+              className="cf-turnstile"
+              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            />
+          </div>
+        )}
 
         {/* Debug info */}
         {process.env.NODE_ENV === 'development' && (
