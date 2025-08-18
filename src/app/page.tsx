@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -83,10 +83,12 @@ export default async function HomePage() {
                       {memory.cover_url && (
                         <div className="flex-shrink-0">
                           <div className="w-16 h-16 rounded overflow-hidden">
-                            <img
-                              src={memory.cover_url}
+                            <ImageWithFallback
+                              publicId={memory.cover_url.split('/').pop() || ''}
                               alt="Memory preview"
                               className="w-full h-full object-cover"
+                              width={64}
+                              quality={60}
                             />
                           </div>
                         </div>

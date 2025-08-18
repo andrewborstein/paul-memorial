@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -59,21 +59,17 @@ export default async function MemoriesPage() {
               const needsTruncation = bodyText.length > 200;
 
               return (
-                <article
+                <Link
                   key={memory.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow"
+                  href={`/memories/${memory.id}`}
+                  className="block bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group"
                 >
                   <div className="flex gap-6">
                     {/* Text Content */}
                     <div className="flex-1 min-w-0">
                       <header className="mb-3">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                          <Link
-                            href={`/memories/${memory.id}`}
-                            className="hover:text-blue-600 transition-colors"
-                          >
-                            {displayTitle}
-                          </Link>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                          {displayTitle}
                         </h2>
                       </header>
 
@@ -81,12 +77,9 @@ export default async function MemoriesPage() {
                       <div className="text-gray-700 mb-3">
                         <p className="whitespace-pre-wrap">{truncatedBody}</p>
                         {needsTruncation && (
-                          <Link
-                            href={`/memories/${memory.id}`}
-                            className="text-blue-600 hover:text-blue-800 font-medium text-sm mt-2 inline-block"
-                          >
+                          <span className="text-blue-600 group-hover:text-blue-800 font-medium text-sm mt-2 inline-block">
                             Read more
-                          </Link>
+                          </span>
                         )}
                       </div>
 
@@ -100,10 +93,12 @@ export default async function MemoriesPage() {
                     {memory.cover_url && (
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 rounded-lg overflow-hidden relative">
-                          <img
-                            src={memory.cover_url}
+                          <ImageWithFallback
+                            publicId={memory.cover_url.split('/').pop() || ''}
                             alt="Memory preview"
                             className="w-full h-full object-cover"
+                            width={96}
+                            quality={60}
                           />
                           {memory.photo_count > 1 && (
                             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
@@ -116,7 +111,7 @@ export default async function MemoriesPage() {
                       </div>
                     )}
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>

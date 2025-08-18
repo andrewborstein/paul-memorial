@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -86,10 +86,12 @@ export default async function PhotosPage() {
                     href={`/memories/photos/${photo.public_id}`}
                     className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
                   >
-                    <img
-                      src={cldUrl(photo.public_id, { w: 400 })}
+                    <ImageWithFallback
+                      publicId={photo.public_id}
                       alt={`Photo from ${photo.memoryTitle}`}
                       className="w-full h-full object-cover"
+                      width={400}
+                      quality={70}
                     />
                   </Link>
                 ))}
@@ -110,18 +112,14 @@ export default async function PhotosPage() {
               <h2 className="text-lg font-semibold mb-4">Photos by memory</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {memoriesWithPhotos.map((memory) => (
-                  <div
+                  <Link
                     key={memory.id}
-                    className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+                    href={`/memories/${memory.id}`}
+                    className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group"
                   >
                     <div className="p-4">
-                      <h3 className="font-medium text-sm mb-1">
-                        <Link
-                          href={`/memories/${memory.id}`}
-                          className="hover:text-blue-600 transition-colors"
-                        >
-                          {memory.title}
-                        </Link>
+                      <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors">
+                        {memory.title}
                       </h3>
                       <p className="text-xs text-gray-500">
                         {memory.photo_count} photo
@@ -131,14 +129,16 @@ export default async function PhotosPage() {
 
                     {memory.cover_url && (
                       <div className="aspect-video">
-                        <img
-                          src={memory.cover_url}
+                        <ImageWithFallback
+                          publicId={memory.cover_url.split('/').pop() || ''}
                           alt={`Preview of ${memory.title}`}
                           className="w-full h-full object-cover"
+                          width={400}
+                          quality={70}
                         />
                       </div>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
