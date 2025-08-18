@@ -22,7 +22,7 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
   if (!isLoaded) {
     return (
       <div className="flex items-center gap-2 text-xs flex-wrap">
-        <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
+        <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
           {new Date(date).toLocaleDateString('en-US', {
             month: 'numeric',
             day: 'numeric',
@@ -35,7 +35,11 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
 
   return (
     <div className="flex items-center gap-2 text-xs flex-wrap">
-      <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
+      <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+        isCurrentUser 
+          ? 'bg-blue-100 text-blue-700' 
+          : 'bg-gray-100 text-gray-700'
+      }`}>
         {isCurrentUser ? 'You' : creatorName}, {new Date(date).toLocaleDateString('en-US', {
           month: 'numeric',
           day: 'numeric',
