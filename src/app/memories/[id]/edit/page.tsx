@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
-import EditMemoryForm from '@/components/EditMemoryForm';
+import CreateMemoryForm from '@/components/CreateMemoryForm';
 import type { MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -38,7 +38,7 @@ export default async function EditMemoryPage({
             </p>
           </div>
 
-          <EditMemoryForm memory={memory} />
+          <CreateMemoryForm memory={memory} />
         </div>
       </PageContainer>
     );

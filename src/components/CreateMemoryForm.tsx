@@ -2,6 +2,8 @@
 import React from 'react';
 import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { useRouter } from 'next/navigation';
+import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
 import {
   DndContext,
   closestCenter,
@@ -30,6 +32,10 @@ type PhotoState = {
   public_id?: string;
   caption?: string;
 };
+
+interface CreateMemoryFormProps {
+  memory?: MemoryDetail; // Optional - if provided, we're in edit mode
+}
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
@@ -209,12 +215,24 @@ function SortablePhotoItem({
   );
 }
 
-export default function CreateMemoryForm() {
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [title, setTitle] = React.useState('');
-  const [body, setBody] = React.useState('');
-  const [photos, setPhotos] = React.useState<PhotoState[]>([]);
+export default function CreateMemoryForm({ memory }: CreateMemoryFormProps = {}) {
+  const router = useRouter();
+  const isEditMode = !!memory;
+  
+  const [name, setName] = React.useState(memory?.name || '');
+  const [email, setEmail] = React.useState(memory?.email || '');
+  const [title, setTitle] = React.useState(memory?.title || '');
+  const [body, setBody] = React.useState(memory?.body || '');
+  const [photos, setPhotos] = React.useState<PhotoState[]>(
+    memory?.photos.map(photo => ({
+      file: new File([], photo.public_id), // Dummy file for existing photos
+      preview: `https://res.cloudinary.com/${CLOUD}/image/upload/w_200,h_200,c_fill,q_auto,dpr_2/${photo.public_id}`,
+      progress: 100,
+      status: 'done' as const,
+      public_id: photo.public_id,
+      caption: photo.caption,
+    })) || []
+  );
   const [isPublishing, setIsPublishing] = React.useState(false);
   const [turnstileToken, setTurnstileToken] = React.useState<string | null>(
     null
@@ -540,7 +558,7 @@ export default function CreateMemoryForm() {
       email,
       title: title.trim() || undefined, // Only send if not empty
       body,
-      date: new Date().toISOString(),
+      date: isEditMode ? memory!.date : new Date().toISOString(),
       photos: photos
         .map((p, i) => ({
           public_id: p.public_id!,
@@ -548,18 +566,21 @@ export default function CreateMemoryForm() {
           sort_index: i,
         }))
         .filter((p) => !!p.public_id),
-      turnstileToken,
+      ...(isEditMode ? {} : { turnstileToken }),
     };
 
-    const r = await fetch('/api/memory', {
-      method: 'POST',
+    const url = isEditMode ? `/api/memory/${memory!.id}` : '/api/memory';
+    const method = isEditMode ? 'PUT' : 'POST';
+
+    const r = await fetch(url, {
+      method,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     if (!r.ok) {
       const errorText = await r.text();
-      setErrors([errorText || 'Failed to publish memory']);
+      setErrors([errorText || `Failed to ${isEditMode ? 'update' : 'publish'} memory`]);
       setIsPublishing(false);
       // Scroll to errors after state update
       setTimeout(scrollToErrors, 100);
@@ -567,7 +588,12 @@ export default function CreateMemoryForm() {
     }
 
     const { id } = await r.json();
-    window.location.href = `/memories/${id}`;
+    if (isEditMode) {
+      router.push(`/memories/${id}`);
+      router.refresh();
+    } else {
+      window.location.href = `/memories/${id}`;
+    }
   }
 
   return (
@@ -724,8 +750,8 @@ export default function CreateMemoryForm() {
         </div>
       )}
 
-      {/* Turnstile */}
-      {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+      {/* Turnstile - only show in create mode */}
+      {!isEditMode && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
         <div className="flex justify-start">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
@@ -750,13 +776,23 @@ export default function CreateMemoryForm() {
           onClick={onPublish}
         >
           {isPublishing
-            ? 'Publishing...'
+            ? (isEditMode ? 'Updating...' : 'Publishing...')
             : photos.some(
                   (p) => p.status === 'uploading' || p.status === 'queued'
                 )
               ? 'Uploading photos...'
-              : 'Publish memory'}
+              : (isEditMode ? 'Update Memory' : 'Publish Memory')}
         </button>
+        
+        {isEditMode && (
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );
