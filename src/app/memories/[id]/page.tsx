@@ -64,7 +64,7 @@ export default async function MemoryPage({
             <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
               <span>Shared by {memory.name}</span>
               <span>•</span>
-              <span>{new Date(memory.date).toLocaleDateString()}</span>
+              <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
             </div>
           </div>
 

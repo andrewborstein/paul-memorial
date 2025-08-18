@@ -92,7 +92,7 @@ export default async function MemoriesPage() {
 
                       {/* Metadata */}
                       <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                        <span>{new Date(memory.date).toLocaleDateString()}</span>
+                        <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
                         {memory.photo_count > 0 && (
                           <>
                             <span>•</span>
