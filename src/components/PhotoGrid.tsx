@@ -20,7 +20,7 @@ export default function PhotoGrid({ photos }: PhotoGridProps) {
           className="aspect-square overflow-hidden rounded-lg group cursor-pointer border border-gray-200 bg-gray-50"
         >
           <img
-            src={cldUrl(photo.public_id, { w: 400, q: 70 })}
+            src={cldUrl(photo.public_id, { w: 400, q: 70, dpr: 'auto' })}
             alt={photo.caption || 'Photo'}
             className="w-full h-full object-cover"
             loading="lazy"

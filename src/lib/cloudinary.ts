@@ -28,7 +28,7 @@ export function publicIdToUrl(publicId: string, type: string = 'image'): string 
 // New optimized URL builder
 export function cldUrl(
   publicId: string,
-  opts: { w?: number; h?: number; crop?: string; q?: number } = {}
+  opts: { w?: number; h?: number; crop?: string; q?: number; dpr?: string } = {}
 ): string {
   const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const parts = ['f_auto'];
@@ -39,19 +39,20 @@ export function cldUrl(
   if (opts.w) parts.push(`w_${opts.w}`);
   if (opts.h) parts.push(`h_${opts.h}`);
   if (opts.crop) parts.push(`c_${opts.crop}`);
+  if (opts.dpr) parts.push(`dpr_${opts.dpr}`);
   
   return `https://res.cloudinary.com/${cloud}/image/upload/${parts.join(',')}/${publicId}`;
 }
 
 // Helper functions for different use cases
 export function getThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 200, q: 60 });
+  return cldUrl(publicId, { w: 200, q: 60, dpr: 'auto' });
 }
 
 export function getSmallThumbnailUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 96, q: 50 });
+  return cldUrl(publicId, { w: 96, q: 50, dpr: 'auto' });
 }
 
 export function getFullSizeUrl(publicId: string): string {
-  return cldUrl(publicId, { w: 1600, q: 80 });
+  return cldUrl(publicId, { w: 1600, q: 80, dpr: 'auto' });
 }
