@@ -25,20 +25,6 @@ export default function NewMemoryPage() {
     };
   }, []);
 
-  // Add Turnstile callback when component mounts
-  useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).turnstile) {
-      (window as any).turnstile.ready(() => {
-        (window as any).turnstile.render('.cf-turnstile', {
-          sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-          callback: (token: string) => {
-            setTurnstileToken(token);
-          },
-        });
-      });
-    }
-  }, []);
-
   async function uploadToCloudinary(files: FileList, memoryId: string) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
     const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
