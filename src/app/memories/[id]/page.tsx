@@ -5,6 +5,7 @@ import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
+import MemoryMetadata from '@/components/MemoryMetadata';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -63,10 +64,12 @@ export default async function MemoryPage({
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-semibold">{displayTitle}</h1>
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                <span>Shared by {memory.name}</span>
-                <span>•</span>
-                <span>{new Date(memory.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}</span>
+              <div className="mt-2">
+                <MemoryMetadata
+                  date={memory.date}
+                  creatorEmail={memory.email}
+                  creatorName={memory.name}
+                />
               </div>
             </div>
             

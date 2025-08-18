@@ -3,6 +3,7 @@ import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import MemoryMetadata from '@/components/MemoryMetadata';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -84,15 +85,11 @@ export default async function MemoriesPage() {
                       </div>
 
                       {/* Metadata */}
-                      <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                        <span>
-                          {new Date(memory.date).toLocaleDateString('en-US', {
-                            month: 'numeric',
-                            day: 'numeric',
-                            year: '2-digit',
-                          })}
-                        </span>
-                      </div>
+                      <MemoryMetadata
+                        date={memory.date}
+                        creatorEmail={memory.email}
+                        creatorName={memory.name}
+                      />
                     </div>
 
                     {/* Photo Thumbnail */}
