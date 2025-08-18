@@ -7,6 +7,9 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Disable caching to prevent stale data
+  unstable_noStore();
+  
   try {
     const { id } = await params;
     console.log('Attempting to fetch memory:', id);
@@ -19,7 +22,7 @@ export async function GET(
 
     console.log('Successfully fetched memory:', id);
     return Response.json(doc, {
-      headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=300' },
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
     });
   } catch (error) {
     console.error('Error fetching memory:', error);
