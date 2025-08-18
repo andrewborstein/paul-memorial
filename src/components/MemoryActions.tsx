@@ -43,14 +43,20 @@ export default function MemoryActions({
 
     setIsDeleting(true);
     try {
+      console.log('Deleting memory:', memoryId);
       const res = await fetch(`/api/memory/${memoryId}`, {
         method: 'DELETE',
       });
 
+      console.log('Delete response status:', res.status);
+      
       if (res.ok) {
-        router.push('/memories');
-        router.refresh();
+        console.log('Memory deleted successfully, redirecting...');
+        // Force a full page reload to ensure cache is cleared
+        window.location.href = '/memories';
       } else {
+        const errorText = await res.text();
+        console.error('Delete failed:', errorText);
         alert('Failed to delete memory');
       }
     } catch (error) {
