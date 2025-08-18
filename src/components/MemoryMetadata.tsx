@@ -21,8 +21,8 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-        <span>
+      <div className="flex items-center gap-2 text-xs flex-wrap">
+        <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
           {new Date(date).toLocaleDateString('en-US', {
             month: 'numeric',
             day: 'numeric',
@@ -34,26 +34,17 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
   }
 
   return (
-    <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-      <span>
+    <div className="flex items-center gap-2 text-xs flex-wrap">
+      <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
         {new Date(date).toLocaleDateString('en-US', {
           month: 'numeric',
           day: 'numeric',
           year: '2-digit',
         })}
       </span>
-      <span>•</span>
-      <span className="flex items-center gap-1">
-        {isCurrentUser ? (
-          <>
-            <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">
-              You
-            </span>
-            <span>shared this</span>
-          </>
-        ) : (
-          <span>Shared by {creatorName}</span>
-        )}
+      <span className="text-gray-400">•</span>
+      <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-xs font-medium">
+        {isCurrentUser ? 'You' : creatorName}
       </span>
     </div>
   );
