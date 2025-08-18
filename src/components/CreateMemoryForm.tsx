@@ -51,7 +51,13 @@ export default function CreateMemoryForm() {
           setPhotos((prev) =>
             prev.map((p) =>
               p === photo
-                ? { ...p, public_id: pid, progress: 100, status: 'done' }
+                ? { 
+                    ...p, 
+                    public_id: pid, 
+                    progress: 100, 
+                    status: 'done',
+                    preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_400/${pid}`
+                  }
                 : p
             )
           );
@@ -424,7 +430,7 @@ export default function CreateMemoryForm() {
           id="photos"
           type="file"
           multiple
-          accept="image/*,video/*"
+          accept="image/*,video/*,.heic,.HEIC,.heif,.HEIF"
           onChange={onSelect}
           className="hidden"
         />
@@ -437,7 +443,7 @@ export default function CreateMemoryForm() {
         </button>
         <p className="text-xs text-gray-500 mt-1">
           Large images are automatically compressed. Videos must be under 10MB.
-          You can upload up to 150 photos/videos per memory.
+          You can upload up to 150 photos/videos per memory. HEIC files are supported and will be converted automatically.
         </p>
       </div>
 
@@ -451,13 +457,39 @@ export default function CreateMemoryForm() {
             {photos.map((p, i) => (
               <div key={i} className="border rounded-lg p-2 relative">
                 <div className="relative">
-                  <img
-                    src={p.preview}
-                    alt=""
-                    className={`w-full h-24 object-cover rounded mb-2 ${
-                      p.status === 'uploading' ? 'opacity-50' : ''
-                    }`}
-                  />
+                  {p.status === 'done' ? (
+                    <img
+                      src={p.preview}
+                      alt=""
+                      className="w-full h-24 object-cover rounded mb-2"
+                      onError={(e) => {
+                        // Fallback for unsupported formats
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={p.preview}
+                      alt=""
+                      className={`w-full h-24 object-cover rounded mb-2 ${
+                        p.status === 'uploading' ? 'opacity-50' : ''
+                      }`}
+                    />
+                  )}
+                  
+                  {/* Fallback for unsupported formats */}
+                  <div className={`hidden w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">📷</div>
+                      <div>{p.file.name}</div>
+                      <div className="text-xs text-gray-400">
+                        {p.file.type || 'Unknown format'}
+                      </div>
+                    </div>
+                  </div>
+                  
                   {p.status === 'uploading' && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
