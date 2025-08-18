@@ -26,6 +26,7 @@ export async function GET() {
             ...memory,
             body: truncatedBody,
             name: detail?.name || '',
+            email: detail?.email || '',
           };
         } catch (error) {
           console.warn(
