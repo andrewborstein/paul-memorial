@@ -9,11 +9,18 @@ import type { MemoryDetail } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
+  console.log('getMemory: Fetching memory with ID:', id);
   const res = await fetch(`/api/memory/${id}`, {
     next: { revalidate: 60 },
   });
-  if (!res.ok) throw new Error('Not found');
-  return res.json();
+  console.log('getMemory: Response status:', res.status);
+  if (!res.ok) {
+    console.log('getMemory: Response not ok, throwing error');
+    throw new Error('Not found');
+  }
+  const data = await res.json();
+  console.log('getMemory: Successfully fetched memory:', data.id);
+  return data;
 }
 
 export default async function MemoryPage({
