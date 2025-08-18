@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { canEditMemory, isSuperUser, getCurrentUser } from '@/lib/user';
@@ -16,20 +16,34 @@ export default function MemoryActions({
 }: MemoryActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [isSuper, setIsSuper] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
 
-  // Check if user can edit this memory
-  const canEdit = canEditMemory(creatorEmail);
-  const isSuper = isSuperUser();
+  // Check permissions on client side only
+  useEffect(() => {
+    const canEditResult = canEditMemory(creatorEmail);
+    const isSuperResult = isSuperUser();
+    
+    setCanEdit(canEditResult);
+    setIsSuper(isSuperResult);
+    setIsLoaded(true);
 
-  // Debug logging
-  console.log('MemoryActions Debug:', {
-    memoryId,
-    creatorEmail,
-    canEdit,
-    isSuper,
-    currentUser: getCurrentUser(),
-  });
+    // Debug logging
+    console.log('MemoryActions Debug:', {
+      memoryId,
+      creatorEmail,
+      canEdit: canEditResult,
+      isSuper: isSuperResult,
+      currentUser: getCurrentUser(),
+    });
+  }, [memoryId, creatorEmail]);
+
+  // Don't render anything until client-side check is complete
+  if (!isLoaded) {
+    return null;
+  }
 
   if (!canEdit) {
     return null;
