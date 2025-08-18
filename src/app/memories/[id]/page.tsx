@@ -5,8 +5,8 @@ import PageContainer from '@/components/PageContainer';
 
 import type { MemoryDetail } from '@/types/memory';
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Make this page dynamic to avoid build-time API calls
+export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
   const res = await fetch(
@@ -25,9 +25,11 @@ export default async function MemoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  console.log('MemoryPage: Attempting to load memory with ID:', id);
 
   try {
     const memory = await getMemory(id);
+    console.log('MemoryPage: Successfully loaded memory:', memory.id);
     const displayTitle = memory.title || memory.name;
 
     return (
@@ -93,6 +95,7 @@ export default async function MemoryPage({
       </PageContainer>
     );
   } catch (error) {
+    console.error('MemoryPage: Error loading memory:', error);
     notFound();
   }
 }
