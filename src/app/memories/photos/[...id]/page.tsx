@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
+import PhotoImage from '@/components/PhotoImage';
 import type { MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
@@ -92,10 +92,12 @@ export default async function PhotoPage({
 
         {/* Photo Display */}
         <div className="flex justify-center">
-          <img
-            src={cldUrl(photo.public_id, { w: 1200 })}
+          <PhotoImage
+            publicId={photo.public_id}
             alt={photo.caption || 'Photo'}
             className="max-w-full h-auto rounded-lg shadow-lg"
+            width={1200}
+            quality="auto"
           />
         </div>
       </PageContainer>
