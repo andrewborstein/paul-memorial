@@ -29,7 +29,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
     setIsLoaded(true);
   }, [memory.email]);
 
-  const displayTitle = memory.title || memory.name;
+  const displayTitle = memory.title || (isCurrentUser ? 'You' : memory.name);
   const bodyText = memory.body || '';
   const truncatedBody = bodyText.length > 200 
     ? bodyText.substring(0, 200).trim() + '...'
