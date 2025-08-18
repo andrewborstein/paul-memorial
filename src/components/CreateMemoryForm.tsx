@@ -487,7 +487,7 @@ export default function CreateMemoryForm() {
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {photos.map((p, i) => (
-              <div key={i} className="border rounded-lg p-2 relative">
+              <div key={i} className="border rounded-lg p-2 relative w-fit">
                 <div className="relative">
                   <img
                     ref={(el) => {
