@@ -2,14 +2,14 @@ import Link from 'next/link';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
+import { serverFetch } from '@/lib/utils';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/memories`, {
+  const res = await serverFetch('/api/memories', {
     next: { revalidate: 60 },
   });
   if (!res.ok) return [];

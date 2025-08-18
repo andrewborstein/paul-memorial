@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { headers } from 'next/headers';
 
 export function emailHash(email: string) {
   return crypto
@@ -16,4 +17,17 @@ export function youtubeId(url: string) {
   } catch {
     return '';
   }
+}
+
+/**
+ * Server-side fetch utility that automatically resolves the correct base URL
+ * for the current environment (localhost, vercel.app, custom domain, etc.)
+ */
+export async function serverFetch(path: string, options?: RequestInit): Promise<Response> {
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+  const baseUrl = `${protocol}://${host}`;
+  
+  return fetch(`${baseUrl}${path}`, options);
 }

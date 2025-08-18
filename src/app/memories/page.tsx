@@ -1,20 +1,15 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
+import { serverFetch } from '@/lib/utils';
 import type { MemoryIndexItem } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-  const baseUrl = `${protocol}://${host}`;
-  
-  const res = await fetch(`${baseUrl}/api/memories`, {
+  const res = await serverFetch('/api/memories', {
     next: { revalidate: 60 },
   });
   if (!res.ok) return [];

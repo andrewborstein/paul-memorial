@@ -2,14 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
+import { serverFetch } from '@/lib/utils';
 import type { MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
 async function getPhotoData(photoId: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/photo/${photoId}`, {
+  const res = await serverFetch(`/api/photo/${photoId}`, {
     next: { revalidate: 60 },
   });
   if (!res.ok) throw new Error('Not found');

@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
+import { serverFetch } from '@/lib/utils';
 import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const res = await fetch(`/api/memories`, {
+  const res = await serverFetch('/api/memories', {
     next: { revalidate: 60 },
   });
   if (!res.ok) return [];
@@ -16,7 +17,7 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
 }
 
 async function getMemoryDetail(id: string): Promise<MemoryDetail | null> {
-  const res = await fetch(`/api/memory/${id}`, {
+  const res = await serverFetch(`/api/memory/${id}`, {
     next: { revalidate: 60 },
   });
   if (!res.ok) return null;

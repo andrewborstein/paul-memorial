@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
+import { serverFetch } from '@/lib/utils';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -11,12 +11,7 @@ export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
   console.log('getMemory: Fetching memory with ID:', id);
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-  const baseUrl = `${protocol}://${host}`;
-  
-  const res = await fetch(`${baseUrl}/api/memory/${id}`, {
+  const res = await serverFetch(`/api/memory/${id}`, {
     next: { revalidate: 60 },
   });
   console.log('getMemory: Response status:', res.status);
