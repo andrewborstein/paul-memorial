@@ -79,10 +79,11 @@ export default function RootLayout({
             </span>
           </div>
         </footer>
-        <Script
+        {/* Temporarily disabled to debug React error */}
+        {/* <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           strategy="beforeInteractive"
-        />
+        /> */}
       </body>
     </html>
   );

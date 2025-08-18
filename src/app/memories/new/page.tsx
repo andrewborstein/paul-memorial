@@ -11,18 +11,20 @@ export default function NewMemoryPage() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{
     current: number;
     total: number;
     message: string;
   } | null>(null);
 
+  // Temporarily disabled Turnstile
+  // const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
   useEffect(() => {
-    // Add global callback for Turnstile
-    (window as any).turnstileCallback = (token: string) => {
-      setTurnstileToken(token);
-    };
+    // Temporarily disabled Turnstile
+    // (window as any).turnstileCallback = (token: string) => {
+    //   setTurnstileToken(token);
+    // };
   }, []);
 
   async function uploadToCloudinary(files: FileList, memoryId: string) {
@@ -140,7 +142,7 @@ export default function NewMemoryPage() {
           email,
           title: title || undefined,
           body: hasText ? body : '',
-          'cf-turnstile-response': turnstileToken,
+          // 'cf-turnstile-response': turnstileToken, // Temporarily disabled
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -156,7 +158,7 @@ export default function NewMemoryPage() {
       setEmail('');
       setTitle('');
       setBody('');
-      setTurnstileToken(null);
+      // setTurnstileToken(null); // Temporarily disabled
       setUploadProgress(null);
       if (document.getElementById('file') as HTMLInputElement) {
         (document.getElementById('file') as HTMLInputElement).value = '';
@@ -328,7 +330,8 @@ export default function NewMemoryPage() {
         </div>
 
         {/* Turnstile */}
-        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+        {/* Temporarily disabled to debug React error */}
+        {/* {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
           <div className="flex justify-start">
             <div
               className="cf-turnstile"
@@ -336,7 +339,7 @@ export default function NewMemoryPage() {
               data-callback="turnstileCallback"
             />
           </div>
-        )}
+        )} */}
 
         <div className="pt-4">
           <button
