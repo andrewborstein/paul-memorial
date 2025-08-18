@@ -25,17 +25,9 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
 
   useEffect(() => {
     const currentUser = getCurrentUser();
-    const isUser = currentUser?.email === memory.email;
-    console.log('MemoryCard Debug:', {
-      memoryId: memory.id,
-      memoryEmail: memory.email,
-      currentUserEmail: currentUser?.email,
-      isCurrentUser: isUser,
-      memoryName: memory.name
-    });
-    setIsCurrentUser(isUser);
+    setIsCurrentUser(currentUser?.email === memory.email);
     setIsLoaded(true);
-  }, [memory.email, memory.id, memory.name]);
+  }, [memory.email]);
 
   const displayTitle = memory.title || (isCurrentUser ? 'You' : memory.name);
   const bodyText = memory.body || '';
