@@ -187,6 +187,7 @@ export default function CreateMemoryForm({
   >(null);
   const [showTitleField, setShowTitleField] = React.useState(false);
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
+  const [isDragging, setIsDragging] = React.useState(false);
 
   // Initialize form with current user data if signed in
   React.useEffect(() => {
@@ -198,6 +199,15 @@ export default function CreateMemoryForm({
       }
     }
   }, [isEditMode]);
+
+  // Auto-resize textarea as content is added
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.max(120, textarea.scrollHeight)}px`;
+    }
+  }, [body]);
 
   const handleSignIn = (name: string, email: string) => {
     // Store in localStorage first
@@ -220,6 +230,7 @@ export default function CreateMemoryForm({
   };
   const errorRef = React.useRef<HTMLDivElement>(null);
   const imageRefs = React.useRef<{ [key: string]: HTMLImageElement }>({});
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   function onSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -650,8 +661,9 @@ export default function CreateMemoryForm({
         {/* Memory input with integrated actions */}
         <div className="border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
           <textarea
+            ref={textareaRef}
             id="body"
-            className="w-full px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-0 resize-none"
+            className="w-full px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-0 resize-y min-h-[120px]"
             placeholder="What will you remember about Paul?"
             value={body}
             onChange={(e) => {
@@ -661,7 +673,7 @@ export default function CreateMemoryForm({
                 setErrors([]);
               }
             }}
-            rows={6}
+            rows={3}
             required
           />
 
