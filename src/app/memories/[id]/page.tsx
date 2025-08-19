@@ -13,25 +13,11 @@ import type { MemoryDetail } from '@/types/memory';
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
-async function getMemory(
-  id: string,
-  fresh?: boolean,
-  t?: string
-): Promise<MemoryDetail> {
-  console.log(
-    'getMemory: Fetching memory with ID:',
-    id,
-    'fresh:',
-    fresh,
-    't:',
-    t
-  );
-  const qs = new URLSearchParams();
-  if (fresh) qs.set('fresh', '1');
-  if (t) qs.set('t', t);
-  const url = qs.toString() ? `/api/memory/${id}?${qs}` : `/api/memory/${id}`;
+async function getMemory(id: string, t?: string): Promise<MemoryDetail> {
+  console.log('getMemory: Fetching memory with ID:', id, 't:', t);
+  const url = t ? `/api/memory/${id}?t=${t}` : `/api/memory/${id}`;
   const res = await serverFetch(url, {
-    cache: fresh ? 'no-store' : 'default',
+    cache: 'no-store',
   });
   console.log('getMemory: Response status:', res.status);
   if (!res.ok) {
@@ -48,23 +34,15 @@ export default async function MemoryPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ fresh?: string; t?: string }>;
+  searchParams?: Promise<{ t?: string }>;
 }) {
   const { id } = await params;
   const params2 = await searchParams;
-  const fresh = params2?.fresh === '1';
   const t = params2?.t;
-  console.log(
-    'MemoryPage: Attempting to load memory with ID:',
-    id,
-    'fresh:',
-    fresh,
-    't:',
-    t
-  );
+  console.log('MemoryPage: Attempting to load memory with ID:', id, 't:', t);
 
   try {
-    const memory = await getMemory(id, fresh, t);
+    const memory = await getMemory(id, t);
     console.log('MemoryPage: Successfully loaded memory:', memory.id);
     const displayTitle = memory.title || memory.name;
 

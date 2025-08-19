@@ -25,7 +25,7 @@ export default function MemoryActions({
   useEffect(() => {
     const canEditResult = canEditMemory(creatorEmail);
     const isSuperResult = isSuperUser();
-    
+
     setCanEdit(canEditResult);
     setIsSuper(isSuperResult);
     setIsLoaded(true);
@@ -63,7 +63,7 @@ export default function MemoryActions({
       });
 
       console.log('Delete response status:', res.status);
-      
+
       if (res.ok) {
         console.log('Memory deleted successfully, redirecting...');
         // Force a full page reload to ensure cache is cleared

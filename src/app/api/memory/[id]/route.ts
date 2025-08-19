@@ -16,13 +16,12 @@ export async function GET(
   try {
     const { id } = await params;
     const { searchParams } = new URL(req.url);
-    const fresh = searchParams.get('fresh') === '1';
     const t = searchParams.get('t') || undefined;
 
-    console.log('Attempting to fetch memory:', id, 'fresh:', fresh, 't:', t);
+    console.log('Attempting to fetch memory:', id, 't:', t);
 
     // Try current id
-    let doc = await readMemory(id, { forceFresh: fresh, updated_at: t });
+    let doc = await readMemory(id, { forceFresh: true, updated_at: t });
     console.log('Tried to read memory directly:', id, 'found:', !!doc);
 
     // If missing, check redirect pointer
@@ -39,7 +38,7 @@ export async function GET(
       if (ptr?.id) {
         console.log('Found redirect pointer:', id, '->', ptr.id);
         doc = await readMemory(ptr.id, {
-          forceFresh: fresh,
+          forceFresh: true,
           updated_at: t || ptr.updated_at,
         });
         console.log('Read memory via redirect:', ptr.id, 'found:', !!doc);
@@ -60,10 +59,7 @@ export async function GET(
       doc.photos?.map((p) => p.public_id).slice(0, 3)
     );
     const response = Response.json(doc);
-    response.headers.set(
-      'Cache-Control',
-      fresh ? 'no-store' : 's-maxage=60, stale-while-revalidate=300'
-    );
+    response.headers.set('Cache-Control', 'no-store');
     return response;
   } catch (error) {
     console.error('Error fetching memory:', error);
