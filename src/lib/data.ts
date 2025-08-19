@@ -150,6 +150,8 @@ export async function immutableUpdateMemory(
     'from old ID:',
     oldId,
     'photos:',
+    newDoc.photos?.length,
+    'index item created with photo_count:',
     newDoc.photos?.length
   );
 

@@ -23,6 +23,14 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  console.log('MemoryCard render:', {
+    id: memory.id,
+    photo_count: memory.photo_count,
+    cover_public_id: memory.cover_public_id,
+    title: memory.title,
+    name: memory.name,
+  });
+
   useEffect(() => {
     const currentUser = getCurrentUser();
     setIsCurrentUser(currentUser?.email === memory.email);
@@ -91,7 +99,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
                 quality="auto"
               />
               {memory.photo_count > 1 && (
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-10">
                   <span className="text-white text-xs font-medium">
                     +{memory.photo_count - 1}
                   </span>
