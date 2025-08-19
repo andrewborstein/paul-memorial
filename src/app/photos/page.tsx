@@ -60,6 +60,9 @@ export default async function PhotosPage() {
     const displayPhotos = allPhotos.slice(0, 10);
     const hasMorePhotos = allPhotos.length > 10;
 
+    const displayTitle = (memory: MemoryIndexItem) =>
+      memory.title?.trim() || memory.body?.trim() || '';
+
     return (
       <PageContainer>
         <PageHeader
@@ -129,8 +132,8 @@ export default async function PhotosPage() {
                       className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group"
                     >
                       <div className="p-4">
-                        <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors">
-                          {memory.title}
+                        <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">
+                          {displayTitle(memory)}
                         </h3>
                         <p className="text-xs text-gray-500">
                           {memory.photo_count} photo
