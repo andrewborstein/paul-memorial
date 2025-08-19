@@ -1,5 +1,10 @@
 import { createMemory } from '@/lib/data';
-import { cldUrl, warmUpImages, getHeroImageUrl, getGridImageUrl } from '@/lib/cloudinary';
+import {
+  cldUrl,
+  warmUpImages,
+  getHeroImageUrl,
+  getGridImageUrl,
+} from '@/lib/cloudinary';
 
 type PhotoInput = {
   public_id: string;
@@ -46,6 +51,7 @@ export async function POST(req: Request) {
         taken_at: p.taken_at ?? null,
         sort_index: i,
       })),
+      ...(body.created_at && { created_at: body.created_at }),
     };
 
     console.log('Creating memory with data:', JSON.stringify(detail, null, 2));
@@ -59,9 +65,11 @@ export async function POST(req: Request) {
         // Hero image (first photo)
         getHeroImageUrl(createdMemory.photos[0].public_id),
         // Grid images (first few photos)
-        ...createdMemory.photos.slice(0, 3).map(photo => getGridImageUrl(photo.public_id))
+        ...createdMemory.photos
+          .slice(0, 3)
+          .map((photo) => getGridImageUrl(photo.public_id)),
       ];
-      
+
       // Fire off warm-up requests in background (don't await)
       warmUpImages(warmUpUrls);
       console.log('Warming up', warmUpUrls.length, 'image URLs');

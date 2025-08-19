@@ -110,11 +110,7 @@ export async function createMemory(
     title: payload.title,
     name: payload.name,
     email: payload.email,
-    body: payload.body?.length
-      ? payload.body.length > 200
-        ? payload.body.slice(0, 200).trim() + '…'
-        : payload.body
-      : '',
+    body: payload.body || '',
     created_at: payload.created_at,
     updated_at: payload.updated_at,
     photo_count: payload.photos?.length ?? 0,

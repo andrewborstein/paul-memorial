@@ -22,6 +22,7 @@ interface MemoryCardProps {
 export default function MemoryCard({ memory }: MemoryCardProps) {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   console.log('MemoryCard render:', {
     id: memory.id,
@@ -41,11 +42,11 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
   // Only show title if it's explicitly set and not empty
   const displayTitle = memory.title?.trim() || undefined;
   const bodyText = memory.body || '';
+  const needsTruncation = bodyText.length > 1000;
   const truncatedBody =
-    bodyText.length > 200
-      ? bodyText.substring(0, 200).trim() + '...'
+    bodyText.length > 1000
+      ? bodyText.substring(0, 1000).trim() + '...'
       : bodyText;
-  const needsTruncation = bodyText.length > 200;
 
   const cardClasses =
     isLoaded && isCurrentUser
@@ -58,33 +59,46 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
       href={`/memories/${memory.id}`}
       className={cardClasses}
     >
+      {/* Name and Date Row */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-gray-900">
+          {memory.name || 'Anonymous'}
+        </p>
+        <MemoryMetadata
+          date={memory.created_at}
+          creatorEmail={memory.email || ''}
+          creatorName={memory.name || ''}
+        />
+      </div>
+
       <div className="flex gap-6">
         {/* Text Content */}
         <div className="flex-1 min-w-0">
+          {/* Title */}
           {displayTitle && (
-            <header className="mb-3">
-              <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                {displayTitle}
-              </h2>
-            </header>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+              {displayTitle}
+            </h2>
           )}
 
           {/* Memory Body */}
           <div className="text-gray-700 mb-3">
-            <p className="whitespace-pre-wrap">{truncatedBody}</p>
+            <p className="whitespace-pre-wrap">
+              {isExpanded ? bodyText : truncatedBody}
+            </p>
             {needsTruncation && (
-              <span className="text-blue-600 group-hover:text-blue-800 font-medium text-sm mt-2 inline-block">
-                Read more
-              </span>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm mt-2"
+              >
+                {isExpanded ? 'Show less' : 'Read more'}
+              </button>
             )}
           </div>
-
-          {/* Metadata */}
-          <MemoryMetadata
-            date={memory.created_at}
-            creatorEmail={memory.email || ''}
-            creatorName={memory.name || ''}
-          />
         </div>
 
         {/* Photo Thumbnail */}

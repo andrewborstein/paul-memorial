@@ -39,14 +39,7 @@ export default function MemoryMetadata({
 
   return (
     <div className="flex items-center gap-2 text-xs flex-wrap">
-      <span
-        className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-          isCurrentUser
-            ? 'bg-blue-100 text-blue-700'
-            : 'bg-gray-100 text-gray-700'
-        }`}
-      >
-        {creatorName},{' '}
+      <span className="text-gray-500 text-xs">
         {new Date(date).toLocaleDateString('en-US', {
           month: 'numeric',
           day: 'numeric',
