@@ -21,6 +21,10 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body className="flex flex-col min-h-screen">
         <SuperUserBanner />
         <header className="border-b">
