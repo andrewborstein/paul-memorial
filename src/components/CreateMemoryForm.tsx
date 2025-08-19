@@ -3,6 +3,7 @@ import React from 'react';
 import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
 import ContactInfoModal from './ContactInfoModal';
+import UserStatusDisplay from './UserStatusDisplay';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
 import { setCurrentUser, getCurrentUser, isSignedIn } from '@/lib/user';
@@ -695,30 +696,15 @@ export default function CreateMemoryForm({
         </div>
       )}
 
-      {/* User Status - only show if signed in */}
-      {isSignedIn() && (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Signed in as
-          </label>
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700">
-              <span className="font-medium">{name}</span>
-              <span className="text-blue-600 ml-2">({email})</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setShowSignInModal(true);
-                setPendingSubmission(null);
-              }}
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
-            >
-              Edit contact info
-            </button>
-          </div>
-        </div>
-      )}
+      {/* User Status Display */}
+      <UserStatusDisplay
+        name={name}
+        email={email}
+        onEditContactInfo={() => {
+          setShowSignInModal(true);
+          setPendingSubmission(null);
+        }}
+      />
 
       <div>
         <label
