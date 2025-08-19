@@ -61,9 +61,12 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
   };
 
   return (
-    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-3 2xl:columns-4 gap-6 space-y-6">
+    <div className="flex flex-wrap justify-center gap-6">
       {memories.map((memory) => (
-        <div key={memory.id} className="break-inside-avoid mb-6">
+        <div
+          key={memory.id}
+          className="w-full sm:w-80 lg:w-80 xl:w-80 2xl:w-80 mb-6"
+        >
           <Link
             href={`/memories/${memory.id}`}
             className={getCardClasses(memory.id)}
