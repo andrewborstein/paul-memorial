@@ -1,7 +1,5 @@
-import { nanoid } from 'nanoid';
-import { writeMemory, writeIndexItem } from '@/lib/data';
+import { createMemory } from '@/lib/data';
 import { cldUrl } from '@/lib/cloudinary';
-import { revalidatePath, revalidateTag } from 'next/cache';
 
 type PhotoInput = {
   public_id: string;
@@ -27,7 +25,6 @@ export async function POST(req: Request) {
       return new Response('Memory is required', { status: 400 });
     }
 
-    const id = `mem_${nanoid(10)}`;
     const photos: PhotoInput[] = (body.photos || [])
       .filter(
         (p: PhotoInput) =>
@@ -39,11 +36,9 @@ export async function POST(req: Request) {
       );
 
     const detail = {
-      id,
       name: String(body.name).slice(0, 100),
       email: String(body.email).slice(0, 100),
       title: body.title?.trim() ? String(body.title).slice(0, 200) : undefined,
-      date: body.date ?? new Date().toISOString(),
       body: String(body.body).slice(0, 5000),
       photos: photos.map((p, i) => ({
         public_id: p.public_id,
@@ -53,37 +48,15 @@ export async function POST(req: Request) {
       })),
     };
 
-    console.log('Creating memory with ID:', id);
-    console.log('Memory detail:', JSON.stringify(detail, null, 2));
+    console.log('Creating memory with data:', JSON.stringify(detail, null, 2));
 
-    // Write detail first
-    await writeMemory(detail);
-    console.log('Memory detail written successfully');
+    const createdMemory = await createMemory(detail);
+    console.log('Memory created successfully with ID:', createdMemory.id);
 
-    // Write index item (no race condition - each memory writes its own file)
-    await writeIndexItem({
-      id: detail.id,
-      title: detail.title,
-      date: detail.date,
-      cover_public_id: detail.photos[0]?.public_id,
-      photo_count: detail.photos.length,
-      body: detail.body?.length
-        ? detail.body.length > 200
-          ? detail.body.slice(0, 200).trim() + '…'
-          : detail.body
-        : '',
-      name: detail.name || '',
-      email: detail.email || '',
-    });
-    console.log('Index item written successfully');
-
-    // Immediately purge all caches
-    revalidateTag('memories-index');
-    revalidatePath('/');
-    revalidatePath('/memories');
-    revalidatePath('/api/memories');
-
-    return Response.json({ id: detail.id }, { status: 201 });
+    return Response.json(
+      { id: createdMemory.id, updated_at: createdMemory.updated_at },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating memory:', error);
     return new Response('Internal server error', { status: 500 });

@@ -12,7 +12,7 @@ interface MemoryCardProps {
     title?: string;
     name?: string;
     email?: string;
-    date: string;
+    created_at: string;
     body?: string;
     cover_public_id?: string;
     photo_count: number;
@@ -73,7 +73,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
 
           {/* Metadata */}
           <MemoryMetadata
-            date={memory.date}
+            date={memory.created_at}
             creatorEmail={memory.email || ''}
             creatorName={memory.name || ''}
           />

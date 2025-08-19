@@ -515,7 +515,7 @@ export default function CreateMemoryForm({
       email,
       title: title.trim() || undefined, // Only send if not empty
       body,
-      date: isEditMode ? memory!.date : new Date().toISOString(),
+      // date field removed - using created_at and updated_at instead
       photos: photos
         .map((p, i) => ({
           public_id: p.public_id!,
@@ -546,7 +546,7 @@ export default function CreateMemoryForm({
       return;
     }
 
-    const { id } = await r.json();
+    const { id, updated_at } = await r.json();
 
     // Set current user in localStorage when creating a new memory
     if (!isEditMode) {
@@ -554,11 +554,11 @@ export default function CreateMemoryForm({
     }
 
     if (isEditMode) {
-      // Redirect to memory page with fresh parameter to bypass cache
-      window.location.href = `/memories/${id}?fresh=1`;
+      // Redirect to memory page with updated_at timestamp for cache busting
+      window.location.href = `/memories/${id}?fresh=1&t=${updated_at}`;
     } else {
-      // Redirect to memories page with fresh parameter to bypass cache
-      window.location.href = '/memories?fresh=1';
+      // Redirect to memories page with updated_at timestamp for cache busting
+      window.location.href = `/memories?fresh=1&t=${updated_at}`;
     }
   }
 

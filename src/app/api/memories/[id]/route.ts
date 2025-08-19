@@ -1,28 +1,32 @@
 import type { MemoryDetail } from '@/types/memory';
-
-import { readBlobJson } from '@/lib/data';
+import { readMemory } from '@/lib/data';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const fresh = new URL(req.url).searchParams.get('fresh') === '1';
-  // First fetch once (no cb) to read date
-  const doc = await readBlobJson<MemoryDetail>(`memories/${params.id}.json`);
-  if (!doc) return new Response('Not found', { status: 404 });
+  try {
+    const { id } = await params;
+    const { searchParams } = new URL(req.url);
+    const fresh = searchParams.get('fresh') === '1';
 
-  // If fresh, refetch once with deterministic cb=date
-  const finalDoc =
-    fresh && doc.date
-      ? await readBlobJson<MemoryDetail>(`memories/${params.id}.json`, {
-          cb: doc.date,
-        })
-      : doc;
+    console.log('Attempting to fetch memory:', id, 'fresh:', fresh);
 
-  const res = Response.json(finalDoc);
-  res.headers.set(
-    'Cache-Control',
-    fresh ? 'no-store' : 's-maxage=60, stale-while-revalidate=300'
-  );
-  return res;
+    const doc = await readMemory(id, { forceFresh: fresh });
+    if (!doc) {
+      console.log('Memory not found:', id);
+      return new Response('Not found', { status: 404 });
+    }
+
+    console.log('Successfully fetched memory:', id);
+    const response = Response.json(doc);
+    response.headers.set(
+      'Cache-Control',
+      fresh ? 'no-store' : 's-maxage=60, stale-while-revalidate=300'
+    );
+    return response;
+  } catch (error) {
+    console.error('Error fetching memory:', error);
+    return new Response('Internal server error', { status: 500 });
+  }
 }

@@ -1,12 +1,13 @@
 export type MemoryIndexItem = {
   id: string;
   title?: string; // Optional - only if explicitly set
-  date: string; // ISO
   cover_public_id?: string; // derived from first photo
   photo_count: number;
   body?: string; // truncated body text
   name?: string; // person's name
   email?: string; // person's email
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 };
 
 export type MemoryPhoto = {
@@ -21,7 +22,8 @@ export type MemoryDetail = {
   name: string;
   email: string;
   title?: string; // Optional - if not provided, use name
-  date: string; // ISO
   body: string;
   photos: MemoryPhoto[];
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 };

@@ -1,26 +1,27 @@
 import { list, put, del, ListBlobResult } from '@vercel/blob';
+import { randomUUID } from 'crypto';
 import type { MemoryDetail, MemoryIndexItem } from '@/types/memory';
 
 const BLOB_PREFIX = process.env.BLOB_PREFIX || '';
 const INDEX_ITEM_PREFIX = 'index-items';
+const REDIRECT_PREFIX = 'redirects'; // oldId -> newId pointer
 
-function k(key: string, prefix = BLOB_PREFIX) {
-  return prefix ? `${prefix}/${key}` : key;
-}
+const k = (key: string) => (BLOB_PREFIX ? `${BLOB_PREFIX}/${key}` : key);
+
+type BlobFile = { pathname: string; downloadUrl: string };
+type Page = { blobs: BlobFile[]; cursor?: string };
 
 export async function readBlobJson<T>(
   key: string,
-  opts?: { forceFresh?: boolean; cb?: string } // cb lets you pass updated_at
+  opts?: { forceFresh?: boolean; cb?: string; updated_at?: string }
 ): Promise<T | null> {
   const token =
     process.env.BLOB_READ_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return null;
 
   const target = k(key);
-
-  // paginate until we find an exact match
-  let cursor: string | undefined = undefined;
-  let file: { downloadUrl: string; pathname: string } | undefined;
+  let cursor: string | undefined;
+  let file: BlobFile | undefined;
 
   do {
     const page: ListBlobResult = await list({ prefix: target, cursor, token });
@@ -30,13 +31,13 @@ export async function readBlobJson<T>(
 
   if (!file) return null;
 
-  // cache-bust the Blob CDN hop when "fresh" or explicit cb provided
   const url = new URL(file.downloadUrl);
-  const cacheBuster =
-    opts?.cb || (opts?.forceFresh ? Date.now().toString() : '');
-  if (cacheBuster) url.searchParams.set('cb', cacheBuster);
+  const cb =
+    opts?.cb ||
+    opts?.updated_at ||
+    (opts?.forceFresh ? Date.now().toString() : '');
+  if (cb) url.searchParams.set('cb', cb);
 
-  // first hop: don't let node/RSC cache this request
   const r = await fetch(url.toString(), { cache: 'no-store' });
   if (!r.ok) return null;
   return (await r.json()) as T;
@@ -56,7 +57,10 @@ async function writeBlobJson(key: string, value: unknown) {
 }
 
 // Existing detail helpers
-export async function readMemory(id: string, opts?: { forceFresh?: boolean }) {
+export async function readMemory(
+  id: string,
+  opts?: { forceFresh?: boolean; updated_at?: string }
+) {
   return await readBlobJson<MemoryDetail>(`memories/${id}.json`, opts);
 }
 
@@ -76,6 +80,78 @@ export async function deleteMemory(id: string) {
 // ✅ New: per-item index summaries
 export async function writeIndexItem(item: MemoryIndexItem) {
   await writeBlobJson(`${INDEX_ITEM_PREFIX}/${item.id}.json`, item);
+}
+
+export async function deleteMemoryAndIndex(id: string) {
+  const token =
+    process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) throw new Error('No Blob write token');
+  await del(k(`memories/${id}.json`), { token }).catch(() => {});
+  await del(k(`${INDEX_ITEM_PREFIX}/${id}.json`), { token }).catch(() => {});
+}
+
+export async function createMemory(
+  doc: Omit<MemoryDetail, 'id' | 'created_at' | 'updated_at'> & {
+    created_at?: string;
+  }
+) {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  const payload: MemoryDetail = {
+    ...doc,
+    id,
+    created_at: doc.created_at ?? now,
+    updated_at: now,
+  };
+  await writeBlobJson(`memories/${id}.json`, payload);
+
+  const indexItem: MemoryIndexItem = {
+    id,
+    title: payload.title,
+    name: payload.name,
+    email: payload.email,
+    body: payload.body?.length
+      ? payload.body.length > 200
+        ? payload.body.slice(0, 200).trim() + '…'
+        : payload.body
+      : '',
+    created_at: payload.created_at,
+    updated_at: payload.updated_at,
+    photo_count: payload.photos?.length ?? 0,
+    cover_public_id: payload.photos?.[0]?.public_id,
+  };
+  await writeIndexItem(indexItem);
+
+  return payload;
+}
+
+export async function immutableUpdateMemory(
+  oldId: string,
+  changes: Partial<MemoryDetail>
+) {
+  // read the old doc (fresh) to keep created_at
+  const oldDoc = await readBlobJson<MemoryDetail>(`memories/${oldId}.json`, {
+    forceFresh: true,
+  });
+  if (!oldDoc) throw new Error('Old memory not found');
+
+  const { id, created_at, updated_at, ...oldDocWithoutIds } = oldDoc;
+  const newDoc = await createMemory({
+    ...oldDocWithoutIds,
+    ...changes,
+    created_at: oldDoc.created_at, // preserve
+  });
+
+  // optional: write a redirect pointer oldId -> newId
+  await writeBlobJson(`${REDIRECT_PREFIX}/${oldId}.json`, {
+    id: newDoc.id,
+    updated_at: newDoc.updated_at,
+  });
+
+  // remove old artifacts
+  await deleteMemoryAndIndex(oldId);
+
+  return newDoc;
 }
 
 export async function aggregateIndex(opts?: { forceFresh?: boolean }) {
@@ -110,6 +186,8 @@ export async function aggregateIndex(opts?: { forceFresh?: boolean }) {
   } while (cursor);
 
   // Sort newest first (ISO date)
-  all.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  all.sort((a, b) =>
+    a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0
+  );
   return all;
 }
