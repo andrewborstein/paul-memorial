@@ -260,7 +260,9 @@ export default function CreateMemoryForm({
   );
   const [errors, setErrors] = React.useState<string[]>([]);
   const [showSignInModal, setShowSignInModal] = React.useState(false);
-  const [pendingSubmission, setPendingSubmission] = React.useState<(() => void) | null>(null);
+  const [pendingSubmission, setPendingSubmission] = React.useState<
+    (() => void) | null
+  >(null);
 
   // Initialize form with current user data if signed in
   React.useEffect(() => {
@@ -278,7 +280,7 @@ export default function CreateMemoryForm({
     setName(name);
     setEmail(email);
     setShowSignInModal(false);
-    
+
     // Continue with the pending submission
     if (pendingSubmission) {
       pendingSubmission();
@@ -672,7 +674,8 @@ export default function CreateMemoryForm({
   }
 
   return (
-    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+    <>
+      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
       {/* Validation Errors */}
       {errors.length > 0 && (
         <div
@@ -691,12 +694,12 @@ export default function CreateMemoryForm({
         </div>
       )}
 
-      {/* User Status */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Signed in as
-        </label>
-        {isSignedIn() ? (
+      {/* User Status - only show if signed in */}
+      {isSignedIn() && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Signed in as
+          </label>
           <div className="flex items-center gap-3">
             <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700">
               <span className="font-medium">{name}</span>
@@ -713,22 +716,8 @@ export default function CreateMemoryForm({
               Edit
             </button>
           </div>
-        ) : (
-          <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600">
-            <span>Not signed in</span>
-            <button
-              type="button"
-              onClick={() => {
-                setShowSignInModal(true);
-                setPendingSubmission(null);
-              }}
-              className="ml-2 text-blue-600 hover:text-blue-800 underline"
-            >
-              Sign in
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div>
         <label
@@ -876,18 +865,19 @@ export default function CreateMemoryForm({
           />
         </div>
       )}
-
-      {/* Sign In Modal */}
-      <SignInModal
-        isOpen={showSignInModal}
-        onClose={() => {
-          setShowSignInModal(false);
-          setPendingSubmission(null);
-        }}
-        onSubmit={handleSignIn}
-        title="Sign in to share your memory"
-        description="Please enter your name and email to share this memory. Your email will not be displayed publicly."
-      />
     </form>
+
+    {/* Sign In Modal - outside the form to avoid nested forms */}
+    <SignInModal
+      isOpen={showSignInModal}
+      onClose={() => {
+        setShowSignInModal(false);
+        setPendingSubmission(null);
+      }}
+      onSubmit={handleSignIn}
+      title="Sign in to share your memory"
+      description="Please enter your name and email to share this memory. Your email will not be displayed publicly."
+    />
+    </>
   );
 }
