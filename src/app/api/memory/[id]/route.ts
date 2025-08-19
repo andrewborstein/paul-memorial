@@ -1,9 +1,13 @@
 import {
   readMemory,
   immutableUpdateMemory,
-  deleteMemory,
+  deleteMemoryAndIndex,
   readBlobJson,
 } from '@/lib/data';
+import { del } from '@vercel/blob';
+
+const k = (key: string) =>
+  process.env.BLOB_PREFIX ? `${process.env.BLOB_PREFIX}/${key}` : key;
 
 export async function GET(
   req: Request,
@@ -116,17 +120,51 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Read the memory to verify it exists
-    const memory = await readMemory(id);
+    console.log('Attempting to delete memory:', id);
+
+    // Try to read the memory directly first
+    let memory = await readMemory(id);
+    let actualId = id;
+
+    // If not found, check for redirect pointer
     if (!memory) {
+      console.log(
+        'Memory not found directly, checking redirect pointer for:',
+        id
+      );
+      const ptr = await readBlobJson<{ id: string; updated_at?: string }>(
+        `redirects/${id}.json`,
+        { forceFresh: true }
+      );
+      if (ptr?.id) {
+        console.log('Found redirect pointer:', id, '->', ptr.id);
+        memory = await readMemory(ptr.id);
+        actualId = ptr.id;
+      }
+    }
+
+    if (!memory) {
+      console.log('Memory not found:', id);
       return new Response('Memory not found', { status: 404 });
     }
+
+    console.log('Found memory to delete:', actualId);
 
     // TODO: Add authentication/authorization here
     // For now, allow deletion (we'll add proper auth later)
 
     // Delete the memory detail file and index item
-    await deleteMemory(id);
+    await deleteMemoryAndIndex(actualId);
+
+    // Also delete the redirect pointer if it exists
+    if (actualId !== id) {
+      const token =
+        process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+      if (token) {
+        await del(k(`redirects/${id}.json`), { token }).catch(() => {});
+        console.log('Deleted redirect pointer:', id);
+      }
+    }
 
     // TODO: Delete photos from Cloudinary
     // For now, just remove from index and memory file
