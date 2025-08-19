@@ -25,6 +25,44 @@ interface CreateMemoryFormProps {
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
+// Image resizing utility
+function resizeImage(file: File, maxWidth: number, quality: number): Promise<File> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    
+    img.onload = () => {
+      // Calculate new dimensions
+      const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+      const newWidth = img.width * ratio;
+      const newHeight = img.height * ratio;
+      
+      // Set canvas size
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      
+      // Draw resized image
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+      
+      // Convert to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const resizedFile = new File([blob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          });
+          resolve(resizedFile);
+        } else {
+          resolve(file); // Fallback to original
+        }
+      }, 'image/jpeg', quality);
+    };
+    
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 // Photo item component
 function PhotoItem({
   photo,
@@ -370,8 +408,15 @@ export default function CreateMemoryForm({
   }
 
   async function uploadOne(ps: PhotoState): Promise<string> {
+    // Resize large images before upload
+    let fileToUpload = ps.file;
+    if (ps.file.size > 10 * 1024 * 1024) { // 10MB limit
+      console.log('Resizing large image:', ps.file.name, 'Size:', ps.file.size);
+      fileToUpload = await resizeImage(ps.file, 1920, 0.8); // Max 1920px width, 80% quality
+    }
+
     const fd = new FormData();
-    fd.append('file', ps.file);
+    fd.append('file', fileToUpload);
     fd.append('upload_preset', PRESET);
     fd.append('folder', 'memories');
 
