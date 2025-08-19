@@ -2,7 +2,7 @@
 import React from 'react';
 import pLimit from 'p-limit';
 import { Turnstile } from '@marsidev/react-turnstile';
-import SignInModal from './SignInModal';
+import ContactInfoModal from './ContactInfoModal';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
 import { setCurrentUser, getCurrentUser, isSignedIn } from '@/lib/user';
@@ -714,7 +714,7 @@ export default function CreateMemoryForm({
               }}
               className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
-              Edit
+              Edit contact info
             </button>
           </div>
         </div>
@@ -868,16 +868,16 @@ export default function CreateMemoryForm({
       )}
     </form>
 
-          {/* Sign In Modal - outside the form to avoid nested forms */}
-      <SignInModal
+          {/* Contact Info Modal - outside the form to avoid nested forms */}
+      <ContactInfoModal
         isOpen={showSignInModal}
         onClose={() => {
           setShowSignInModal(false);
           setPendingSubmission(null);
         }}
         onSubmit={handleSignIn}
-        title="Sign in to share your memory"
-        description="Your memory is ready to publish! Please enter your name and email to continue. Your email will not be displayed publicly."
+        title="Contact info"
+        description="Your memory is ready to publish! Please provide your contact information to continue."
       />
     </>
   );
