@@ -60,43 +60,53 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentMemories.map((memory) => (
-                <Link
-                  key={memory.id}
-                  href={`/memories/${memory.id}`}
-                  className="block"
-                >
-                  <article className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow group">
-                    <div className="flex gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                          {memory.title || memory.name || 'Untitled'}
-                        </h3>
-                        {memory.photo_count > 0 && (
-                          <p className="text-xs text-gray-500">
-                            {memory.photo_count} photo
-                            {memory.photo_count !== 1 ? 's' : ''}
-                          </p>
-                        )}
+              {recentMemories.map((memory) => {
+                const bodyText = memory.body || '';
+                const truncatedBody =
+                  bodyText.length > 200
+                    ? bodyText.substring(0, 200).trim() + '...'
+                    : bodyText;
+                const displayTitle = memory.title?.trim() || undefined;
+
+                return (
+                  <Link
+                    key={memory.id}
+                    href={`/memories/${memory.id}`}
+                    className="block"
+                  >
+                    <article className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow group">
+                      {/* Name and Date */}
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-medium text-gray-900">
+                          {memory.name || 'Anonymous'}
+                        </p>
+                        <span className="text-gray-500 text-xs">
+                          {new Date(memory.created_at).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'numeric',
+                              day: 'numeric',
+                              year: '2-digit',
+                            }
+                          )}
+                        </span>
                       </div>
 
-                      {memory.cover_public_id && (
-                        <div className="flex-shrink-0">
-                          <div className="w-24 h-24 rounded overflow-hidden">
-                            <ImageWithFallback
-                              publicId={memory.cover_public_id}
-                              alt="Memory preview"
-                              className="w-full h-full object-cover"
-                              width={96}
-                              quality="auto"
-                            />
-                          </div>
-                        </div>
+                      {/* Title */}
+                      {displayTitle && (
+                        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          {displayTitle}
+                        </h3>
                       )}
-                    </div>
-                  </article>
-                </Link>
-              ))}
+
+                      {/* Content */}
+                      <div className="text-gray-700 text-sm mb-3">
+                        <p className="whitespace-pre-wrap">{truncatedBody}</p>
+                      </div>
+                    </article>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
