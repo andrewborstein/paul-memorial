@@ -7,6 +7,8 @@ import type { MemoryIndexItem } from '@/types/memory';
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
+export const fetchCache = 'force-no-store';
+
 async function getMemories(): Promise<MemoryIndexItem[]> {
   // Add timestamp to bust cache
   const timestamp = Date.now();
