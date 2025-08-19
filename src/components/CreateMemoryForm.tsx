@@ -374,6 +374,14 @@ export default function CreateMemoryForm({
     fd.append('file', ps.file);
     fd.append('upload_preset', PRESET);
     fd.append('folder', 'memories');
+    // Add eager transforms to generate optimized versions immediately
+    fd.append('eager', JSON.stringify([
+      { width: 400, height: 400, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto:eco' },
+      { width: 800, height: 800, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto:eco' },
+      { width: 1200, fetch_format: 'auto', quality: 'auto' },
+      { width: 1600, fetch_format: 'auto', quality: 'auto' }
+    ]));
+    fd.append('eager_async', 'true');
 
     return new Promise<string>((resolve, reject) => {
       const xhr = new XMLHttpRequest();

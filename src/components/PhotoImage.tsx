@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { cldUrl } from '@/lib/cloudinary';
+import { getHeroImageUrl } from '@/lib/cloudinary';
 
 interface PhotoImageProps {
   publicId: string;
@@ -60,7 +60,7 @@ export default function PhotoImage({
             setIsLoading(false);
           }
         }}
-        src={cldUrl(publicId, { w: width })}
+        src={getHeroImageUrl(publicId)}
         alt={alt}
         className={`${className} transition-opacity duration-300`}
         onLoad={handleLoad}

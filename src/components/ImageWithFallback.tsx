@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { cldUrl } from '@/lib/cloudinary';
+import { cldUrl, getSmallThumbnailUrl } from '@/lib/cloudinary';
 
 interface ImageWithFallbackProps {
   publicId?: string;
@@ -61,13 +61,7 @@ export default function ImageWithFallback({
       return src;
     }
     // All thumbnails are square, use fill cropping
-    return cldUrl(publicId!, {
-      w: width,
-      h: width,
-      crop: 'fill',
-      q: quality,
-      dpr,
-    });
+    return getSmallThumbnailUrl(publicId!);
   }, [src, publicId, width, quality, dpr]);
 
   const handleLoad = () => {
