@@ -122,10 +122,9 @@ export default function ContactInfoModal({
 
     setIsSubmitting(true);
     try {
-      onSubmit(
-        `${firstName.trim()} ${lastName.trim()}`,
-        email.trim().toLowerCase()
-      );
+      const fullName = `${firstName.trim()} ${lastName.trim()}`;
+      const cleanEmail = email.trim().toLowerCase();
+      onSubmit(fullName, cleanEmail);
     } finally {
       setIsSubmitting(false);
     }
@@ -134,7 +133,9 @@ export default function ContactInfoModal({
   const handleWelcomeContinue = () => {
     setIsSubmitting(true);
     try {
-      onSubmit(`${firstName} ${lastName}`, email.trim().toLowerCase());
+      const fullName = `${firstName} ${lastName}`;
+      const cleanEmail = email.trim().toLowerCase();
+      onSubmit(fullName, cleanEmail);
     } finally {
       setIsSubmitting(false);
     }

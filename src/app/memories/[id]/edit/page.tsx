@@ -30,14 +30,12 @@ export default async function EditMemoryPage({
 
     return (
       <PageContainer>
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold mb-2">Edit Memory</h1>
-            <p className="text-gray-600">Update your memory "{displayTitle}"</p>
-          </div>
-
-          <CreateMemoryForm memory={memory} />
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold mb-2">Edit Memory</h1>
+          <p className="text-gray-600">Update your memory "{displayTitle}"</p>
         </div>
+
+        <CreateMemoryForm memory={memory} />
       </PageContainer>
     );
   } catch (error) {

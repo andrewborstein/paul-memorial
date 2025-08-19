@@ -1,24 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentUser, isSignedIn } from '@/lib/user';
+import { getCurrentUser, isSignedIn, type UserInfo } from '@/lib/user';
 
 interface UserStatusDisplayProps {
-  name: string;
-  email: string;
   onEditContactInfo: () => void;
 }
 
 export default function UserStatusDisplay({
-  name,
-  email,
   onEditContactInfo,
 }: UserStatusDisplayProps) {
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
   useEffect(() => {
-    setIsUserSignedIn(isSignedIn());
+    const user = getCurrentUser();
+    setCurrentUser(user);
     setIsLoaded(true);
   }, []);
 
@@ -26,15 +23,15 @@ export default function UserStatusDisplay({
     return null; // Don't render anything until client-side check is complete
   }
 
-  if (!isUserSignedIn) {
+  if (!currentUser) {
     return null; // Don't show anything if not signed in
   }
 
   return (
     <div className="flex items-center gap-3">
       <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700">
-        <span className="font-medium">{name}</span>
-        <span className="text-blue-600 ml-2">({email})</span>
+        <span className="font-medium">{currentUser.name}</span>
+        <span className="text-blue-600 ml-2">({currentUser.email})</span>
       </div>
       <button
         type="button"

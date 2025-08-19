@@ -1,6 +1,8 @@
+import PageContainer from '@/components/PageContainer';
+
 export default function TestEnvPage() {
   return (
-    <div className="max-w-4xl mx-auto px-2 py-8">
+    <PageContainer>
       <h1 className="text-2xl font-semibold mb-6">
         Environment Variables Test
       </h1>
@@ -232,6 +234,6 @@ export default function TestEnvPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

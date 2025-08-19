@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import PageContainer from '@/components/PageContainer';
 
 export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false);
@@ -28,7 +29,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <PageContainer>
       <div className="mb-6">
         <Link
           href="/photos"
@@ -115,6 +116,6 @@ export default function UploadPage() {
           {isUploading ? 'Uploading...' : 'Upload Photos'}
         </button>
       </form>
-    </div>
+    </PageContainer>
   );
 }

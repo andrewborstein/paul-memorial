@@ -22,11 +22,11 @@ export interface UserInfo {
 
 export function setCurrentUser(email: string, name: string): UserInfo {
   const emailHash = hashEmail(email);
-  const userInfo: UserInfo = { 
-    email, 
-    emailHash, 
-    name, 
-    signedInAt: new Date().toISOString() 
+  const userInfo: UserInfo = {
+    email,
+    emailHash,
+    name,
+    signedInAt: new Date().toISOString(),
   };
 
   if (typeof window !== 'undefined') {

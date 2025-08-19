@@ -200,8 +200,10 @@ export default function CreateMemoryForm({
   }, [isEditMode]);
 
   const handleSignIn = (name: string, email: string) => {
-    console.log('handleSignIn called with:', { name, email });
+    // Store in localStorage first
     setCurrentUser(email, name);
+
+    // Update form state
     setName(name);
     setEmail(email);
     setShowSignInModal(false);
@@ -211,12 +213,6 @@ export default function CreateMemoryForm({
     if (pendingSubmission) {
       // Use setTimeout to ensure state updates have taken effect
       setTimeout(() => {
-        console.log(
-          'Executing pending submission with name:',
-          name,
-          'email:',
-          email
-        );
         pendingSubmission(name, email);
         setPendingSubmission(null);
       }, 0);
@@ -589,11 +585,6 @@ export default function CreateMemoryForm({
 
     const { id, updated_at } = await r.json();
 
-    // Set current user in localStorage when creating a new memory
-    if (!isEditMode) {
-      setCurrentUser(email, name);
-    }
-
     if (isEditMode) {
       // Redirect to memory page with updated_at timestamp for cache busting
       window.location.href = `/memories/${id}?fresh=1&t=${updated_at}`;
@@ -619,8 +610,6 @@ export default function CreateMemoryForm({
 
         {/* User Status Display */}
         <UserStatusDisplay
-          name={name}
-          email={email}
           onEditContactInfo={() => {
             setShowSignInModal(true);
             setPendingSubmission(null);
@@ -763,6 +752,21 @@ export default function CreateMemoryForm({
                     />
                   </svg>
                   {photos.length > 0 ? `Photos (${photos.length})` : 'Photos'}
+                  {photos.length > 0 && (
+                    <svg
+                      className="w-4 h-4 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
@@ -865,9 +869,14 @@ export default function CreateMemoryForm({
                     <div className="w-4 h-4 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-sm font-medium">
                       {photos.filter((p) => p.status === 'uploading').length}{' '}
-                      uploading,{' '}
-                      {photos.filter((p) => p.status === 'queued').length}{' '}
-                      queued
+                      uploading
+                      {photos.filter((p) => p.status === 'queued').length >
+                        0 && (
+                        <>
+                          , {photos.filter((p) => p.status === 'queued').length}{' '}
+                          queued
+                        </>
+                      )}
                     </span>
                   </div>
                 </div>

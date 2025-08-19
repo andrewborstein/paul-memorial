@@ -103,7 +103,7 @@ export default async function PhotosPage() {
               {hasMorePhotos && (
                 <div className="text-center mt-6">
                   <Link
-                    href="/memories/photos"
+                    href="/photos/all"
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
                     View all {allPhotos.length} photos
