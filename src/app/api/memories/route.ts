@@ -1,6 +1,7 @@
 import { readIndex, readMemory } from '@/lib/data';
 
 export const fetchCache = 'force-no-store';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
