@@ -96,8 +96,7 @@ export default async function PhotoPage({
             publicId={photo.public_id}
             alt={photo.caption || 'Photo'}
             className="max-w-full h-auto rounded-lg shadow-lg"
-            width={1200}
-            quality={80}
+            priority={true}
           />
         </div>
       </PageContainer>

@@ -67,16 +67,11 @@ export default async function PhotoPage({
         <div className="space-y-6">
           {/* Photo */}
           <div className="flex justify-center">
-            <div className="bg-red-100 p-4 rounded">
-              <p>Debug: Photo component should render here</p>
-              <p>Photo ID: {photo.public_id}</p>
-            </div>
             <PhotoImage
               publicId={photo.public_id}
               alt={photo.caption || 'Photo'}
               className="max-w-full h-auto rounded-lg shadow-lg"
-              width={1200}
-              quality="auto"
+              priority={true}
             />
           </div>
 

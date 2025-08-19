@@ -62,7 +62,7 @@ export default function ImageWithFallback({
     }
     // All thumbnails are square, use fill cropping
     return getSmallThumbnailUrl(publicId!);
-  }, [src, publicId, width, quality, dpr]);
+  }, [src, publicId, width]);
 
   const handleLoad = () => {
     setIsLoading(false);
