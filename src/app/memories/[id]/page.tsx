@@ -12,10 +12,11 @@ import type { MemoryDetail } from '@/types/memory';
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
-async function getMemory(id: string): Promise<MemoryDetail> {
-  console.log('getMemory: Fetching memory with ID:', id);
-  const res = await serverFetch(`/api/memory/${id}`, {
-    cache: 'no-store',
+async function getMemory(id: string, fresh?: boolean): Promise<MemoryDetail> {
+  console.log('getMemory: Fetching memory with ID:', id, 'fresh:', fresh);
+  const url = fresh ? `/api/memory/${id}?fresh=1` : `/api/memory/${id}`;
+  const res = await serverFetch(url, {
+    cache: fresh ? 'no-store' : 'default',
   });
   console.log('getMemory: Response status:', res.status);
   if (!res.ok) {
@@ -29,14 +30,23 @@ async function getMemory(id: string): Promise<MemoryDetail> {
 
 export default async function MemoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ fresh?: string }>;
 }) {
   const { id } = await params;
-  console.log('MemoryPage: Attempting to load memory with ID:', id);
+  const params2 = await searchParams;
+  const fresh = params2?.fresh === '1';
+  console.log(
+    'MemoryPage: Attempting to load memory with ID:',
+    id,
+    'fresh:',
+    fresh
+  );
 
   try {
-    const memory = await getMemory(id);
+    const memory = await getMemory(id, fresh);
     console.log('MemoryPage: Successfully loaded memory:', memory.id);
     const displayTitle = memory.title || memory.name;
 

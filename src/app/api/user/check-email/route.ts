@@ -1,20 +1,20 @@
-import { readIndex } from '@/lib/data';
+import { aggregateIndex } from '@/lib/data';
 
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
-    
+
     if (!email || typeof email !== 'string') {
       return new Response('Email is required', { status: 400 });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    
+
     // Read all memories to check for existing email
-    const memories = await readIndex();
-    
+    const memories = await aggregateIndex();
+
     // Find any memory with this email
-    const existingMemory = memories.find(memory => {
+    const existingMemory = memories.find((memory) => {
       // We need to read the full memory to get the email
       // For now, we'll check the index and then read the detail if needed
       return false; // Placeholder - we'll implement this properly
@@ -34,19 +34,19 @@ export async function POST(request: Request) {
       })
     );
 
-    const existingUser = memoriesWithEmail.find(m => m !== null);
+    const existingUser = memoriesWithEmail.find((m) => m !== null);
 
     if (existingUser) {
       return Response.json({
         exists: true,
         name: existingUser.name,
-        email: existingUser.email
+        email: existingUser.email,
       });
     } else {
       return Response.json({
         exists: false,
         name: null,
-        email: null
+        email: null,
       });
     }
   } catch (error) {

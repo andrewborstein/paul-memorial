@@ -1,4 +1,4 @@
-import { readIndex, readMemory } from '@/lib/data';
+import { aggregateIndex, readMemory } from '@/lib/data';
 
 export const revalidate = 60;
 
@@ -11,7 +11,7 @@ export async function GET(
 
   try {
     // Get all memories
-    const memories = await readIndex();
+    const memories = await aggregateIndex();
 
     // Find the memory that contains this photo
     for (const memoryItem of memories) {

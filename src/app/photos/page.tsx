@@ -11,10 +11,8 @@ export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  // Add timestamp to bust cache
-  const timestamp = Date.now();
-  const res = await serverFetch(`/api/memories?t=${timestamp}`, {
-    cache: 'no-store',
+  const res = await serverFetch('/api/memories', {
+    next: { tags: ['memories-index'] },
   });
   if (!res.ok) return [];
   return res.json();

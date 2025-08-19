@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
-import { readIndex, writeIndex, writeMemory } from '@/lib/data';
+import { writeMemory, writeIndexItem } from '@/lib/data';
 import { cldUrl } from '@/lib/cloudinary';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 type PhotoInput = {
   public_id: string;
@@ -59,27 +60,28 @@ export async function POST(req: Request) {
     await writeMemory(detail);
     console.log('Memory detail written successfully');
 
-    // Update index (prepend)
-    const index = await readIndex();
-    console.log('Current index has', index.length, 'memories');
-    const coverPublicId = detail.photos[0]?.public_id;
-    console.log('Cover public ID:', coverPublicId);
-    console.log('Photos array:', detail.photos);
+    // Write index item (no race condition - each memory writes its own file)
+    await writeIndexItem({
+      id: detail.id,
+      title: detail.title,
+      date: detail.date,
+      cover_public_id: detail.photos[0]?.public_id,
+      photo_count: detail.photos.length,
+      body: detail.body?.length
+        ? detail.body.length > 200
+          ? detail.body.slice(0, 200).trim() + '…'
+          : detail.body
+        : '',
+      name: detail.name || '',
+      email: detail.email || '',
+    });
+    console.log('Index item written successfully');
 
-    const nextIndex = [
-      {
-        id: detail.id,
-        title: detail.title || undefined, // Only use title if explicitly provided
-        date: detail.date,
-        cover_public_id: coverPublicId,
-        photo_count: detail.photos.length,
-      },
-      ...index,
-    ].slice(0, 500); // keep it small
-
-    console.log('New index entry:', JSON.stringify(nextIndex[0], null, 2));
-    await writeIndex(nextIndex);
-    console.log('Index updated successfully');
+    // Immediately purge all caches
+    revalidateTag('memories-index');
+    revalidatePath('/');
+    revalidatePath('/memories');
+    revalidatePath('/api/memories');
 
     return Response.json({ id: detail.id }, { status: 201 });
   } catch (error) {

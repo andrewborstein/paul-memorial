@@ -6,6 +6,7 @@ export type MemoryIndexItem = {
   photo_count: number;
   body?: string; // truncated body text
   name?: string; // person's name
+  email?: string; // person's email
 };
 
 export type MemoryPhoto = {

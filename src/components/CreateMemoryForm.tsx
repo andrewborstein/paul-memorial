@@ -554,11 +554,11 @@ export default function CreateMemoryForm({
     }
 
     if (isEditMode) {
-      router.push(`/memories/${id}`);
-      router.refresh();
+      // Redirect to memory page with fresh parameter to bypass cache
+      window.location.href = `/memories/${id}?fresh=1`;
     } else {
-      // Simple redirect with cache busting
-      window.location.href = `/memories?t=${Date.now()}`;
+      // Redirect to memories page with fresh parameter to bypass cache
+      window.location.href = '/memories?fresh=1';
     }
   }
 

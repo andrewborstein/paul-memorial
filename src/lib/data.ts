@@ -1,107 +1,115 @@
-import { list, put, del } from '@vercel/blob';
+import { list, put, del, ListBlobResult } from '@vercel/blob';
 import type { MemoryDetail, MemoryIndexItem } from '@/types/memory';
 
-const INDEX_KEY = 'index.json';
 const BLOB_PREFIX = process.env.BLOB_PREFIX || '';
+const INDEX_ITEM_PREFIX = 'index-items';
 
-function getBlobKey(key: string): string {
-  return BLOB_PREFIX ? `${BLOB_PREFIX}/${key}` : key;
+function k(key: string, prefix = BLOB_PREFIX) {
+  return prefix ? `${prefix}/${key}` : key;
 }
 
-async function readBlobJson<T>(key: string): Promise<T | null> {
-  try {
-    // Prefer read-only token, fallback to read-write
-    const token =
-      process.env.BLOB_READ_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) {
-      console.warn('No Blob read token found');
-      return null;
-    }
+export async function readBlobJson<T>(
+  key: string,
+  opts?: { forceFresh?: boolean; cb?: string } // cb lets you pass updated_at
+): Promise<T | null> {
+  const token =
+    process.env.BLOB_READ_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return null;
 
-    const blobKey = getBlobKey(key);
-    console.log('Attempting to read Blob with key:', blobKey);
+  const target = k(key);
 
-    const { blobs } = await list({ prefix: blobKey, limit: 1, token });
-    console.log('Found blobs:', blobs.length);
+  // paginate until we find an exact match
+  let cursor: string | undefined = undefined;
+  let file: { downloadUrl: string; pathname: string } | undefined;
 
-    if (blobs.length === 0) {
-      console.log('No blobs found for key:', blobKey);
-      return null;
-    }
+  do {
+    const page: ListBlobResult = await list({ prefix: target, cursor, token });
+    file = page.blobs.find((b) => b.pathname === target);
+    cursor = page.cursor || undefined;
+  } while (!file && cursor);
 
-    const res = await fetch(blobs[0].downloadUrl);
-    if (!res.ok) {
-      console.error(
-        'Failed to fetch blob content:',
-        res.status,
-        res.statusText
-      );
-      return null;
-    }
+  if (!file) return null;
 
-    const data = await res.json();
-    console.log('Successfully read blob data for key:', key);
-    return data as T;
-  } catch (error) {
-    console.error('Failed to read from Blob:', error);
-    return null;
-  }
+  // cache-bust the Blob CDN hop when "fresh" or explicit cb provided
+  const url = new URL(file.downloadUrl);
+  const cacheBuster =
+    opts?.cb || (opts?.forceFresh ? Date.now().toString() : '');
+  if (cacheBuster) url.searchParams.set('cb', cacheBuster);
+
+  // first hop: don't let node/RSC cache this request
+  const r = await fetch(url.toString(), { cache: 'no-store' });
+  if (!r.ok) return null;
+  return (await r.json()) as T;
 }
 
 async function writeBlobJson(key: string, value: unknown) {
-  // Prefer write token, fallback to read-write
   const token =
     process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
-    throw new Error('No Blob write token found');
-  }
-
-  const blobKey = getBlobKey(key);
-  await put(blobKey, JSON.stringify(value), {
+  if (!token) throw new Error('No Blob write token');
+  await put(k(key), JSON.stringify(value), {
     access: 'public',
     addRandomSuffix: false,
     allowOverwrite: true,
+    contentType: 'application/json',
     token,
   });
 }
 
-export async function readIndex(): Promise<MemoryIndexItem[]> {
-  return (await readBlobJson<MemoryIndexItem[]>(INDEX_KEY)) ?? [];
-}
-
-export async function writeIndex(items: MemoryIndexItem[]) {
-  await writeBlobJson(INDEX_KEY, items);
-}
-
-export async function readMemory(id: string): Promise<MemoryDetail | null> {
-  console.log('Attempting to read memory file:', `memories/${id}.json`);
-  const result = await readBlobJson<MemoryDetail>(`memories/${id}.json`);
-  console.log('Memory read result:', result ? 'found' : 'not found');
-  return result;
+// Existing detail helpers
+export async function readMemory(id: string, opts?: { forceFresh?: boolean }) {
+  return await readBlobJson<MemoryDetail>(`memories/${id}.json`, opts);
 }
 
 export async function writeMemory(doc: MemoryDetail) {
-  console.log('Writing memory to Blob:', `memories/${doc.id}.json`);
-  await writeBlobJson(`memories/${doc.id}.json`, doc);
-  console.log('Memory written successfully to Blob');
+  const payload = { ...doc, updated_at: new Date().toISOString() };
+  await writeBlobJson(`memories/${doc.id}.json`, payload);
 }
 
 export async function deleteMemory(id: string) {
-  try {
-    // Prefer write token, fallback to read-write
-    const token =
-      process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) {
-      throw new Error('No Blob write token found');
-    }
+  const token =
+    process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) throw new Error('No Blob write token');
+  await del(k(`memories/${id}.json`), { token }).catch(() => {});
+  await del(k(`${INDEX_ITEM_PREFIX}/${id}.json`), { token }).catch(() => {});
+}
 
-    const blobKey = getBlobKey(`memories/${id}.json`);
-    console.log('Deleting memory blob:', blobKey);
-    
-    await del(blobKey, { token });
-    console.log('Memory deleted successfully from Blob');
-  } catch (error) {
-    console.error('Failed to delete memory from Blob:', error);
-    // Don't throw - we want to continue even if blob deletion fails
-  }
+// ✅ New: per-item index summaries
+export async function writeIndexItem(item: MemoryIndexItem) {
+  await writeBlobJson(`${INDEX_ITEM_PREFIX}/${item.id}.json`, item);
+}
+
+export async function aggregateIndex(opts?: { forceFresh?: boolean }) {
+  const token =
+    process.env.BLOB_READ_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return [] as MemoryIndexItem[];
+
+  // List items
+  const all: MemoryIndexItem[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const { blobs, cursor: next } = await list({
+      prefix: k(`${INDEX_ITEM_PREFIX}/`),
+      cursor,
+      token,
+    });
+    cursor = next || undefined;
+
+    // Fetch each JSON with a concurrency cap
+    const chunk = await Promise.all(
+      blobs.map(async (b) => {
+        const u = new URL(b.downloadUrl);
+        if (opts?.forceFresh) u.searchParams.set('cb', Date.now().toString());
+        const r = await fetch(u.toString(), { cache: 'no-store' });
+        if (!r.ok) return null;
+        return (await r.json()) as MemoryIndexItem;
+      })
+    );
+
+    for (const x of chunk) if (x) all.push(x);
+  } while (cursor);
+
+  // Sort newest first (ISO date)
+  all.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  return all;
 }

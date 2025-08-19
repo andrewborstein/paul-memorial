@@ -1,27 +1,34 @@
 import {
-  readIndex,
-  writeIndex,
   readMemory,
   writeMemory,
   deleteMemory,
+  writeIndexItem,
 } from '@/lib/data';
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    console.log('Attempting to fetch memory:', id);
+    const { searchParams } = new URL(req.url);
+    const fresh = searchParams.get('fresh') === '1';
 
-    const doc = await readMemory(id);
+    console.log('Attempting to fetch memory:', id, 'fresh:', fresh);
+
+    const doc = await readMemory(id, { forceFresh: fresh });
     if (!doc) {
       console.log('Memory not found:', id);
       return new Response('Not found', { status: 404 });
     }
 
     console.log('Successfully fetched memory:', id);
-    return Response.json(doc);
+    const response = Response.json(doc);
+    response.headers.set(
+      'Cache-Control',
+      fresh ? 'no-store' : 's-maxage=60, stale-while-revalidate=300'
+    );
+    return response;
   } catch (error) {
     console.error('Error fetching memory:', error);
     return new Response('Internal server error', { status: 500 });
@@ -68,21 +75,21 @@ export async function PUT(
     // Write updated memory
     await writeMemory(updatedMemory);
 
-    // Update index
-    const index = await readIndex();
-    const coverPublicId = updatedMemory.photos[0]?.public_id;
-    const updatedIndex = index.map((item) =>
-      item.id === id
-        ? {
-            id: updatedMemory.id,
-            title: updatedMemory.title || undefined, // Only use title if explicitly provided
-            date: updatedMemory.date,
-            cover_public_id: coverPublicId,
-            photo_count: updatedMemory.photos.length,
-          }
-        : item
-    );
-    await writeIndex(updatedIndex);
+    // Update index item
+    await writeIndexItem({
+      id: updatedMemory.id,
+      title: updatedMemory.title,
+      date: updatedMemory.date,
+      cover_public_id: updatedMemory.photos[0]?.public_id,
+      photo_count: updatedMemory.photos.length,
+      body: updatedMemory.body?.length
+        ? updatedMemory.body.length > 200
+          ? updatedMemory.body.slice(0, 200).trim() + '…'
+          : updatedMemory.body
+        : '',
+      name: updatedMemory.name || '',
+      email: updatedMemory.email || '',
+    });
 
     return Response.json({ id: updatedMemory.id });
   } catch (error) {
@@ -107,12 +114,7 @@ export async function DELETE(
     // TODO: Add authentication/authorization here
     // For now, allow deletion (we'll add proper auth later)
 
-    // Remove from index
-    const index = await readIndex();
-    const updatedIndex = index.filter((m) => m.id !== id);
-    await writeIndex(updatedIndex);
-
-    // Delete the memory detail file
+    // Delete the memory detail file and index item
     await deleteMemory(id);
 
     // TODO: Delete photos from Cloudinary

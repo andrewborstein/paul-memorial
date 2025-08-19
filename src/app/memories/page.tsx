@@ -10,20 +10,27 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-async function getMemories(): Promise<MemoryIndexItem[]> {
-  // Add timestamp and random to bust cache
-  const timestamp = Date.now();
-  const random = Math.random();
-  const res = await serverFetch(`/api/memories?t=${timestamp}&r=${random}`, {
-    cache: 'no-store', // Disable cache entirely
+async function getMemories(searchParams?: {
+  fresh?: string;
+}): Promise<MemoryIndexItem[]> {
+  const fresh = searchParams?.fresh === '1';
+  const url = fresh ? '/api/memories?fresh=1' : '/api/memories';
+
+  const res = await serverFetch(url, {
+    cache: fresh ? 'no-store' : 'default',
   });
   if (!res.ok) return [];
   return res.json();
 }
 
-export default async function MemoriesPage() {
+export default async function MemoriesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ fresh?: string }>;
+}) {
   try {
-    const memories = await getMemories();
+    const params = await searchParams;
+    const memories = await getMemories(params);
 
     return (
       <PageContainer>
