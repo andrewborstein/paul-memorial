@@ -583,18 +583,19 @@ export default function CreateMemoryForm({
   }
 
   async function onPublish() {
-    // Check if user is signed in
-    if (!isSignedIn()) {
-      setShowSignInModal(true);
-      setPendingSubmission(() => onPublish);
-      return;
-    }
-
+    // Always validate form first
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       // Scroll to errors after state update
       setTimeout(scrollToErrors, 100);
+      return; // Don't show sign-in modal for invalid forms
+    }
+
+    // Check if user is signed in
+    if (!isSignedIn()) {
+      setShowSignInModal(true);
+      setPendingSubmission(() => onPublish);
       return;
     }
 
@@ -867,17 +868,17 @@ export default function CreateMemoryForm({
       )}
     </form>
 
-    {/* Sign In Modal - outside the form to avoid nested forms */}
-    <SignInModal
-      isOpen={showSignInModal}
-      onClose={() => {
-        setShowSignInModal(false);
-        setPendingSubmission(null);
-      }}
-      onSubmit={handleSignIn}
-      title="Sign in to share your memory"
-      description="Please enter your name and email to share this memory. Your email will not be displayed publicly."
-    />
+          {/* Sign In Modal - outside the form to avoid nested forms */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => {
+          setShowSignInModal(false);
+          setPendingSubmission(null);
+        }}
+        onSubmit={handleSignIn}
+        title="Sign in to share your memory"
+        description="Your memory is ready to publish! Please enter your name and email to continue. Your email will not be displayed publicly."
+      />
     </>
   );
 }
