@@ -25,7 +25,7 @@ export default function NewMemoryPage() {
 
       <PageHeader
         title="Share a memory"
-        description="Share a note, photos, or both. This can include condolences, memories, stories, or messages of support."
+        description="This can include condolences, memories, stories, or messages of support."
       />
 
       <CreateMemoryForm />

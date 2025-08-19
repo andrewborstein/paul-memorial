@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { clearCurrentUser, getCurrentUser } from '@/lib/user';
 
 interface ContactInfoModalProps {
   isOpen: boolean;
@@ -30,6 +31,15 @@ export default function ContactInfoModal({
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [hasCurrentUser, setHasCurrentUser] = useState(false);
+
+  // Check if there's a current user on mount and when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      const currentUser = getCurrentUser();
+      setHasCurrentUser(!!currentUser);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -141,10 +151,40 @@ export default function ContactInfoModal({
     onClose();
   };
 
+  const handleSignOut = () => {
+    clearCurrentUser();
+    handleClose();
+    // Reload the window to ensure clean state
+    window.location.reload();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
+      <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        <h2 className="text-xl font-semibold text-gray-900 mb-2 pr-8">
+          {title}
+        </h2>
         {step === 'email' && (
           <p className="text-gray-600 mb-2">{description}</p>
         )}
@@ -190,14 +230,16 @@ export default function ContactInfoModal({
               >
                 {isCheckingEmail ? 'Checking...' : 'Continue'}
               </button>
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isCheckingEmail}
-                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
-              >
-                Cancel
-              </button>
+              {hasCurrentUser && (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={isCheckingEmail}
+                  className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Sign out
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -292,14 +334,16 @@ export default function ContactInfoModal({
               >
                 {isSubmitting ? 'Continuing...' : 'Continue'}
               </button>
-              <button
-                type="button"
-                onClick={() => setStep('email')}
-                disabled={isSubmitting}
-                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
-              >
-                Use different email
-              </button>
+              {hasCurrentUser && (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Sign out
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -183,7 +183,7 @@ export default function CreateMemoryForm({
   const [errors, setErrors] = React.useState<string[]>([]);
   const [showSignInModal, setShowSignInModal] = React.useState(false);
   const [pendingSubmission, setPendingSubmission] = React.useState<
-    (() => void) | null
+    ((signInName?: string, signInEmail?: string) => void) | null
   >(null);
   const [showTitleField, setShowTitleField] = React.useState(false);
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
@@ -205,11 +205,21 @@ export default function CreateMemoryForm({
     setName(name);
     setEmail(email);
     setShowSignInModal(false);
+    setErrors([]); // Clear any existing errors
 
-    // Continue with the pending submission
+    // Continue with the pending submission after state updates
     if (pendingSubmission) {
-      pendingSubmission();
-      setPendingSubmission(null);
+      // Use setTimeout to ensure state updates have taken effect
+      setTimeout(() => {
+        console.log(
+          'Executing pending submission with name:',
+          name,
+          'email:',
+          email
+        );
+        pendingSubmission(name, email);
+        setPendingSubmission(null);
+      }, 0);
     }
   };
   const errorRef = React.useRef<HTMLDivElement>(null);
@@ -482,10 +492,26 @@ export default function CreateMemoryForm({
     // Check if user is signed in
     if (!isSignedIn()) {
       setShowSignInModal(true);
-      setPendingSubmission(() => onPublish);
+      // Create a closure that captures current form state and will receive sign-in values
+      setPendingSubmission(() => {
+        return async (signInName?: string, signInEmail?: string) => {
+          // Re-validate and submit with current state
+          const validationErrors = validateForm();
+          if (validationErrors.length > 0) {
+            setErrors(validationErrors);
+            setTimeout(scrollToErrors, 100);
+            return;
+          }
+          await submitMemory(signInName, signInEmail);
+        };
+      });
       return;
     }
 
+    await submitMemory();
+  }
+
+  async function submitMemory(signInName?: string, signInEmail?: string) {
     // Check if any photos are still uploading or failed
     const uploadingPhotos = photos.filter(
       (p) => p.status === 'uploading' || p.status === 'queued'
@@ -509,10 +535,25 @@ export default function CreateMemoryForm({
     setErrors([]);
     setIsPublishing(true);
 
-    console.log('Submitting payload with name:', name, 'email:', email);
+    // Use sign-in values if provided, otherwise use current state
+    const finalName = signInName || name;
+    const finalEmail = signInEmail || email;
+
+    console.log(
+      'Submitting payload with name:',
+      finalName,
+      'email:',
+      finalEmail
+    );
+    console.log(
+      'Name length:',
+      finalName?.length,
+      'Email length:',
+      finalEmail?.length
+    );
     const payload = {
-      name,
-      email,
+      name: finalName,
+      email: finalEmail,
       title: title.trim() || undefined, // Only send if not empty
       body,
       // date field removed - using created_at and updated_at instead
@@ -741,7 +782,7 @@ export default function CreateMemoryForm({
                   p.status === 'error'
               )
             }
-            onClick={onPublish}
+            onClick={() => onPublish()}
           >
             {isPublishing
               ? isEditMode
