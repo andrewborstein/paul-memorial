@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
+import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
@@ -90,14 +91,13 @@ export default async function MemoryPage({
           {/* Header */}
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-semibold">{displayTitle}</h1>
-              <div className="mt-2">
+              <PageHeader title={displayTitle}>
                 <MemoryMetadata
                   date={memory.created_at}
                   creatorEmail={memory.email}
                   creatorName={memory.name}
                 />
-              </div>
+              </PageHeader>
             </div>
 
             {/* Edit/Delete Actions */}

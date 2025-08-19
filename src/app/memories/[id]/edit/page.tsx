@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
+import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import CreateMemoryForm from '@/components/CreateMemoryForm';
 import type { MemoryDetail } from '@/types/memory';
@@ -42,10 +43,10 @@ export default async function EditMemoryPage({
 
     return (
       <PageContainer>
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold mb-2">Edit Memory</h1>
-          <p className="text-gray-600">Update your memory "{displayTitle}"</p>
-        </div>
+        <PageHeader
+          title="Edit Memory"
+          description={`Update your memory "${displayTitle}"`}
+        />
 
         <CreateMemoryForm memory={memory} />
       </PageContainer>

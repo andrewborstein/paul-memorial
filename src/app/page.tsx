@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
+import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem } from '@/types/memory';
@@ -24,15 +25,12 @@ export default async function HomePage() {
 
     return (
       <PageContainer>
-        <div className="text-center py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Paul Bedrosian Memorial
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            A place to share memories, photos, and stories about Paul. Help us
-            celebrate his life and the impact he had on all of us.
-          </p>
+        <PageHeader
+          title="Paul Bedrosian Memorial"
+          description="A place to share memories, photos, and stories about Paul. Help us celebrate his life and the impact he had on all of us."
+        />
 
+        <div className="text-center mb-8">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/memories/new"

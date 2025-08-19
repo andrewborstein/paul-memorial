@@ -21,7 +21,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col min-h-screen">
         <SuperUserBanner />
         <header className="border-b">
           <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2">
@@ -65,7 +65,7 @@ export default function RootLayout({
             </div>
           </nav>
         </header>
-        <main className="max-w-7xl mx-auto py-8 px-2">{children}</main>
+        <main className="flex-1 py-8 px-2">{children}</main>
         <footer className="max-w-4xl mx-auto py-8 text-sm text-gray-500 px-5 md:px-2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
             <span>Made with love by friends & family.</span>
