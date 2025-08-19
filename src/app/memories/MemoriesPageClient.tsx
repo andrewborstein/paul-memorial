@@ -18,7 +18,7 @@ const VIEW_STORAGE_KEY = 'paul-memorial-view-preference';
 export default function MemoriesPageClient({
   memories,
 }: MemoriesPageClientProps) {
-  const [view, setView] = useState<'list' | 'masonry'>('list');
+  const [view, setView] = useState<'list' | 'masonry'>('masonry');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load view preference from localStorage on mount
