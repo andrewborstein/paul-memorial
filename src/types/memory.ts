@@ -1,6 +1,6 @@
 export type MemoryIndexItem = {
   id: string;
-  title: string;
+  title?: string; // Optional - only if explicitly set
   date: string; // ISO
   cover_public_id?: string; // derived from first photo
   photo_count: number;

@@ -9,8 +9,10 @@ import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const res = await serverFetch('/api/memories', {
-    next: { revalidate: 60 },
+  // Add timestamp to bust cache
+  const timestamp = Date.now();
+  const res = await serverFetch(`/api/memories?t=${timestamp}`, {
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
@@ -18,7 +20,7 @@ async function getMemories(): Promise<MemoryIndexItem[]> {
 
 async function getMemoryDetail(id: string): Promise<MemoryDetail | null> {
   const res = await serverFetch(`/api/memory/${id}`, {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) return null;
   return res.json();
@@ -78,7 +80,9 @@ export default async function PhotosPage() {
         ) : (
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-semibold mb-4">All photos ({allPhotos.length})</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                All photos ({allPhotos.length})
+              </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {displayPhotos.map((photo) => (
                   <Link
@@ -116,37 +120,37 @@ export default async function PhotosPage() {
                     id: memory.id,
                     title: memory.title,
                     cover_public_id: memory.cover_public_id,
-                    photo_count: memory.photo_count
+                    photo_count: memory.photo_count,
                   });
                   return (
-                  <Link
-                    key={memory.id}
-                    href={`/memories/${memory.id}`}
-                    className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group"
-                  >
-                    <div className="p-4">
-                      <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors">
-                        {memory.title}
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        {memory.photo_count} photo
-                        {memory.photo_count !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-
-                    {memory.cover_public_id && (
-                      <div className="aspect-square">
-                        <ImageWithFallback
-                          publicId={memory.cover_public_id}
-                          alt={`Preview of ${memory.title}`}
-                          className="w-full h-full object-cover"
-                          width={300}
-                          quality="auto"
-                        />
+                    <Link
+                      key={memory.id}
+                      href={`/memories/${memory.id}`}
+                      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group"
+                    >
+                      <div className="p-4">
+                        <h3 className="font-medium text-sm mb-1 group-hover:text-blue-600 transition-colors">
+                          {memory.title}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {memory.photo_count} photo
+                          {memory.photo_count !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                    )}
-                  </Link>
-                );
+
+                      {memory.cover_public_id && (
+                        <div className="aspect-square">
+                          <ImageWithFallback
+                            publicId={memory.cover_public_id}
+                            alt={`Preview of ${memory.title}`}
+                            className="w-full h-full object-cover"
+                            width={300}
+                            quality="auto"
+                          />
+                        </div>
+                      )}
+                    </Link>
+                  );
                 })}
               </div>
             </div>

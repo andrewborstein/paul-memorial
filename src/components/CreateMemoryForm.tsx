@@ -7,25 +7,9 @@ import UserStatusDisplay from './UserStatusDisplay';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
 import { setCurrentUser, getCurrentUser, isSignedIn } from '@/lib/user';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 type PhotoState = {
+  id: string; // Unique identifier
   file: File;
   preview: string;
   progress: number; // 0..100
@@ -41,57 +25,34 @@ interface CreateMemoryFormProps {
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
-// Sortable photo item component
-function SortablePhotoItem({
+// Photo item component
+function PhotoItem({
   photo,
-  index,
-  onReorder,
   onDelete,
   imageRefs,
-  totalPhotos,
 }: {
   photo: PhotoState;
-  index: number;
-  onReorder: (from: number, to: number) => void;
   onDelete: (photo: PhotoState) => void;
   imageRefs: React.MutableRefObject<{ [key: string]: HTMLImageElement }>;
-  totalPhotos: number;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: photo.file.name });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="border rounded-lg p-2 relative w-fit"
-    >
+    <div className="relative w-fit">
       <div className="relative">
         <img
           ref={(el) => {
             if (el) imageRefs.current[photo.file.name] = el;
           }}
-          src={photo.preview}
+          src={
+            photo.status === 'done' && photo.public_id
+              ? `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_96,h_96,c_fill/${photo.public_id}`
+              : photo.preview
+          }
           alt=""
-          className={`w-32 h-32 object-cover rounded mb-2 cursor-grab active:cursor-grabbing ${
+          className={`w-24 h-24 object-cover rounded mb-2 ${
             photo.status === 'uploading' || photo.status === 'queued'
               ? 'opacity-50'
               : ''
           }`}
-          {...attributes}
-          {...listeners}
           onLoad={(e) => {
             console.log('Image loaded successfully:', photo.file.name);
             const target = e.target as HTMLImageElement;
@@ -153,84 +114,43 @@ function SortablePhotoItem({
 
         {/* Fallback for unsupported formats */}
         <div
-          className={`hidden w-32 h-32 bg-gray-100 rounded mb-2 flex items-center justify-center text-xs text-gray-500`}
+          className={`hidden w-24 h-24 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500`}
         >
           <div className="text-center">
             <div className="text-lg mb-1">📷</div>
-            <div className="truncate max-w-full px-1">
-              {photo.public_id
-                ? photo.public_id.split('/').pop()
-                : photo.file.name}
-            </div>
             <div className="text-xs text-gray-400">
               {photo.status === 'done'
                 ? 'Loading...'
                 : photo.file.type || 'Unknown format'}
             </div>
-            {photo.status === 'uploading' && (
-              <div className="text-xs text-blue-600 mt-1">Converting...</div>
-            )}
           </div>
         </div>
 
         {photo.status === 'uploading' && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-          </div>
+          <>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            </div>
+            {/* Progress bar at bottom of image */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
+              <div
+                className="bg-blue-600 h-1 transition-all duration-300"
+                style={{ width: `${photo.progress}%` }}
+              />
+            </div>
+          </>
         )}
+
+        {/* Delete button over image */}
+        <button
+          type="button"
+          onClick={() => onDelete(photo)}
+          className="absolute top-1 right-1 w-6 h-6 bg-white text-gray-900 rounded-full text-sm font-bold flex items-center justify-center hover:bg-gray-100 border border-gray-300 shadow-sm"
+          title="Remove photo"
+        >
+          ×
+        </button>
       </div>
-      <div className="text-xs text-gray-600 mt-2 flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            disabled={index === 0}
-            onClick={() => onReorder(index, index - 1)}
-            className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
-            title="Move image up"
-          >
-            ↑
-          </button>
-          <button
-            type="button"
-            disabled={index === totalPhotos - 1}
-            onClick={() => onReorder(index, index + 1)}
-            className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
-            title="Move image down"
-          >
-            ↓
-          </button>
-        </div>
-        <span>
-          {photo.status === 'uploading' ? (
-            `${photo.progress}%`
-          ) : photo.status === 'error' ? (
-            <span className="text-red-600">✗ error</span>
-          ) : photo.status === 'done' ? (
-            <button
-              type="button"
-              onClick={() => onDelete(photo)}
-              className="inline-flex items-center justify-center w-6 h-6 bg-red-50 text-red-700 rounded-full text-xs hover:bg-red-100 border border-red-300"
-              title="Remove image"
-            >
-              <span className="text-sm font-bold">×</span>
-            </button>
-          ) : photo.status === 'queued' ? (
-            <span className="text-gray-400">...</span>
-          ) : (
-            photo.status
-          )}
-        </span>
-      </div>
-      {photo.status === 'uploading' && (
-        <div className="mt-2">
-          <div className="w-full bg-gray-200 rounded-full h-1">
-            <div
-              className="bg-blue-600 h-1 rounded-full transition-all duration-300"
-              style={{ width: `${photo.progress}%` }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -247,6 +167,7 @@ export default function CreateMemoryForm({
   const [body, setBody] = React.useState(memory?.body || '');
   const [photos, setPhotos] = React.useState<PhotoState[]>(
     memory?.photos.map((photo) => ({
+      id: `existing-${photo.public_id}`,
       file: new File([], photo.public_id), // Dummy file for existing photos
       preview: `https://res.cloudinary.com/${CLOUD}/image/upload/f_jpg,fl_progressive,fl_force_strip,w_200,h_200,c_fill,q_auto,dpr_2/${photo.public_id}`,
       progress: 100,
@@ -264,6 +185,8 @@ export default function CreateMemoryForm({
   const [pendingSubmission, setPendingSubmission] = React.useState<
     (() => void) | null
   >(null);
+  const [showTitleField, setShowTitleField] = React.useState(false);
+  const [showPhotoModal, setShowPhotoModal] = React.useState(false);
 
   // Initialize form with current user data if signed in
   React.useEffect(() => {
@@ -277,6 +200,7 @@ export default function CreateMemoryForm({
   }, [isEditMode]);
 
   const handleSignIn = (name: string, email: string) => {
+    console.log('handleSignIn called with:', { name, email });
     setCurrentUser(email, name);
     setName(name);
     setEmail(email);
@@ -291,17 +215,10 @@ export default function CreateMemoryForm({
   const errorRef = React.useRef<HTMLDivElement>(null);
   const imageRefs = React.useRef<{ [key: string]: HTMLImageElement }>({});
 
-  // DnD sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   function onSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     const items = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random()}`,
       file,
       preview: URL.createObjectURL(file),
       progress: 0,
@@ -311,6 +228,9 @@ export default function CreateMemoryForm({
 
     // Auto-upload the new files
     uploadNewFiles(items);
+
+    // Open the modal to show upload progress
+    setShowPhotoModal(true);
   }
 
   function uploadNewFiles(newPhotos: PhotoState[]) {
@@ -432,30 +352,6 @@ export default function CreateMemoryForm({
     }
   }
 
-  function reorder(from: number, to: number) {
-    setPhotos((prev) => {
-      const next = prev.slice();
-      const [m] = next.splice(from, 1);
-      next.splice(to, 0, m);
-      return next;
-    });
-  }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      setPhotos((items) => {
-        const oldIndex = items.findIndex(
-          (item) => item.file.name === active.id
-        );
-        const newIndex = items.findIndex((item) => item.file.name === over?.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }
-
   async function uploadOne(ps: PhotoState): Promise<string> {
     const fd = new FormData();
     fd.append('file', ps.file);
@@ -555,18 +451,8 @@ export default function CreateMemoryForm({
   function validateForm(): string[] {
     const newErrors: string[] = [];
 
-    if (!name.trim()) {
-      newErrors.push('Name is required');
-    }
-
-    if (!email.trim()) {
-      newErrors.push('Email is required');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.push('Please enter a valid email address');
-    }
-
     if (!body.trim()) {
-      newErrors.push('Memory is required');
+      newErrors.push('Please include a memory before publishing');
     }
 
     return newErrors;
@@ -623,6 +509,7 @@ export default function CreateMemoryForm({
     setErrors([]);
     setIsPublishing(true);
 
+    console.log('Submitting payload with name:', name, 'email:', email);
     const payload = {
       name,
       email,
@@ -670,191 +557,335 @@ export default function CreateMemoryForm({
       router.push(`/memories/${id}`);
       router.refresh();
     } else {
-      // Force a full page reload to ensure the index is updated
-      window.location.href = '/memories';
+      // Simple redirect with cache busting
+      window.location.href = `/memories?t=${Date.now()}`;
     }
   }
 
   return (
     <>
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-      {/* Validation Errors */}
-      {errors.length > 0 && (
-        <div
-          ref={errorRef}
-          tabIndex={-1}
-          className="bg-red-50 border border-red-200 rounded-md p-4 focus:outline-none focus:ring-2 focus:ring-red-500"
-        >
-          <div className="text-red-800 text-sm font-medium mb-2">
-            Please fix the following errors:
-          </div>
-          <ul className="text-red-700 text-sm space-y-1">
-            {errors.map((error, index) => (
-              <li key={index}>• {error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* User Status Display */}
-      <UserStatusDisplay
-        name={name}
-        email={email}
-        onEditContactInfo={() => {
-          setShowSignInModal(true);
-          setPendingSubmission(null);
-        }}
-      />
-
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-semibold text-gray-700 mb-2"
-        >
-          Title (Optional)
-        </label>
-        <p className="text-xs text-gray-500 mb-2">
-          Optional. If left blank, your name will be used as the title.
-        </p>
-        <input
-          id="title"
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Give your memory a title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          maxLength={200}
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="body"
-          className="block text-sm font-semibold text-gray-700 mb-2"
-        >
-          Memory *
-        </label>
-        <textarea
-          id="body"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Share your memory, story, or message"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={6}
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Photos / videos (Optional)
-        </label>
-        <input
-          id="photos"
-          type="file"
-          multiple
-          accept="image/*,video/*,.heic,.HEIC,.heif,.HEIF"
-          onChange={onSelect}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => document.getElementById('photos')?.click()}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 border border-gray-300"
-        >
-          Add photos
-        </button>
-        <p className="text-xs text-gray-500 mt-1">
-          Large images are automatically compressed. Videos must be under 10MB.
-          You can upload up to 150 photos/videos per memory. HEIC files are
-          supported and will be converted automatically.
-        </p>
-      </div>
-
-      {/* Photo Preview Grid */}
-      {photos.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
-            Photo Preview
-          </h3>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+      <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        {/* Validation Errors */}
+        {errors.length > 0 && (
+          <div
+            ref={errorRef}
+            tabIndex={-1}
+            className="bg-red-50 border border-red-200 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-red-500"
           >
-            <SortableContext
-              items={photos.map((p) => p.file.name)}
-              strategy={verticalListSortingStrategy}
+            <div className="text-red-700 text-sm">{errors[0]}</div>
+          </div>
+        )}
+
+        {/* User Status Display */}
+        <UserStatusDisplay
+          name={name}
+          email={email}
+          onEditContactInfo={() => {
+            setShowSignInModal(true);
+            setPendingSubmission(null);
+          }}
+        />
+
+        {/* Title Field - Hidden by default, expandable */}
+        {showTitleField && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-gray-700"
+              >
+                Title (Optional)
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowTitleField(false)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Hide
+              </button>
+            </div>
+            <input
+              id="title"
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Give your memory a title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={200}
+              autoFocus
+            />
+          </div>
+        )}
+
+        {/* Memory input with integrated actions */}
+        <div className="border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+          <textarea
+            id="body"
+            className="w-full px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-0 resize-none"
+            placeholder="What will you remember about Paul?"
+            value={body}
+            onChange={(e) => {
+              setBody(e.target.value);
+              // Clear errors when user starts typing
+              if (errors.length > 0) {
+                setErrors([]);
+              }
+            }}
+            rows={6}
+            required
+          />
+
+          {/* Integrated action buttons - like Facebook */}
+          <div className="border-t border-gray-200 px-3 py-2 bg-gray-50 rounded-b-md">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-600 font-medium">
+                Add to your memory:
+              </span>
+              <div className="flex items-center gap-2">
+                {/* Title button */}
+                <button
+                  type="button"
+                  onClick={() => setShowTitleField(!showTitleField)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors shadow-sm"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Title
+                  {title.trim() && (
+                    <svg
+                      className="w-4 h-4 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Photos button with count */}
+                <input
+                  id="photos"
+                  type="file"
+                  multiple
+                  accept="image/*,video/*,.heic,.HEIC,.heif,.HEIF"
+                  onChange={onSelect}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (photos.length > 0) {
+                      setShowPhotoModal(true);
+                    } else {
+                      document.getElementById('photos')?.click();
+                    }
+                  }}
+                  disabled={photos.some(
+                    (p) => p.status === 'uploading' || p.status === 'queued'
+                  )}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors shadow-sm"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  {photos.length > 0 ? `Photos (${photos.length})` : 'Photos'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            disabled={
+              isPublishing ||
+              photos.some(
+                (p) =>
+                  p.status === 'uploading' ||
+                  p.status === 'queued' ||
+                  p.status === 'error'
+              )
+            }
+            onClick={onPublish}
+          >
+            {isPublishing
+              ? isEditMode
+                ? 'Updating...'
+                : 'Publishing...'
+              : photos.some(
+                    (p) => p.status === 'uploading' || p.status === 'queued'
+                  )
+                ? 'Uploading photos...'
+                : isEditMode
+                  ? 'Update'
+                  : 'Publish'}
+          </button>
+
+          {isEditMode && (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
             >
-              <div className="flex flex-wrap gap-2">
-                {photos.map((p, i) => (
-                  <SortablePhotoItem
-                    key={p.file.name}
+              Cancel
+            </button>
+          )}
+        </div>
+
+        {/* Turnstile - only show in create mode */}
+        {!isEditMode && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="hidden">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => setTurnstileToken(token)}
+            />
+          </div>
+        )}
+      </form>
+
+      {/* Photo Management Modal */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Manage Photos</h3>
+              <button
+                type="button"
+                onClick={() => setShowPhotoModal(false)}
+                disabled={photos.some(
+                  (p) => p.status === 'uploading' || p.status === 'queued'
+                )}
+                className={`text-gray-500 hover:text-gray-700 ${
+                  photos.some(
+                    (p) => p.status === 'uploading' || p.status === 'queued'
+                  )
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                }`}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4">
+              {/* Uploading indicator */}
+              {photos.some(
+                (p) => p.status === 'uploading' || p.status === 'queued'
+              ) && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="flex items-center gap-2 text-blue-700">
+                    <div className="w-4 h-4 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-medium">
+                      {photos.filter((p) => p.status === 'uploading').length}{' '}
+                      uploading,{' '}
+                      {photos.filter((p) => p.status === 'queued').length}{' '}
+                      queued
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div
+                className="grid gap-2"
+                style={{
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 96px))',
+                }}
+              >
+                {photos.map((p) => (
+                  <PhotoItem
+                    key={p.id}
                     photo={p}
-                    index={i}
-                    onReorder={reorder}
                     onDelete={deletePhoto}
                     imageRefs={imageRefs}
-                    totalPhotos={photos.length}
                   />
                 ))}
               </div>
-            </SortableContext>
-          </DndContext>
+
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex gap-2 items-center">
+                  <input
+                    id="photos-modal"
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,.heic,.HEIC,.heif,.HEIF"
+                    onChange={onSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById('photos-modal')?.click()
+                    }
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    Add more photos
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPhotoModal(false)}
+                    disabled={photos.some(
+                      (p) => p.status === 'uploading' || p.status === 'queued'
+                    )}
+                    className={`px-4 py-2 text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="flex gap-4">
-        <button
-          type="button"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          disabled={
-            isPublishing ||
-            photos.some(
-              (p) =>
-                p.status === 'uploading' ||
-                p.status === 'queued' ||
-                p.status === 'error'
-            )
-          }
-          onClick={onPublish}
-        >
-          {isPublishing
-            ? isEditMode
-              ? 'Updating...'
-              : 'Publishing...'
-            : photos.some(
-                  (p) => p.status === 'uploading' || p.status === 'queued'
-                )
-              ? 'Uploading photos...'
-              : isEditMode
-                ? 'Update Memory'
-                : 'Publish memory'}
-        </button>
-
-        {isEditMode && (
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-
-      {/* Turnstile - only show in create mode */}
-      {!isEditMode && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-        <div className="flex justify-start">
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-            onSuccess={(token) => setTurnstileToken(token)}
-          />
-        </div>
-      )}
-    </form>
-
-          {/* Contact Info Modal - outside the form to avoid nested forms */}
+      {/* Contact Info Modal - outside the form to avoid nested forms */}
       <ContactInfoModal
         isOpen={showSignInModal}
         onClose={() => {
@@ -863,7 +894,7 @@ export default function CreateMemoryForm({
         }}
         onSubmit={handleSignIn}
         title="Contact info"
-        description="Your memory is ready to publish! Please provide your contact information to continue."
+        description="Enter a valid email to create and edit your memories."
       />
     </>
   );

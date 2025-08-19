@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 async function getMemory(id: string): Promise<MemoryDetail> {
   console.log('getMemory: Fetching memory with ID:', id);
   const res = await serverFetch(`/api/memory/${id}`, {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   console.log('getMemory: Response status:', res.status);
   if (!res.ok) {
@@ -72,17 +72,16 @@ export default async function MemoryPage({
                 />
               </div>
             </div>
-            
+
             {/* Edit/Delete Actions */}
-            <MemoryActions 
-              memoryId={memory.id}
-              creatorEmail={memory.email}
-            />
+            <MemoryActions memoryId={memory.id} creatorEmail={memory.email} />
           </div>
 
           {/* Text Content */}
           <div>
-            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{memory.body}</p>
+            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {memory.body}
+            </p>
           </div>
 
           {/* Photos */}

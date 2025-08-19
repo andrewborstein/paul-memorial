@@ -29,16 +29,20 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
     setIsLoaded(true);
   }, [memory.email]);
 
-  const displayTitle = memory.title || (isCurrentUser ? 'You' : memory.name || 'Unknown');
+  // Only show title if it's explicitly set and not empty
+  // Only show title if it's explicitly set and not empty
+  const displayTitle = memory.title?.trim() || undefined;
   const bodyText = memory.body || '';
-  const truncatedBody = bodyText.length > 200 
-    ? bodyText.substring(0, 200).trim() + '...'
-    : bodyText;
+  const truncatedBody =
+    bodyText.length > 200
+      ? bodyText.substring(0, 200).trim() + '...'
+      : bodyText;
   const needsTruncation = bodyText.length > 200;
 
-  const cardClasses = isLoaded && isCurrentUser
-    ? "block bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group"
-    : "block bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group";
+  const cardClasses =
+    isLoaded && isCurrentUser
+      ? 'block bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group'
+      : 'block bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow group';
 
   return (
     <Link
@@ -49,11 +53,13 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
       <div className="flex gap-6">
         {/* Text Content */}
         <div className="flex-1 min-w-0">
-          <header className="mb-3">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-              {displayTitle}
-            </h2>
-          </header>
+          {displayTitle && (
+            <header className="mb-3">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                {displayTitle}
+              </h2>
+            </header>
+          )}
 
           {/* Memory Body */}
           <div className="text-gray-700 mb-3">

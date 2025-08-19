@@ -9,7 +9,11 @@ interface MemoryMetadataProps {
   creatorName: string;
 }
 
-export default function MemoryMetadata({ date, creatorEmail, creatorName }: MemoryMetadataProps) {
+export default function MemoryMetadata({
+  date,
+  creatorEmail,
+  creatorName,
+}: MemoryMetadataProps) {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -35,12 +39,15 @@ export default function MemoryMetadata({ date, creatorEmail, creatorName }: Memo
 
   return (
     <div className="flex items-center gap-2 text-xs flex-wrap">
-      <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-        isCurrentUser 
-          ? 'bg-blue-100 text-blue-700' 
-          : 'bg-gray-100 text-gray-700'
-      }`}>
-        {isCurrentUser ? 'You' : creatorName}, {new Date(date).toLocaleDateString('en-US', {
+      <span
+        className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+          isCurrentUser
+            ? 'bg-blue-100 text-blue-700'
+            : 'bg-gray-100 text-gray-700'
+        }`}
+      >
+        {creatorName},{' '}
+        {new Date(date).toLocaleDateString('en-US', {
           month: 'numeric',
           day: 'numeric',
           year: '2-digit',

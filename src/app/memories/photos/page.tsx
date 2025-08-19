@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
   const res = await serverFetch('/api/memories', {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
@@ -23,7 +23,7 @@ export default async function PhotosPage() {
 
   return (
     <PageContainer>
-      <div className="flex items-start justify-between mb-8 gap-4">
+      <div className="flex items-center justify-between mb-8 gap-4">
         <div className="min-w-0 flex-1">
           <PageHeader
             title="Photos"

@@ -5,12 +5,17 @@ import { serverFetch } from '@/lib/utils';
 import MemoryCard from '@/components/MemoryCard';
 import type { MemoryIndexItem } from '@/types/memory';
 
-// Make this page dynamic to avoid build-time API calls
+// Force dynamic rendering and disable all caching
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const res = await serverFetch('/api/memories', {
-    next: { revalidate: 60 },
+  // Add timestamp and random to bust cache
+  const timestamp = Date.now();
+  const random = Math.random();
+  const res = await serverFetch(`/api/memories?t=${timestamp}&r=${random}`, {
+    cache: 'no-store', // Disable cache entirely
   });
   if (!res.ok) return [];
   return res.json();
@@ -22,7 +27,7 @@ export default async function MemoriesPage() {
 
     return (
       <PageContainer>
-        <div className="flex items-start justify-between mb-8 gap-4">
+        <div className="flex items-center justify-between mb-8 gap-4">
           <div className="min-w-0 flex-1">
             <PageHeader
               title="Memories"
@@ -68,7 +73,7 @@ export default async function MemoriesPage() {
     console.error('Error loading memories page:', error);
     return (
       <PageContainer>
-        <div className="flex items-start justify-between mb-8 gap-4">
+        <div className="flex items-center justify-between mb-8 gap-4">
           <div className="min-w-0 flex-1">
             <PageHeader
               title="Memories"

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 async function getPhotoData(photoId: string) {
   const res = await serverFetch(`/api/photo/${photoId}`, {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) throw new Error('Not found');
   return res.json();

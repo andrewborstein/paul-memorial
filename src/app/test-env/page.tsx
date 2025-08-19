@@ -223,7 +223,7 @@ export default function TestEnvPage() {
 
           {/* Actual widget test */}
           {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-            <div className="mt-4">
+            <div className="mt-4 hidden">
               <div
                 className="cf-turnstile"
                 data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}

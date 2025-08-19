@@ -1,5 +1,10 @@
-import { readIndex, writeIndex, readMemory, writeMemory, deleteMemory } from '@/lib/data';
-import { revalidatePath } from 'next/cache';
+import {
+  readIndex,
+  writeIndex,
+  readMemory,
+  writeMemory,
+  deleteMemory,
+} from '@/lib/data';
 
 export async function GET(
   _req: Request,
@@ -66,11 +71,11 @@ export async function PUT(
     // Update index
     const index = await readIndex();
     const coverPublicId = updatedMemory.photos[0]?.public_id;
-    const updatedIndex = index.map(item => 
-      item.id === id 
+    const updatedIndex = index.map((item) =>
+      item.id === id
         ? {
             id: updatedMemory.id,
-            title: updatedMemory.title || updatedMemory.name,
+            title: updatedMemory.title || undefined, // Only use title if explicitly provided
             date: updatedMemory.date,
             cover_public_id: coverPublicId,
             photo_count: updatedMemory.photos.length,
@@ -78,12 +83,6 @@ export async function PUT(
         : item
     );
     await writeIndex(updatedIndex);
-
-    // Invalidate cache
-    revalidatePath('/');
-    revalidatePath('/memories');
-    revalidatePath('/memories/[id]', 'page');
-    revalidatePath('/photos');
 
     return Response.json({ id: updatedMemory.id });
   } catch (error) {
@@ -98,7 +97,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    
+
     // Read the memory to verify it exists
     const memory = await readMemory(id);
     if (!memory) {
@@ -110,7 +109,7 @@ export async function DELETE(
 
     // Remove from index
     const index = await readIndex();
-    const updatedIndex = index.filter(m => m.id !== id);
+    const updatedIndex = index.filter((m) => m.id !== id);
     await writeIndex(updatedIndex);
 
     // Delete the memory detail file
@@ -118,14 +117,6 @@ export async function DELETE(
 
     // TODO: Delete photos from Cloudinary
     // For now, just remove from index and memory file
-
-    // Invalidate cache aggressively
-    revalidatePath('/');
-    revalidatePath('/memories');
-    revalidatePath('/memories/[id]', 'page');
-    revalidatePath('/photos');
-    revalidatePath('/api/memories');
-    revalidatePath('/api/memory/[id]', 'page');
 
     return new Response(null, { status: 204 });
   } catch (error) {

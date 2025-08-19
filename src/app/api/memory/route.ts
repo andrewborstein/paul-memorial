@@ -1,7 +1,6 @@
 import { nanoid } from 'nanoid';
 import { readIndex, writeIndex, writeMemory } from '@/lib/data';
 import { cldUrl } from '@/lib/cloudinary';
-import { revalidatePath } from 'next/cache';
 
 type PhotoInput = {
   public_id: string;
@@ -54,6 +53,7 @@ export async function POST(req: Request) {
     };
 
     console.log('Creating memory with ID:', id);
+    console.log('Memory detail:', JSON.stringify(detail, null, 2));
 
     // Write detail first
     await writeMemory(detail);
@@ -63,23 +63,23 @@ export async function POST(req: Request) {
     const index = await readIndex();
     console.log('Current index has', index.length, 'memories');
     const coverPublicId = detail.photos[0]?.public_id;
+    console.log('Cover public ID:', coverPublicId);
+    console.log('Photos array:', detail.photos);
+
     const nextIndex = [
       {
         id: detail.id,
-        title: detail.title || detail.name, // Use title if provided, otherwise use name
+        title: detail.title || undefined, // Only use title if explicitly provided
         date: detail.date,
         cover_public_id: coverPublicId,
         photo_count: detail.photos.length,
       },
       ...index,
     ].slice(0, 500); // keep it small
-    await writeIndex(nextIndex);
 
-    // Invalidate cache
-    revalidatePath('/');
-    revalidatePath('/memories');
-    revalidatePath('/memories/[id]', 'page');
-    revalidatePath('/photos');
+    console.log('New index entry:', JSON.stringify(nextIndex[0], null, 2));
+    await writeIndex(nextIndex);
+    console.log('Index updated successfully');
 
     return Response.json({ id: detail.id }, { status: 201 });
   } catch (error) {

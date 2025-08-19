@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
   const res = await serverFetch('/api/memories', {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();

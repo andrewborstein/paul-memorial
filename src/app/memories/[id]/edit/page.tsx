@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 async function getMemory(id: string): Promise<MemoryDetail> {
   const res = await serverFetch(`/api/memory/${id}`, {
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) {
     throw new Error('Not found');
@@ -33,9 +33,7 @@ export default async function EditMemoryPage({
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold mb-2">Edit Memory</h1>
-            <p className="text-gray-600">
-              Update your memory "{displayTitle}"
-            </p>
+            <p className="text-gray-600">Update your memory "{displayTitle}"</p>
           </div>
 
           <CreateMemoryForm memory={memory} />

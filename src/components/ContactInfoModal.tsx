@@ -11,7 +11,8 @@ interface ContactInfoModalProps {
 }
 
 interface UserInfo {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
 }
 
@@ -24,7 +25,8 @@ export default function ContactInfoModal({
 }: ContactInfoModalProps) {
   const [step, setStep] = useState<'email' | 'name' | 'welcome'>('email');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
@@ -41,12 +43,18 @@ export default function ContactInfoModal({
     return null;
   };
 
-  const validateName = (name: string) => {
-    if (!name.trim()) {
-      return 'Name is required';
+  const validateNames = (firstName: string, lastName: string) => {
+    if (!firstName.trim()) {
+      return 'First name is required';
     }
-    if (name.trim().length < 2) {
-      return 'Name must be at least 2 characters';
+    if (!lastName.trim()) {
+      return 'Last name is required';
+    }
+    if (firstName.trim().length < 2) {
+      return 'First name must be at least 2 characters';
+    }
+    if (lastName.trim().length < 2) {
+      return 'Last name must be at least 2 characters';
     }
     return null;
   };
@@ -71,10 +79,12 @@ export default function ContactInfoModal({
 
       if (response.ok) {
         const { exists, name: existingName } = await response.json();
-        
+
         if (exists && existingName) {
-          // Existing user
-          setName(existingName);
+          // Existing user - split the name
+          const nameParts = existingName.split(' ');
+          setFirstName(nameParts[0] || '');
+          setLastName(nameParts.slice(1).join(' ') || '');
           setStep('welcome');
         } else {
           // New user
@@ -94,7 +104,7 @@ export default function ContactInfoModal({
   };
 
   const handleNameSubmit = () => {
-    const nameError = validateName(name);
+    const nameError = validateNames(firstName, lastName);
     if (nameError) {
       setErrors([nameError]);
       return;
@@ -102,7 +112,10 @@ export default function ContactInfoModal({
 
     setIsSubmitting(true);
     try {
-      onSubmit(name.trim(), email.trim().toLowerCase());
+      onSubmit(
+        `${firstName.trim()} ${lastName.trim()}`,
+        email.trim().toLowerCase()
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -111,7 +124,7 @@ export default function ContactInfoModal({
   const handleWelcomeContinue = () => {
     setIsSubmitting(true);
     try {
-      onSubmit(name, email.trim().toLowerCase());
+      onSubmit(`${firstName} ${lastName}`, email.trim().toLowerCase());
     } finally {
       setIsSubmitting(false);
     }
@@ -120,7 +133,8 @@ export default function ContactInfoModal({
   const handleClose = () => {
     setStep('email');
     setEmail('');
-    setName('');
+    setFirstName('');
+    setLastName('');
     setErrors([]);
     setIsSubmitting(false);
     setIsCheckingEmail(false);
@@ -131,8 +145,10 @@ export default function ContactInfoModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
-        <p className="text-gray-600 mb-6">{description}</p>
-        
+        {step === 'email' && (
+          <p className="text-gray-600 mb-2">{description}</p>
+        )}
+
         {errors.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
             <ul className="text-red-700 text-sm space-y-1">
@@ -147,7 +163,10 @@ export default function ContactInfoModal({
         {step === 'email' && (
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1 sr-only"
+              >
                 Email *
               </label>
               <input
@@ -161,13 +180,13 @@ export default function ContactInfoModal({
                 onKeyDown={(e) => e.key === 'Enter' && checkEmail()}
               />
             </div>
-            
+
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={checkEmail}
                 disabled={isCheckingEmail}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isCheckingEmail ? 'Checking...' : 'Continue'}
               </button>
@@ -175,7 +194,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={handleClose}
                 disabled={isCheckingEmail}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -187,32 +206,55 @@ export default function ContactInfoModal({
         {step === 'name' && (
           <div className="space-y-4">
             <div className="text-sm text-gray-600 mb-4">
-              Welcome! Please tell us your name.
+              Your name will be displayed next to your contributions.
             </div>
-            
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Your name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Your first and last name"
-                disabled={isSubmitting}
-                onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
-                autoFocus
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-1 sr-only"
+                >
+                  First name *
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="First name"
+                  disabled={isSubmitting}
+                  onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-1 sr-only"
+                >
+                  Last name *
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Last name"
+                  disabled={isSubmitting}
+                  onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
+                />
+              </div>
             </div>
-            
+
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleNameSubmit}
                 disabled={isSubmitting}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Saving...' : 'Continue'}
               </button>
@@ -220,7 +262,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={() => setStep('email')}
                 disabled={isSubmitting}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
                 Back
               </button>
@@ -234,13 +276,13 @@ export default function ContactInfoModal({
             <div className="text-center">
               <div className="text-2xl mb-2">👋</div>
               <div className="text-lg font-medium text-gray-900 mb-1">
-                Welcome back, {name}!
+                Welcome back, {firstName} {lastName}!
               </div>
               <div className="text-sm text-gray-600">
                 We'll use your existing contact info.
               </div>
             </div>
-            
+
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
@@ -254,7 +296,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={() => setStep('email')}
                 disabled={isSubmitting}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
                 Use different email
               </button>

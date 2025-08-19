@@ -8,8 +8,10 @@ import type { MemoryIndexItem } from '@/types/memory';
 export const dynamic = 'force-dynamic';
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
-  const res = await serverFetch('/api/memories', {
-    next: { revalidate: 60 },
+  // Add timestamp to bust cache
+  const timestamp = Date.now();
+  const res = await serverFetch(`/api/memories?t=${timestamp}`, {
+    cache: 'no-store',
   });
   if (!res.ok) return [];
   return res.json();
