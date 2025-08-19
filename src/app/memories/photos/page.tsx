@@ -9,6 +9,8 @@ import type { MemoryIndexItem } from '@/types/memory';
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
+export const fetchCache = 'force-no-store';
+
 async function getMemories(): Promise<MemoryIndexItem[]> {
   const res = await serverFetch('/api/memories', {
     cache: 'no-store',
