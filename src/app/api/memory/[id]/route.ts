@@ -5,6 +5,7 @@ import {
   readBlobJson,
 } from '@/lib/data';
 import { del } from '@vercel/blob';
+import { warmUpImages, getHeroImageUrl, getGridImageUrl } from '@/lib/cloudinary';
 
 const k = (key: string) =>
   process.env.BLOB_PREFIX ? `${process.env.BLOB_PREFIX}/${key}` : key;
@@ -98,6 +99,20 @@ export async function PUT(
 
     // Perform immutable update (creates new memory, deletes old one)
     const updatedMemory = await immutableUpdateMemory(id, changes);
+
+    // Warm up the most important image URLs for faster first view
+    if (updatedMemory.photos.length > 0) {
+      const warmUpUrls = [
+        // Hero image (first photo)
+        getHeroImageUrl(updatedMemory.photos[0].public_id),
+        // Grid images (first few photos)
+        ...updatedMemory.photos.slice(0, 3).map(photo => getGridImageUrl(photo.public_id))
+      ];
+      
+      // Fire off warm-up requests in background (don't await)
+      warmUpImages(warmUpUrls);
+      console.log('Warming up', warmUpUrls.length, 'image URLs for updated memory');
+    }
 
     return Response.json({
       id: updatedMemory.id,

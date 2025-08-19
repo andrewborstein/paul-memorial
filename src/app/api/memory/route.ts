@@ -1,5 +1,5 @@
 import { createMemory } from '@/lib/data';
-import { cldUrl } from '@/lib/cloudinary';
+import { cldUrl, warmUpImages, getHeroImageUrl, getGridImageUrl } from '@/lib/cloudinary';
 
 type PhotoInput = {
   public_id: string;
@@ -52,6 +52,20 @@ export async function POST(req: Request) {
 
     const createdMemory = await createMemory(detail);
     console.log('Memory created successfully with ID:', createdMemory.id);
+
+    // Warm up the most important image URLs for faster first view
+    if (createdMemory.photos.length > 0) {
+      const warmUpUrls = [
+        // Hero image (first photo)
+        getHeroImageUrl(createdMemory.photos[0].public_id),
+        // Grid images (first few photos)
+        ...createdMemory.photos.slice(0, 3).map(photo => getGridImageUrl(photo.public_id))
+      ];
+      
+      // Fire off warm-up requests in background (don't await)
+      warmUpImages(warmUpUrls);
+      console.log('Warming up', warmUpUrls.length, 'image URLs');
+    }
 
     return Response.json(
       { id: createdMemory.id, updated_at: createdMemory.updated_at },
