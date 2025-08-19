@@ -7,9 +7,18 @@ import type { MemoryDetail } from '@/types/memory';
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
-async function getMemory(id: string): Promise<MemoryDetail> {
-  const res = await serverFetch(`/api/memory/${id}`, {
-    cache: 'no-store',
+async function getMemory(
+  id: string,
+  fresh?: boolean,
+  t?: string
+): Promise<MemoryDetail> {
+  const params = new URLSearchParams();
+  if (fresh) params.set('fresh', '1');
+  if (t) params.set('t', t);
+
+  const url = `/api/memory/${id}${params.toString() ? `?${params.toString()}` : ''}`;
+  const res = await serverFetch(url, {
+    cache: fresh ? 'no-store' : 'default',
   });
   if (!res.ok) {
     throw new Error('Not found');
@@ -19,13 +28,16 @@ async function getMemory(id: string): Promise<MemoryDetail> {
 
 export default async function EditMemoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ fresh?: string; t?: string }>;
 }) {
   const { id } = await params;
+  const { fresh, t } = searchParams ? await searchParams : {};
 
   try {
-    const memory = await getMemory(id);
+    const memory = await getMemory(id, fresh === '1', t);
     const displayTitle = memory.title || memory.name;
 
     return (

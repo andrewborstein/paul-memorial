@@ -129,6 +129,8 @@ export async function immutableUpdateMemory(
   oldId: string,
   changes: Partial<MemoryDetail>
 ) {
+  console.log('Starting immutable update for oldId:', oldId);
+
   // read the old doc (fresh) to keep created_at
   const oldDoc = await readBlobJson<MemoryDetail>(`memories/${oldId}.json`, {
     forceFresh: true,
@@ -142,14 +144,25 @@ export async function immutableUpdateMemory(
     created_at: oldDoc.created_at, // preserve
   });
 
+  console.log(
+    'Created new memory with ID:',
+    newDoc.id,
+    'from old ID:',
+    oldId,
+    'photos:',
+    newDoc.photos?.length
+  );
+
   // optional: write a redirect pointer oldId -> newId
   await writeBlobJson(`${REDIRECT_PREFIX}/${oldId}.json`, {
     id: newDoc.id,
     updated_at: newDoc.updated_at,
   });
+  console.log('Created redirect pointer:', oldId, '->', newDoc.id);
 
   // remove old artifacts
   await deleteMemoryAndIndex(oldId);
+  console.log('Deleted old memory and index for:', oldId);
 
   return newDoc;
 }

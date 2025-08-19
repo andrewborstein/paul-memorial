@@ -597,8 +597,8 @@ export default function CreateMemoryForm({
     const { id, updated_at } = await r.json();
 
     if (isEditMode) {
-      // Redirect to memory page with updated_at timestamp for cache busting
-      window.location.href = `/memories/${id}?fresh=1&t=${updated_at}`;
+      // Force hard reload to memory page to clear any cached photo URLs
+      window.location.replace(`/memories/${id}?fresh=1&t=${updated_at}`);
     } else {
       // Redirect to memories page with updated_at timestamp for cache busting
       window.location.href = `/memories?fresh=1&t=${updated_at}`;

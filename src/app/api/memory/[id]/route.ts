@@ -15,23 +15,30 @@ export async function GET(
     const fresh = searchParams.get('fresh') === '1';
     const t = searchParams.get('t') || undefined;
 
-    console.log('Attempting to fetch memory:', id, 'fresh:', fresh);
+    console.log('Attempting to fetch memory:', id, 'fresh:', fresh, 't:', t);
 
     // Try current id
     let doc = await readMemory(id, { forceFresh: fresh, updated_at: t });
+    console.log('Tried to read memory directly:', id, 'found:', !!doc);
 
     // If missing, check redirect pointer
     if (!doc) {
+      console.log(
+        'Memory not found directly, checking redirect pointer for:',
+        id
+      );
       const ptr = await readBlobJson<{ id: string; updated_at?: string }>(
         `redirects/${id}.json`,
         { forceFresh: true }
       );
+      console.log('Redirect pointer result:', ptr);
       if (ptr?.id) {
         console.log('Found redirect pointer:', id, '->', ptr.id);
         doc = await readMemory(ptr.id, {
           forceFresh: fresh,
           updated_at: t || ptr.updated_at,
         });
+        console.log('Read memory via redirect:', ptr.id, 'found:', !!doc);
       }
     }
 
@@ -40,7 +47,14 @@ export async function GET(
       return new Response('Not found', { status: 404 });
     }
 
-    console.log('Successfully fetched memory:', id);
+    console.log(
+      'Successfully fetched memory:',
+      id,
+      'photos:',
+      doc.photos?.length,
+      'photo IDs:',
+      doc.photos?.map((p) => p.public_id).slice(0, 3)
+    );
     const response = Response.json(doc);
     response.headers.set(
       'Cache-Control',

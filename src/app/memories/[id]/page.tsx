@@ -25,9 +25,10 @@ async function getMemory(
     't:',
     t
   );
-  const url = fresh
-    ? `/api/memory/${id}?fresh=1${t ? `&t=${t}` : ''}`
-    : `/api/memory/${id}`;
+  const qs = new URLSearchParams();
+  if (fresh) qs.set('fresh', '1');
+  if (t) qs.set('t', t);
+  const url = qs.toString() ? `/api/memory/${id}?${qs}` : `/api/memory/${id}`;
   const res = await serverFetch(url, {
     cache: fresh ? 'no-store' : 'default',
   });

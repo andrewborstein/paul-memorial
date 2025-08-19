@@ -97,19 +97,19 @@ export default function ImageWithFallback({
 
   return (
     <div className="relative">
+      {isLoading && (
+        <div className={`absolute inset-0 bg-gray-200 animate-pulse z-0`}>
+          <div className="w-full h-full bg-gray-300 rounded"></div>
+        </div>
+      )}
       <img
         src={imageSrc}
         alt={alt}
-        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300 object-cover`}
+        className={`${className} object-cover relative z-10`}
         onLoad={handleLoad}
         onError={handleError}
         loading="lazy"
       />
-      {isLoading && (
-        <div className={`absolute inset-0 bg-gray-200 animate-pulse`}>
-          <div className="w-full h-full bg-gray-300 rounded"></div>
-        </div>
-      )}
     </div>
   );
 }
