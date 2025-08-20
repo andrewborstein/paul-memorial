@@ -742,7 +742,11 @@ export default function CreateMemoryForm({
                 <button
                   type="button"
                   onClick={() => setShowTitleField(!showTitleField)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors shadow-sm"
+                  className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition-colors shadow-sm ${
+                    title.trim()
+                      ? 'bg-green-50 border border-green-600 text-green-800 hover:bg-green-100'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -796,7 +800,11 @@ export default function CreateMemoryForm({
                   disabled={photos.some(
                     (p) => p.status === 'uploading' || p.status === 'queued'
                   )}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors shadow-sm"
+                  className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition-colors shadow-sm ${
+                    photos.length > 0
+                      ? 'bg-green-50 border border-green-600 text-green-800 hover:bg-green-100'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -976,23 +984,23 @@ export default function CreateMemoryForm({
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      document.getElementById('photos-modal')?.click()
-                    }
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Add more photos
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={() => setShowPhotoModal(false)}
                     disabled={photos.some(
                       (p) => p.status === 'uploading' || p.status === 'queued'
                     )}
-                    className={`px-4 py-2 text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     Done
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById('photos-modal')?.click()
+                    }
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    + Add more photos
                   </button>
                 </div>
               </div>

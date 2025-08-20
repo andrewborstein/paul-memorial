@@ -31,6 +31,8 @@ export function setCurrentUser(email: string, name: string): UserInfo {
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
+    // Dispatch event to notify components of user update
+    window.dispatchEvent(new CustomEvent('userUpdated'));
   }
 
   return userInfo;
@@ -50,6 +52,8 @@ export function getCurrentUser(): UserInfo | null {
 export function clearCurrentUser(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(USER_STORAGE_KEY);
+    // Dispatch event to notify components of user update
+    window.dispatchEvent(new CustomEvent('userUpdated'));
   }
 }
 

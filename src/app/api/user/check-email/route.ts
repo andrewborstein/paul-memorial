@@ -1,4 +1,17 @@
 import { aggregateIndex } from '@/lib/data';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
+
+async function readUsers() {
+  try {
+    const data = await fs.readFile(USERS_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -9,38 +22,48 @@ export async function POST(request: Request) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+    console.log('Checking email:', normalizedEmail);
 
-    // Read all memories to check for existing email
+    // First check the users file
+    const users = await readUsers();
+    console.log('Found users:', users.length);
+    
+    const existingUser = users.find(user => user.email === normalizedEmail);
+    if (existingUser) {
+      console.log('Existing user found in users file:', existingUser);
+      return Response.json({
+        exists: true,
+        name: existingUser.name,
+        email: existingUser.email,
+      });
+    }
+
+    // If not found in users, check memories as fallback
     const memories = await aggregateIndex();
+    console.log('Found memories:', memories.length);
 
-    // Find any memory with this email
-    const existingMemory = memories.find((memory) => {
-      // We need to read the full memory to get the email
-      // For now, we'll check the index and then read the detail if needed
-      return false; // Placeholder - we'll implement this properly
-    });
-
-    // For now, let's check if we have any memories with this email
-    // This is a simplified approach - in a real app you'd have a users table
     const memoriesWithEmail = await Promise.all(
       memories.map(async (memory) => {
         try {
           const { readMemory } = await import('@/lib/data');
           const detail = await readMemory(memory.id);
+          console.log(`Memory ${memory.id} email:`, detail?.email);
           return detail?.email === normalizedEmail ? detail : null;
-        } catch {
+        } catch (error) {
+          console.error(`Error reading memory ${memory.id}:`, error);
           return null;
         }
       })
     );
 
-    const existingUser = memoriesWithEmail.find((m) => m !== null);
+    const existingMemoryUser = memoriesWithEmail.find((m) => m !== null);
+    console.log('Existing user found in memories:', existingMemoryUser);
 
-    if (existingUser) {
+    if (existingMemoryUser) {
       return Response.json({
         exists: true,
-        name: existingUser.name,
-        email: existingUser.email,
+        name: existingMemoryUser.name,
+        email: existingMemoryUser.email,
       });
     } else {
       return Response.json({

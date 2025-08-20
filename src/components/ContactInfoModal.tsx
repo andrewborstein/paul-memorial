@@ -80,6 +80,7 @@ export default function ContactInfoModal({
     setErrors([]);
 
     try {
+      console.log('Checking email in modal:', email.trim().toLowerCase());
       // Check if email exists in our system
       const response = await fetch('/api/user/check-email', {
         method: 'POST',
@@ -87,20 +88,27 @@ export default function ContactInfoModal({
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
-        const { exists, name: existingName } = await response.json();
+        const result = await response.json();
+        console.log('API response:', result);
+        const { exists, name: existingName } = result;
 
         if (exists && existingName) {
+          console.log('Existing user found:', existingName);
           // Existing user - split the name
           const nameParts = existingName.split(' ');
           setFirstName(nameParts[0] || '');
           setLastName(nameParts.slice(1).join(' ') || '');
           setStep('welcome');
         } else {
+          console.log('New user');
           // New user
           setStep('name');
         }
       } else {
+        console.log('API failed, assuming new user');
         // If API fails, assume new user
         setStep('name');
       }
