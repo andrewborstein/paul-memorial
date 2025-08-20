@@ -36,68 +36,74 @@ export default async function PhotoPage({
 
     return (
       <PageContainer>
-        {/* Breadcrumbs and Navigation */}
-        <div className="mb-6 flex items-center justify-between">
-          <nav>
-            <ol className="flex items-center space-x-2 text-sm">
-              <li>
-                <Link
-                  href="/memories"
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Memories
-                </Link>
-              </li>
-              <li className="text-gray-400">/</li>
-              <li>
-                <Link
-                  href={`/memories/${memory.id}`}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  {displayTitle}
-                </Link>
-              </li>
-              <li className="text-gray-400">/</li>
-              <li className="text-gray-600 font-medium">
-                Photo {photoIndex + 1} of {memory.photos.length}
-              </li>
-            </ol>
-          </nav>
+        <div className="space-y-6">
+          {/* Breadcrumbs and Navigation */}
+          <div className="flex items-center justify-between flex-wrap">
+            <nav>
+              <ol className="flex items-center space-x-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <Link
+                    href="/memories"
+                    className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                  >
+                    Memories
+                  </Link>
+                  <span className="text-gray-400">/</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Link
+                    href={`/memories/${memory.id}`}
+                    className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                  >
+                    {displayTitle}
+                  </Link>
+                  <span className="text-gray-400">/</span>
+                </li>
+                <li className="text-gray-600 font-medium whitespace-nowrap">
+                  Photo {photoIndex + 1} of {memory.photos.length}
+                </li>
+              </ol>
+            </nav>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-2">
-            {prevPhoto ? (
-              <Link
-                href={`/memories/photos/${prevPhoto.public_id}`}
-                className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200"
-              >
-                ← Previous
-              </Link>
-            ) : (
-              <div className="px-3 py-1 text-gray-400 text-sm">← Previous</div>
-            )}
+            {/* Navigation Buttons */}
+            <div className="flex items-center gap-2 py-4 w-full sm:w-auto">
+              {prevPhoto ? (
+                <Link
+                  href={`/memories/photos/${prevPhoto.public_id}`}
+                  className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center"
+                >
+                  ← Previous
+                </Link>
+              ) : (
+                <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  ← Previous
+                </div>
+              )}
 
-            {nextPhoto ? (
-              <Link
-                href={`/memories/photos/${nextPhoto.public_id}`}
-                className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200"
-              >
-                Next →
-              </Link>
-            ) : (
-              <div className="px-3 py-1 text-gray-400 text-sm">Next →</div>
-            )}
+              {nextPhoto ? (
+                <Link
+                  href={`/memories/photos/${nextPhoto.public_id}`}
+                  className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center"
+                >
+                  Next →
+                </Link>
+              ) : (
+                <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  Next →
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Photo Display */}
-        <div className="flex justify-center">
-          <PhotoImage
-            publicId={photo.public_id}
-            alt={photo.caption || 'Photo'}
-            className="max-w-full h-auto rounded-lg shadow-lg"
-            priority={true}
-          />
+          {/* Photo Display */}
+          <div className="flex justify-center">
+            <PhotoImage
+              publicId={photo.public_id}
+              alt={photo.caption || 'Photo'}
+              className="max-w-full h-auto rounded-lg shadow-lg"
+              priority={true}
+            />
+          </div>
         </div>
       </PageContainer>
     );

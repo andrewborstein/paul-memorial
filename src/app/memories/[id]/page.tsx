@@ -48,42 +48,45 @@ export default async function MemoryPage({
 
     return (
       <PageContainer>
-        {/* Breadcrumbs */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm">
-            <li>
-              <Link
-                href="/memories"
-                className="text-blue-600 hover:text-blue-800"
-              >
-                Memories
-              </Link>
-            </li>
-            <li className="text-gray-400">/</li>
-            <li className="text-gray-600 font-medium">{displayTitle}</li>
-          </ol>
-        </nav>
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+          {/* Breadcrumbs */}
+          <nav>
+            <ol className="flex items-center space-x-2 text-sm flex-wrap">
+              <li>
+                <Link
+                  href="/memories"
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Memories
+                </Link>
+              </li>
+              <li className="text-gray-400">/</li>
+              <li className="text-gray-600 font-medium">{displayTitle}</li>
+            </ol>
+          </nav>
+
+          {/* Edit/Delete Actions */}
+          <MemoryActions memoryId={memory.id} creatorEmail={memory.email} />
+        </div>
 
         {/* Memory Content */}
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-              <PageHeader title={displayTitle}>
-                <MemoryMetadata
-                  date={memory.created_at}
-                  creatorEmail={memory.email}
-                  creatorName={memory.name}
-                />
-              </PageHeader>
-            </div>
-
-            {/* Edit/Delete Actions */}
-            <MemoryActions memoryId={memory.id} creatorEmail={memory.email} />
-          </div>
-
           {/* Text Content */}
-          <div>
+          <div className="space-y-2">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <PageHeader title={displayTitle} visuallyHidden />
+            </div>
+            <MemoryMetadata
+              date={memory.created_at}
+              creatorEmail={memory.email}
+              creatorName={memory.name}
+            />
+            {memory.title && (
+              <h2 className="text-lg font-semibold text-gray-900">
+                {memory.title}
+              </h2>
+            )}
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {memory.body}
             </p>

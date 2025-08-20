@@ -22,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://res.cloudinary.com"
+          crossOrigin="anonymous"
+        />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </head>
       <body className="flex flex-col min-h-screen">
@@ -75,7 +79,7 @@ export default function RootLayout({
             <span>Made with love by friends & family.</span>
             <span className="hidden sm:inline text-gray-300">•</span>
             <span>
-              Send feedback or questions to{' '}
+              Feedback or questions:
               <a
                 href="mailto:contact@paulbedrosian.com"
                 className="text-blue-600 hover:text-blue-800"
