@@ -1,17 +1,64 @@
-// Cloudinary utility functions
+// src/lib/cloudinary.ts
+import type { ImageLoader } from 'next/image';
+
+const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+const BASE = `https://res.cloudinary.com/${CLOUD}/image/upload`;
+const UPLOAD = '/upload/';
+
+// ---------- internal helpers ----------
+function isCloudinaryUrl(url: string) {
+  return /\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(url);
+}
+
+function parseCloudinaryPath(afterUpload: string) {
+  // Handle cases like:
+  //   "v1755704386/memorial/foo.jpg"
+  //   "w_1600,q_auto/v1755704386/memorial/foo.jpg"
+  //   "t_mem_photo_lg/memorial/foo.jpg"
+  const parts = afterUpload.split('/');
+  let i = 0;
+
+  // Skip transform segment
+  if (
+    parts[i]?.includes(',') ||
+    parts[i]?.startsWith('t_') ||
+    parts[i]?.startsWith('c_') ||
+    parts[i]?.startsWith('w_') ||
+    parts[i]?.startsWith('q_') ||
+    parts[i]?.startsWith('f_') ||
+    parts[i]?.startsWith('dpr_') ||
+    parts[i]?.startsWith('g_')
+  ) {
+    i += 1;
+  }
+
+  // Optional version segment
+  let version: string | undefined;
+  if (/^v\d+$/.test(parts[i] ?? '')) {
+    version = parts[i];
+    i += 1;
+  }
+
+  const publicId = parts.slice(i).join('/');
+  return { version, publicId };
+}
+
+// ---------- utilities ----------
 export function optimizeImageUrl(
   url: string,
   width: number = 400,
   quality: number = 70
 ): string {
-  if (!url.includes('cloudinary.com')) return url;
+  if (!CLOUD || !isCloudinaryUrl(url)) return url;
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  if (!cloudName) return url;
+  const idx = url.indexOf(UPLOAD);
+  if (idx === -1) return url;
 
-  // Extract public ID from URL
-  const publicId = url.split('/').slice(-1)[0].split('.')[0];
-  return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_${quality},w_${width}/${publicId}`;
+  const after = url.slice(idx + UPLOAD.length);
+  const { version, publicId } = parseCloudinaryPath(after);
+
+  const v = version ? `${version}/` : '';
+  return `${BASE}/${v}f_auto,q_${quality},w_${width}/${publicId}`;
 }
 
 export function getCloudinaryUploadUrl(cloudName: string) {
@@ -20,115 +67,142 @@ export function getCloudinaryUploadUrl(cloudName: string) {
 
 export function publicIdToUrl(
   publicId: string,
-  type: string = 'image'
+  type: string = 'image',
+  version?: string | number
 ): string {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  if (!cloudName) return '';
-
-  return `https://res.cloudinary.com/${cloudName}/${type}/upload/${publicId}`;
+  if (!CLOUD) return '';
+  const v = version !== undefined ? `v${String(version)}/` : '';
+  return `https://res.cloudinary.com/${CLOUD}/${type}/upload/${v}${publicId}`;
 }
 
-// Enhanced URL builder with versioning and optimized transforms
+// Enhanced URL builder
 export function cldUrl(
   publicId: string,
-  opts: { 
-    w?: number; 
-    h?: number; 
-    crop?: string; 
-    q?: number | string; 
-    dpr?: string | number;
-    version?: string;
+  opts: {
+    w?: number;
+    h?: number;
+    crop?: string;
+    q?: number | string;
+    version?: string | number;
     gravity?: string;
   } = {}
 ): string {
-  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-  const parts = ['f_auto'];
+  const parts = ['f_auto', `q_${opts.q ?? 'auto'}`];
 
-  // Quality - use eco for grids, auto for hero images
-  if (opts.q) parts.push(`q_${opts.q}`);
-  else parts.push('q_auto');
-
-  // Dimensions and cropping
   if (opts.w) parts.push(`w_${opts.w}`);
   if (opts.h) parts.push(`h_${opts.h}`);
   if (opts.crop) parts.push(`c_${opts.crop}`);
   if (opts.gravity) parts.push(`g_${opts.gravity}`);
-  else if (opts.crop === 'fill') parts.push('g_auto'); // Auto gravity for fill crops
+  else if (opts.crop === 'fill') parts.push('g_auto');
 
-  // DPR for high-DPI displays
-  if (opts.dpr) parts.push(`dpr_${opts.dpr}`);
+  const transform = parts.join(',');
+  const v = opts.version !== undefined ? `v${String(opts.version)}/` : '';
 
-  const transformString = parts.join(',');
-  const versionPath = opts.version ? `v${opts.version}/` : '';
-  
-  return `https://res.cloudinary.com/${cloud}/image/upload/${versionPath}${transformString}/${publicId}`;
+  return `${BASE}/${v}${transform}/${publicId}`;
 }
 
-// Optimized helper functions for different use cases
-export function getThumbnailUrl(publicId: string, version?: string): string {
-  return cldUrl(publicId, { 
-    w: 200, 
-    h: 200, 
-    crop: 'fill', 
-    q: 'auto:eco', 
-    dpr: 2,
-    version 
+// ---------- helper variants ----------
+export function getThumbnailUrl(publicId: string, version?: string | number) {
+  return cldUrl(publicId, {
+    w: 200,
+    h: 200,
+    crop: 'fill',
+    q: 'auto:eco',
+    version,
   });
 }
 
-export function getSmallThumbnailUrl(publicId: string, version?: string): string {
-  return cldUrl(publicId, { 
-    w: 144, 
-    h: 144, 
-    crop: 'fill', 
-    q: 'auto:eco', 
-    dpr: 2,
-    version 
+export function getSmallThumbnailUrl(
+  publicId: string,
+  version?: string | number
+) {
+  return cldUrl(publicId, {
+    w: 144,
+    h: 144,
+    crop: 'fill',
+    q: 'auto:eco',
+    version,
   });
 }
 
-export function getGridImageUrl(publicId: string, version?: string): string {
-  return cldUrl(publicId, { 
-    w: 600, 
-    h: 600, 
-    crop: 'fill', 
-    q: 'auto:eco', 
-    dpr: 'auto',
-    version 
+export function getGridImageUrl(publicId: string, version?: string | number) {
+  return cldUrl(publicId, {
+    w: 600,
+    h: 600,
+    crop: 'fill',
+    q: 'auto:eco',
+    version,
   });
 }
 
-export function getHeroImageUrl(publicId: string, version?: string): string {
-  return cldUrl(publicId, { 
-    w: 1200, 
-    q: 'auto', 
-    dpr: 'auto',
-    version 
+export function getHeroImageUrl(publicId: string, version?: string | number) {
+  return cldUrl(publicId, {
+    w: 1200,
+    q: 'auto',
+    version,
   });
 }
 
-export function getFullSizeUrl(publicId: string, version?: string): string {
-  return cldUrl(publicId, { 
-    w: 1600, 
-    q: 'auto', 
-    dpr: 'auto',
-    version 
+export function getFullSizeUrl(publicId: string, version?: string | number) {
+  return cldUrl(publicId, {
+    w: 1600,
+    q: 'auto',
+    version,
   });
 }
 
-// Eager transform configuration for uploads
+// ---------- eager transform list ----------
 export const EAGER_TRANSFORMS = [
-  { width: 400, height: 400, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto:eco' },
-  { width: 800, height: 800, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto:eco' },
+  {
+    width: 144,
+    height: 144,
+    crop: 'fill',
+    gravity: 'auto',
+    fetch_format: 'auto',
+    quality: 'auto:eco',
+  },
+  {
+    width: 200,
+    height: 200,
+    crop: 'fill',
+    gravity: 'auto',
+    fetch_format: 'auto',
+    quality: 'auto:eco',
+  },
+  { width: 600, fetch_format: 'auto', quality: 'auto' },
   { width: 1200, fetch_format: 'auto', quality: 'auto' },
-  { width: 1600, fetch_format: 'auto', quality: 'auto' }
+  { width: 1600, fetch_format: 'auto', quality: 'auto' },
 ];
 
-// Warm-up function for preloading images
-export function warmUpImages(urls: string[]): void {
-  urls.forEach(url => {
-    fetch(url, { method: 'HEAD' }).catch(() => {
-      // Silently fail - this is just for warming up caches
-    });
-  });
+// ---------- warm-up ----------
+export async function warmUpImages(urls: string[]): Promise<void> {
+  await Promise.all(
+    urls.map(async (url) => {
+      try {
+        await fetch(url, { method: 'GET', cache: 'no-store' });
+      } catch {
+        // ignore
+      }
+    })
+  );
 }
+
+// ---------- Next.js loader ----------
+export const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
+  const q = quality ?? 70;
+
+  if (src.startsWith('http')) {
+    if (!isCloudinaryUrl(src)) return src;
+
+    const idx = src.indexOf(UPLOAD);
+    if (idx === -1) return src;
+
+    const after = src.slice(idx + UPLOAD.length);
+    const { version, publicId } = parseCloudinaryPath(after);
+    const v = version ? `${version}/` : '';
+    return `${BASE}/${v}f_auto,q_${q},w_${width}/${publicId}`;
+  }
+
+  // Treat as publicId
+  return `${BASE}/f_auto,q_${q},w_${width}/${src}`;
+};

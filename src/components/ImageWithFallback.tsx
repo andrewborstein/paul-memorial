@@ -1,19 +1,27 @@
 'use client';
 
 import React from 'react';
-import { cldUrl, getSmallThumbnailUrl } from '@/lib/cloudinary';
+import Image from 'next/image';
+import { cloudinaryLoader } from '@/lib/cloudinary';
+import { getSmallThumbnailUrl } from '@/lib/cloudinary';
 
 interface ImageWithFallbackProps {
   publicId?: string;
-  src?: string;
+  src?: string; // Can be full Cloudinary URL or any remote URL
   alt: string;
   className?: string;
-  width?: number;
+  width?: number; // Acts as a hint (for explicit width images)
   quality?: number | string;
-  dpr?: number;
+  dpr?: number; // Ignored intentionally; Next handles DPR via srcset
   fallbackText?: string;
   onLoad?: () => void;
   onError?: () => void;
+  /** Optional: pass sizes to control which srcset candidates are chosen */
+  sizes?: string;
+  /** Optional: preload critical images */
+  priority?: boolean;
+  /** If you want to force a square crop for tiny thumbs (like your old logic) */
+  squareThumbFallback?: boolean;
 }
 
 export default function ImageWithFallback({
@@ -23,46 +31,29 @@ export default function ImageWithFallback({
   className = '',
   width = 400,
   quality = 70,
-  dpr = 2,
+  // dpr ignored on purpose
   fallbackText = 'Loading...',
   onLoad,
   onError,
+  sizes = '(max-width: 1024px) 100vw, 1024px',
+  priority = false,
+  squareThumbFallback = false,
 }: ImageWithFallbackProps) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasError, setHasError] = React.useState(false);
 
-  // Convert old URLs to better quality - must be before any conditional returns
-  const imageSrc = React.useMemo(() => {
-    if (src) {
-      // If it's an old q_60 URL, convert it to q_auto
-      if (src.includes('q_60')) {
-        return src.replace('q_60', 'q_auto');
+  // Derive a usable src: prefer explicit src, else build tiny square thumb from publicId
+  const effectiveSrc = React.useMemo(() => {
+    if (src) return src;
+    if (publicId) {
+      if (squareThumbFallback) {
+        // Small square thumb; good for avatars/lists
+        return getSmallThumbnailUrl(publicId); // keep your existing helper
       }
-      // If it's an old w_96 URL, convert it to w_144 with dpr_2
-      if (src.includes('w_96') && src.includes('dpr_auto')) {
-        return src.replace('w_96,dpr_auto', 'w_144,dpr_2');
-      }
-      // If it's an old URL without proper cropping, add it
-      if (src.includes('w_144') && !src.includes('c_fill')) {
-        return src.replace('w_144', 'w_144,h_144,c_fill');
-      }
-      // If it's a Cloudinary URL but doesn't have proper square cropping, add it
-      if (src.includes('cloudinary.com') && !src.includes('c_fill')) {
-        // Add height and crop parameters to make it square
-        const baseUrl = src.split('/upload/')[0] + '/upload/';
-        const transformations = src.split('/upload/')[1];
-        const parts = transformations.split('/');
-        const publicId = parts[parts.length - 1];
-
-        // Build new transformations with square cropping
-        const newTransformations = `w_${width},h_${width},c_fill,q_auto,dpr_2`;
-        return `${baseUrl}${newTransformations}/${publicId}`;
-      }
-      return src;
+      return publicId; // let loader build full URL
     }
-    // All thumbnails are square, use fill cropping
-    return getSmallThumbnailUrl(publicId!);
-  }, [src, publicId, width]);
+    return '';
+  }, [src, publicId, squareThumbFallback]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -76,22 +67,48 @@ export default function ImageWithFallback({
     onError?.();
   };
 
-  if (hasError) {
-    return <div className={`bg-gray-200 animate-pulse ${className}`}></div>;
+  // Error state: keep your visual fallback
+  if (hasError || !effectiveSrc) {
+    return (
+      <div className={`bg-gray-200 animate-pulse ${className}`}>
+        <span className="sr-only">{fallbackText}</span>
+      </div>
+    );
   }
+
+  /**
+   * Layout strategy:
+   * - If parent supplies an explicit size via CSS (common Tailwind: relative + set height),
+   *   we use `fill` with object-cover.
+   * - Otherwise we pass width/height so Next can reserve layout space.
+   *
+   * You already wrap with a container; we keep that pattern and preserve skeleton.
+   */
+  const useFill = /(^|\s)(relative|aspect-\w+)/.test(className);
 
   return (
     <div className="relative">
       {isLoading && (
-        <div className={`absolute inset-0 bg-gray-200 animate-pulse z-0`}></div>
+        <div className="absolute inset-0 bg-gray-200 animate-pulse z-0" />
       )}
-      <img
-        src={imageSrc}
+
+      <Image
+        // Cloudinary-aware loader: normalizes transforms to f_auto,q_auto,w_{width}
+        loader={cloudinaryLoader}
+        src={effectiveSrc}
         alt={alt}
+        // When using fill, parent must be positioned; we keep your className on the Image itself
+        fill={useFill || undefined}
+        width={!useFill ? width : undefined}
+        // Rough aspect ratio fallback if explicit width used; tweak as needed
+        height={!useFill ? Math.round((width / 4) * 3) : undefined}
+        quality={typeof quality === 'string' ? parseInt(quality, 10) : quality}
         className={`${className} object-cover relative z-10`}
         onLoad={handleLoad}
         onError={handleError}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
+        priority={priority}
+        sizes={sizes}
       />
     </div>
   );
