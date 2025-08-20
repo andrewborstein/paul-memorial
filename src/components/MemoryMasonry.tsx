@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import MemoryMetadata from '@/components/MemoryMetadata';
+// import Masonry from 'masonry-layout';
 
 interface MemoryMasonryProps {
   memories: {
@@ -25,6 +26,8 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
   const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>(
     {}
   );
+  const masonryRef = useRef<HTMLDivElement>(null);
+  const masonryInstance = useRef<any | null>(null);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -37,6 +40,58 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
     setUserStates(states);
     setIsLoaded(true);
   }, [memories]);
+
+  // Initialize Masonry
+  useEffect(() => {
+    if (masonryRef.current && memories.length > 0) {
+      // Destroy existing instance if it exists
+      if (masonryInstance.current) {
+        try {
+          masonryInstance.current.destroy();
+        } catch (e) {
+          // Ignore destroy errors
+        }
+        masonryInstance.current = null;
+      }
+
+      // Initialize new Masonry instance
+      try {
+        // Temporarily disabled masonry due to runtime errors
+        // const masonry = new Masonry(masonryRef.current, {
+        //   itemSelector: '.memory-card',
+        //   columnWidth: '.memory-card',
+        //   percentPosition: true,
+        //   gutter: 24, // 6 * 4 = 24px to match gap-6
+        // });
+        // masonryInstance.current = masonry;
+      } catch (e) {
+        console.error('Failed to initialize masonry:', e);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (masonryInstance.current) {
+        try {
+          masonryInstance.current.destroy();
+        } catch (e) {
+          // Ignore destroy errors
+        }
+        masonryInstance.current = null;
+      }
+    };
+  }, [memories, expandedStates]);
+
+  // Relayout when content changes (like when "Read more" is clicked)
+  useEffect(() => {
+    if (masonryInstance.current) {
+      try {
+        masonryInstance.current.layout();
+      } catch (e) {
+        // Ignore layout errors
+      }
+    }
+  }, [expandedStates]);
 
   const displayTitle = (memory: any) => memory.title?.trim() || undefined;
   const bodyText = (memory: any) => memory.body || '';
@@ -61,9 +116,9 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div ref={masonryRef} className="w-full masonry-container">
       {memories.map((memory) => (
-        <div key={memory.id}>
+        <div key={memory.id} className="memory-card w-full mb-6">
           <Link
             href={`/memories/${memory.id}`}
             className={getCardClasses(memory.id)}
