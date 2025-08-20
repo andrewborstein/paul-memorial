@@ -1,22 +1,27 @@
+import { NextResponse } from 'next/server';
+import { unstable_cache as cache } from 'next/cache';
 import { aggregateIndex } from '@/lib/data';
-import { unstable_noStore as noStore } from 'next/cache';
 
-export const fetchCache = 'force-no-store';
-export const dynamic = 'force-dynamic';
+// Allow static/edge caching for GET
+export const dynamic = 'force-static';
+export const revalidate = 300; // safety window (5 min)
 
-export async function GET(req: Request) {
-  noStore();
-  try {
-    console.log('Starting /api/memories request');
-    // Primary list is race-proof and fast
-    const list = await aggregateIndex({ forceFresh: true });
-    console.log('Aggregated index, found', list.length, 'memories');
+// Wrap your expensive aggregation in Next's cache and tag it
+const getCachedMemories = cache(
+  async () => {
+    const items = await aggregateIndex({ forceFresh: false });
+    return items;
+  },
+  ['memories-index-cache-key'],
+  { tags: ['memories-index'], revalidate: 300 }
+);
 
-    const res = Response.json(list);
-    res.headers.set('Cache-Control', 'no-store');
-    return res;
-  } catch (error) {
-    console.error('Error in /api/memories:', error);
-    return new Response('Internal Server Error', { status: 500 });
-  }
+export async function GET() {
+  const items = await getCachedMemories();
+  return NextResponse.json(items, {
+    headers: {
+      // CDN (edge) cache for 5 min, then serve stale while revalidating
+      'Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
+    },
+  });
 }

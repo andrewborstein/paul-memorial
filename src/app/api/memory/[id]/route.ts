@@ -126,8 +126,9 @@ export async function PUT(
       );
     }
 
-    // Re-index photos
+    // Re-index photos and memories
     revalidateTag('photos-index');
+    revalidateTag('memories-index');
 
     return Response.json({
       id: updatedMemory.id,
@@ -194,8 +195,9 @@ export async function DELETE(
 
     // TODO: Delete photos from Cloudinary
     // For now, just remove from index and memory file
-    // Re-index photos
+    // Re-index photos and memories
     revalidateTag('photos-index');
+    revalidateTag('memories-index');
 
     return new Response(null, { status: 204 });
   } catch (error) {
