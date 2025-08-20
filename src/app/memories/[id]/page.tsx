@@ -61,7 +61,7 @@ export default async function MemoryPage({
                 </Link>
               </li>
               <li className="text-gray-400">/</li>
-              <li className="text-gray-600 font-medium">{displayTitle}</li>
+              <li className="text-gray-600 font-medium">{memory.name}</li>
             </ol>
           </nav>
 
