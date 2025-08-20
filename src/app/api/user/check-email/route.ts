@@ -27,8 +27,10 @@ export async function POST(request: Request) {
     // First check the users file
     const users = await readUsers();
     console.log('Found users:', users.length);
-    
-    const existingUser = users.find(user => user.email === normalizedEmail);
+
+    const existingUser = users.find(
+      (user: any) => user.email === normalizedEmail
+    );
     if (existingUser) {
       console.log('Existing user found in users file:', existingUser);
       return Response.json({

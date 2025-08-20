@@ -121,7 +121,7 @@ export default function ContactInfoModal({
     }
   };
 
-  const handleNameSubmit = () => {
+  const handleNameSubmit = async () => {
     const nameError = validateNames(firstName, lastName);
     if (nameError) {
       setErrors([nameError]);
@@ -132,17 +132,33 @@ export default function ContactInfoModal({
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`;
       const cleanEmail = email.trim().toLowerCase();
+
+      // Store user data in the users API
+      await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, name: fullName }),
+      });
+
       onSubmit(fullName, cleanEmail);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleWelcomeContinue = () => {
+  const handleWelcomeContinue = async () => {
     setIsSubmitting(true);
     try {
       const fullName = `${firstName} ${lastName}`;
       const cleanEmail = email.trim().toLowerCase();
+
+      // Store user data in the users API (in case they haven't been stored yet)
+      await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, name: fullName }),
+      });
+
       onSubmit(fullName, cleanEmail);
     } finally {
       setIsSubmitting(false);

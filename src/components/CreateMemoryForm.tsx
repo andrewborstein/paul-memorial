@@ -6,7 +6,12 @@ import ContactInfoModal from './ContactInfoModal';
 import UserStatusDisplay from './UserStatusDisplay';
 import { useRouter } from 'next/navigation';
 import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
-import { setCurrentUser, getCurrentUser, isSignedIn } from '@/lib/user';
+import {
+  setCurrentUser,
+  getCurrentUser,
+  isSignedIn,
+  isSuperUser,
+} from '@/lib/user';
 
 type PhotoState = {
   id: string; // Unique identifier
@@ -550,8 +555,19 @@ export default function CreateMemoryForm({
       return; // Don't show sign-in modal for invalid forms
     }
 
-    // Check if user is signed in
-    if (!isSignedIn()) {
+    // Check if user is signed in or is super user
+    const currentUser = getCurrentUser();
+    const isSuper = isSuperUser();
+    console.log('onPublish: Current user:', currentUser);
+    console.log('onPublish: isSignedIn():', isSignedIn());
+    console.log('onPublish: isSuperUser():', isSuper);
+    console.log('onPublish: Form email:', email);
+    console.log('onPublish: Form name:', name);
+
+    if (!isSignedIn() && !isSuper) {
+      console.log(
+        'onPublish: User not signed in and not super user, showing sign-in modal'
+      );
       setShowSignInModal(true);
       // Create a closure that captures current form state and will receive sign-in values
       setPendingSubmission(() => {
@@ -569,6 +585,7 @@ export default function CreateMemoryForm({
       return;
     }
 
+    console.log('onPublish: User is signed in, proceeding with submit');
     await submitMemory();
   }
 

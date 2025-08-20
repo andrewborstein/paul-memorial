@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const users = await readUsers();
 
     // Check if user already exists
-    const existingUser = users.find(user => user.email === normalizedEmail);
+    const existingUser = users.find((user) => user.email === normalizedEmail);
     if (existingUser) {
       return Response.json({
         exists: true,

@@ -5,7 +5,13 @@ import {
   readBlobJson,
 } from '@/lib/data';
 import { del } from '@vercel/blob';
-import { warmUpImages, getHeroImageUrl, getGridImageUrl } from '@/lib/cloudinary';
+import {
+  warmUpImages,
+  getHeroImageUrl,
+  getGridImageUrl,
+} from '@/lib/cloudinary';
+import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 
 const k = (key: string) =>
   process.env.BLOB_PREFIX ? `${process.env.BLOB_PREFIX}/${key}` : key;
@@ -106,13 +112,22 @@ export async function PUT(
         // Hero image (first photo)
         getHeroImageUrl(updatedMemory.photos[0].public_id),
         // Grid images (first few photos)
-        ...updatedMemory.photos.slice(0, 3).map(photo => getGridImageUrl(photo.public_id))
+        ...updatedMemory.photos
+          .slice(0, 3)
+          .map((photo) => getGridImageUrl(photo.public_id)),
       ];
-      
+
       // Fire off warm-up requests in background (don't await)
       warmUpImages(warmUpUrls);
-      console.log('Warming up', warmUpUrls.length, 'image URLs for updated memory');
+      console.log(
+        'Warming up',
+        warmUpUrls.length,
+        'image URLs for updated memory'
+      );
     }
+
+    // Re-index photos
+    revalidateTag('photos-index');
 
     return Response.json({
       id: updatedMemory.id,
@@ -179,6 +194,8 @@ export async function DELETE(
 
     // TODO: Delete photos from Cloudinary
     // For now, just remove from index and memory file
+    // Re-index photos
+    revalidateTag('photos-index');
 
     return new Response(null, { status: 204 });
   } catch (error) {
