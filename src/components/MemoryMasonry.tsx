@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import MemoryMetadata from '@/components/MemoryMetadata';
-// import Masonry from 'masonry-layout';
+import Masonry from 'masonry-layout';
 
 interface MemoryMasonryProps {
   memories: {
@@ -56,14 +56,21 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
 
       // Initialize new Masonry instance
       try {
-        // Temporarily disabled masonry due to runtime errors
-        // const masonry = new Masonry(masonryRef.current, {
-        //   itemSelector: '.memory-card',
-        //   columnWidth: '.memory-card',
-        //   percentPosition: true,
-        //   gutter: 24, // 6 * 4 = 24px to match gap-6
-        // });
-        // masonryInstance.current = masonry;
+        const masonry = new Masonry(masonryRef.current, {
+          itemSelector: '.memory-card',
+          columnWidth: '.memory-card',
+          percentPosition: true,
+          gutter: 0, // Using padding instead
+          fitWidth: false,
+        });
+        masonryInstance.current = masonry;
+
+        // Trigger layout after initialization
+        setTimeout(() => {
+          if (masonryInstance.current) {
+            masonryInstance.current.layout();
+          }
+        }, 100);
       } catch (e) {
         console.error('Failed to initialize masonry:', e);
       }
@@ -93,6 +100,22 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
     }
   }, [expandedStates]);
 
+  // Handle window resize for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      if (masonryInstance.current) {
+        try {
+          masonryInstance.current.layout();
+        } catch (e) {
+          // Ignore layout errors
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const displayTitle = (memory: any) => memory.title?.trim() || undefined;
   const bodyText = (memory: any) => memory.body || '';
   const needsTruncation = (memory: any) => bodyText(memory).length > 1000;
@@ -118,7 +141,10 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
   return (
     <div ref={masonryRef} className="w-full masonry-container">
       {memories.map((memory) => (
-        <div key={memory.id} className="memory-card w-full mb-6">
+        <div
+          key={memory.id}
+          className="memory-card w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 mb-6 px-3"
+        >
           <Link
             href={`/memories/${memory.id}`}
             className={getCardClasses(memory.id)}
