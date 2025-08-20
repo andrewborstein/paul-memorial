@@ -13,7 +13,6 @@ interface ResponsiveImageProps {
   onError?: () => void;
 }
 
-// Standard responsive breakpoints
 const WIDTHS = [400, 600, 800, 1200, 1600];
 
 export default function ResponsiveImage({
@@ -28,18 +27,13 @@ export default function ResponsiveImage({
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasError, setHasError] = React.useState(false);
 
-  const generateSrcSet = () => {
-    return WIDTHS.map(width => {
-      const url = cldUrl(publicId, { 
-        w: width, 
-        q: 'auto', 
-        dpr: 'auto' 
-      });
+  const generateSrcSet = () =>
+    WIDTHS.map((width) => {
+      const url = cldUrl(publicId, { w: width, q: 'auto' });
       return `${url} ${width}w`;
     }).join(', ');
-  };
 
-  const defaultSrc = cldUrl(publicId, { w: 1200, q: 'auto', dpr: 'auto' });
+  const defaultSrc = cldUrl(publicId, { w: 1200, q: 'auto' });
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -55,7 +49,9 @@ export default function ResponsiveImage({
 
   if (hasError) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}>
+      <div
+        className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}
+      >
         <div className="text-center">
           <div className="text-lg mb-1">📷</div>
           <div className="text-xs">Failed to load image</div>

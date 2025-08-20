@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import MemoryMetadata from '@/components/MemoryMetadata';
+import SquareThumb from './SquareThumb';
 
 interface MemoryMasonryProps {
   memories: {
@@ -164,12 +165,11 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
 
               {memory.cover_public_id && (
                 <div className="w-12 h-12 rounded-lg overflow-hidden relative flex-shrink-0 ml-4">
-                  <ImageWithFallback
+                  <SquareThumb
                     publicId={memory.cover_public_id}
-                    alt="Memory preview"
-                    className="w-full h-full object-cover"
-                    width={48}
-                    quality="auto"
+                    alt={`${memory.photo_count} photos`}
+                    className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                   {memory.photo_count > 1 && (
                     <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-10">

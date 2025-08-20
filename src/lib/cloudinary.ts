@@ -11,23 +11,18 @@ function isCloudinaryUrl(url: string) {
 }
 
 function parseCloudinaryPath(afterUpload: string) {
-  // Handle cases like:
-  //   "v1755704386/memorial/foo.jpg"
-  //   "w_1600,q_auto/v1755704386/memorial/foo.jpg"
-  //   "t_mem_photo_lg/memorial/foo.jpg"
+  // Handles:
+  //  - "v1755704386/memorial/foo.jpg"
+  //  - "w_1600,q_auto/v1755704386/memorial/foo.jpg"
+  //  - "t_name/memorial/foo.jpg"
   const parts = afterUpload.split('/');
   let i = 0;
 
-  // Skip transform segment
+  // Skip transform segment if present
   if (
     parts[i]?.includes(',') ||
-    parts[i]?.startsWith('t_') ||
-    parts[i]?.startsWith('c_') ||
-    parts[i]?.startsWith('w_') ||
-    parts[i]?.startsWith('q_') ||
-    parts[i]?.startsWith('f_') ||
-    parts[i]?.startsWith('dpr_') ||
-    parts[i]?.startsWith('g_')
+    /^t_/.test(parts[i] ?? '') ||
+    /^(?:c_|w_|q_|f_|dpr_|g_)/.test(parts[i] ?? '')
   ) {
     i += 1;
   }
@@ -43,7 +38,19 @@ function parseCloudinaryPath(afterUpload: string) {
   return { version, publicId };
 }
 
-// ---------- utilities ----------
+function normalizeQualityToken(
+  q: unknown,
+  fallback: 'auto' | `${number}` | 'auto:eco' = 'auto'
+): string {
+  // If numeric and finite -> use that number
+  if (typeof q === 'number' && Number.isFinite(q)) return String(q);
+  // If explicitly 'auto' or 'auto:...' -> keep it
+  if (typeof q === 'string' && /^auto(?::[\w-]+)?$/.test(q)) return q;
+  // Otherwise use fallback (default 'auto')
+  return fallback;
+}
+
+// ---------- public utils ----------
 export function optimizeImageUrl(
   url: string,
   width: number = 400,
@@ -58,6 +65,7 @@ export function optimizeImageUrl(
   const { version, publicId } = parseCloudinaryPath(after);
 
   const v = version ? `${version}/` : '';
+  // Keep numeric here; this utility is for simple rewrites
   return `${BASE}/${v}f_auto,q_${quality},w_${width}/${publicId}`;
 }
 
@@ -75,7 +83,6 @@ export function publicIdToUrl(
   return `https://res.cloudinary.com/${CLOUD}/${type}/upload/${v}${publicId}`;
 }
 
-// Enhanced URL builder
 export function cldUrl(
   publicId: string,
   opts: {
@@ -87,7 +94,7 @@ export function cldUrl(
     gravity?: string;
   } = {}
 ): string {
-  const parts = ['f_auto', `q_${opts.q ?? 'auto'}`];
+  const parts = ['f_auto', `q_${normalizeQualityToken(opts.q, 'auto')}`];
 
   if (opts.w) parts.push(`w_${opts.w}`);
   if (opts.h) parts.push(`h_${opts.h}`);
@@ -101,7 +108,6 @@ export function cldUrl(
   return `${BASE}/${v}${transform}/${publicId}`;
 }
 
-// ---------- helper variants ----------
 export function getThumbnailUrl(publicId: string, version?: string | number) {
   return cldUrl(publicId, {
     w: 200,
@@ -151,7 +157,6 @@ export function getFullSizeUrl(publicId: string, version?: string | number) {
   });
 }
 
-// ---------- eager transform list ----------
 export const EAGER_TRANSFORMS = [
   {
     width: 144,
@@ -174,7 +179,6 @@ export const EAGER_TRANSFORMS = [
   { width: 1600, fetch_format: 'auto', quality: 'auto' },
 ];
 
-// ---------- warm-up ----------
 export async function warmUpImages(urls: string[]): Promise<void> {
   await Promise.all(
     urls.map(async (url) => {
@@ -187,10 +191,11 @@ export async function warmUpImages(urls: string[]): Promise<void> {
   );
 }
 
-// ---------- Next.js loader ----------
+// ---------- Next.js loader (preserves crop/height from explicit URLs) ----------
 export const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
-  const q = quality ?? 70;
+  const qToken = normalizeQualityToken(quality, 'auto');
 
+  // If src is a full Cloudinary URL, preserve crop/height/gravity, replace width/quality
   if (src.startsWith('http')) {
     if (!isCloudinaryUrl(src)) return src;
 
@@ -198,11 +203,76 @@ export const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
     if (idx === -1) return src;
 
     const after = src.slice(idx + UPLOAD.length);
+    // Extract potential transform segment (first part), version, and public id
+    const firstSlash = after.indexOf('/');
+    const firstSeg = firstSlash === -1 ? after : after.slice(0, firstSlash);
+    const rest = firstSlash === -1 ? '' : after.slice(firstSlash + 1);
+
+    let transformSeg = '';
+    let remainder = after;
+
+    // If the first segment looks like transforms, keep it separately
+    const looksLikeTransform =
+      firstSeg.includes(',') ||
+      /^t_/.test(firstSeg) ||
+      /^(?:c_|w_|q_|f_|dpr_|g_)/.test(firstSeg);
+
+    if (looksLikeTransform) {
+      transformSeg = firstSeg;
+      remainder = rest; // version/publicId live after the transform segment
+    }
+
+    const { version, publicId } = parseCloudinaryPath(remainder);
+
+    // Parse existing transforms and keep only crop/gravity/height (+ any others you want to preserve)
+    const preserved: string[] = [];
+    if (transformSeg) {
+      for (const tok of transformSeg.split(',')) {
+        if (
+          tok.startsWith('c_') || // crop
+          tok.startsWith('g_') || // gravity
+          tok.startsWith('h_') || // height
+          tok.startsWith('ar_') // aspect-ratio (optional to preserve)
+        ) {
+          preserved.push(tok);
+        }
+        // We intentionally DROP any existing w_*, q_*, f_*, dpr_* so the loader can control them
+      }
+    }
+
+    const v = version ? `${version}/` : '';
+
+    // Build final transform: f_auto, q_{token}, w_{width}, then preserved crop/height/gravity
+    // (Order is fine for Cloudinary; including c_* and h_* after/before w_* both work.)
+    const finalParts = [`f_auto`, `q_${qToken}`, `w_${width}`, ...preserved];
+    const finalTransform = finalParts.join(',');
+
+    return `${BASE}/${v}${finalTransform}/${publicId}`;
+  }
+
+  // Treat as publicId (no explicit transforms): we emit width + auto quality/format
+  return `${BASE}/f_auto,q_${qToken},w_${width}/${src}`;
+};
+
+// Square-specific loader: forces server-side square crop
+export const cloudinarySquareLoader: ImageLoader = ({
+  src,
+  width,
+  quality,
+}) => {
+  const qToken = normalizeQualityToken(quality, 'auto:eco');
+
+  if (src.startsWith('http')) {
+    if (!isCloudinaryUrl(src)) return src;
+    const idx = src.indexOf(UPLOAD);
+    if (idx === -1) return src;
+
+    const after = src.slice(idx + UPLOAD.length);
     const { version, publicId } = parseCloudinaryPath(after);
     const v = version ? `${version}/` : '';
-    return `${BASE}/${v}f_auto,q_${q},w_${width}/${publicId}`;
+    return `${BASE}/${v}f_auto,q_${qToken},w_${width},h_${width},c_fill,g_auto/${publicId}`;
   }
 
   // Treat as publicId
-  return `${BASE}/f_auto,q_${q},w_${width}/${src}`;
+  return `${BASE}/f_auto,q_${qToken},w_${width},h_${width},c_fill,g_auto/${src}`;
 };

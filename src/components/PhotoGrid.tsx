@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ImageWithFallback from './ImageWithFallback';
+import SquareThumb from './SquareThumb';
 
 interface Photo {
   public_id: string;
@@ -19,12 +20,11 @@ export default function PhotoGrid({ photos }: PhotoGridProps) {
           href={`/memories/photos/${photo.public_id}`}
           className="aspect-square overflow-hidden rounded-lg group cursor-pointer border border-gray-200 bg-gray-50 relative"
         >
-          <ImageWithFallback
+          <SquareThumb
             publicId={photo.public_id}
             alt={photo.caption || 'Photo'}
-            className="w-full h-full object-cover"
-            width={300}
-            quality="auto"
+            className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
           {photo.caption && (
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity">

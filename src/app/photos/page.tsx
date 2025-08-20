@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import SquareThumb from '@/components/SquareThumb';
 
 type PhotosIndexItem =
   | string
@@ -96,14 +97,13 @@ export default function PhotosPage() {
                   <Link
                     key={id}
                     href={`/memories/photos/${id}`}
-                    className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                    className="block"
                   >
-                    <ImageWithFallback
+                    <SquareThumb
                       publicId={id}
                       alt={`Photo ${index + 1} of ${photos.length}`}
-                      className="w-full h-full object-cover"
-                      width={300}
-                      quality="auto"
+                      className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                   </Link>
                 );

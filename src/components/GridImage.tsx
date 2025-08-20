@@ -12,7 +12,6 @@ interface GridImageProps {
   onError?: () => void;
 }
 
-// Smaller widths for grid images with eco quality
 const GRID_WIDTHS = [300, 400, 600, 800];
 
 export default function GridImage({
@@ -26,25 +25,22 @@ export default function GridImage({
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasError, setHasError] = React.useState(false);
 
-  const generateSrcSet = () => {
-    return GRID_WIDTHS.map(width => {
-      const url = cldUrl(publicId, { 
-        w: width, 
+  const generateSrcSet = () =>
+    GRID_WIDTHS.map((width) => {
+      const url = cldUrl(publicId, {
+        w: width,
         h: width,
         crop: 'fill',
-        q: 'auto:eco', 
-        dpr: 'auto' 
+        q: 'auto:eco',
       });
       return `${url} ${width}w`;
     }).join(', ');
-  };
 
-  const defaultSrc = cldUrl(publicId, { 
-    w: 600, 
+  const defaultSrc = cldUrl(publicId, {
+    w: 600,
     h: 600,
     crop: 'fill',
-    q: 'auto:eco', 
-    dpr: 'auto' 
+    q: 'auto:eco',
   });
 
   const handleLoad = () => {
@@ -61,7 +57,9 @@ export default function GridImage({
 
   if (hasError) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}>
+      <div
+        className={`bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg ${className}`}
+      >
         <div className="text-center">
           <div className="text-lg mb-1">📷</div>
           <div className="text-xs">Failed to load image</div>
