@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import crypto from 'crypto';
+import { revalidateTag } from 'next/cache';
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,6 +53,9 @@ export async function POST(req: NextRequest) {
 
     if (response.ok) {
       console.log(`Successfully deleted from Cloudinary: ${public_id}`);
+      // Re-index photos and memories
+      revalidateTag('photos-index');
+      revalidateTag('memories-index');
       return new Response('Deleted', { status: 200 });
     } else {
       const errorText = await response.text();

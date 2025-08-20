@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { serverFetch } from '@/lib/utils';
+import { revalidateTag } from 'next/cache';
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -22,6 +23,10 @@ export async function DELETE(req: NextRequest) {
         deletedCount++;
       }
     }
+
+    // Re-index photos and memories
+    revalidateTag('photos-index');
+    revalidateTag('memories-index');
 
     return Response.json({
       success: true,

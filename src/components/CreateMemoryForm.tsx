@@ -11,6 +11,7 @@ import {
   getCurrentUser,
   isSignedIn,
   isSuperUser,
+  clearSuperUser,
 } from '@/lib/user';
 
 type PhotoState = {
@@ -178,18 +179,12 @@ function PhotoItem({
         </div>
 
         {photo.status === 'uploading' && (
-          <>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-            </div>
-            {/* Progress bar at bottom of image */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
-              <div
-                className="bg-blue-600 h-1 transition-all duration-300"
-                style={{ width: `${photo.progress}%` }}
-              />
-            </div>
-          </>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
+            <div
+              className="bg-blue-600 h-1 transition-all duration-300"
+              style={{ width: `${photo.progress}%` }}
+            />
+          </div>
         )}
 
         {/* Delete button over image */}
@@ -698,6 +693,49 @@ export default function CreateMemoryForm({
           }}
         />
 
+        {/* Super User Warning */}
+        {!isEditMode && isSuperUser() && (
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-5 h-5 text-amber-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-amber-800">
+                  Super User Mode Active
+                </h3>
+                <p className="text-sm text-amber-700 mt-1">
+                  You're currently in super user mode. To share a memory as
+                  yourself, please{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearSuperUser();
+                      window.location.reload();
+                    }}
+                    className="text-amber-800 underline hover:text-amber-900 font-medium"
+                  >
+                    exit super user mode
+                  </button>{' '}
+                  and sign in with your personal account.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Title Field - Hidden by default, expandable */}
         {showTitleField && (
           <div className="space-y-2">
@@ -919,7 +957,7 @@ export default function CreateMemoryForm({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Manage Photos</h3>
+              <h3 className="text-lg font-semibold">Add Photos</h3>
               <button
                 type="button"
                 onClick={() => setShowPhotoModal(false)}

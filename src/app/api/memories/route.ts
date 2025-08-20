@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server';
 import { unstable_cache as cache } from 'next/cache';
 import { aggregateIndex } from '@/lib/data';
 
-// Allow static/edge caching for GET
 export const dynamic = 'force-static';
-export const revalidate = 300; // safety window (5 min)
+export const revalidate = 300;
 
-// Wrap your expensive aggregation in Next's cache and tag it
 const getCachedMemories = cache(
   async () => {
     const items = await aggregateIndex({ forceFresh: false });
@@ -16,11 +14,22 @@ const getCachedMemories = cache(
   { tags: ['memories-index'], revalidate: 300 }
 );
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const t = searchParams.get('t');
+
+  if (t) {
+    // “Fresh-read” path used right after create/update redirects (?t=updated_at)
+    const items = await aggregateIndex({ forceFresh: true });
+    return NextResponse.json(items, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+
+  // Fast, edge-cached path
   const items = await getCachedMemories();
   return NextResponse.json(items, {
     headers: {
-      // CDN (edge) cache for 5 min, then serve stale while revalidating
       'Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
     },
   });

@@ -25,12 +25,21 @@ export default function MemoriesPage() {
 
   useEffect(() => {
     const ac = new AbortController();
+
     (async () => {
       try {
-        // Browser fetch; API is edge-cached (see step 2).
-        const res = await fetch('/api/memories', {
+        const t =
+          typeof window !== 'undefined'
+            ? new URLSearchParams(window.location.search).get('t')
+            : null;
+
+        const url = t
+          ? `/api/memories?t=${encodeURIComponent(t)}`
+          : '/api/memories';
+
+        const res = await fetch(url, {
           signal: ac.signal,
-          cache: 'no-store', // browser won't cache; edge cache still applies
+          cache: 'no-store', // browser cache disabled; edge/API handles caching
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: MemoryIndexItem[] = await res.json();
@@ -40,6 +49,7 @@ export default function MemoriesPage() {
           setErr(e?.message ?? 'Failed to load memories');
       }
     })();
+
     return () => ac.abort();
   }, []);
 

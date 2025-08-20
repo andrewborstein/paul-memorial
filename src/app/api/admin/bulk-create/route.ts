@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { serverFetch } from '@/lib/utils';
+import { revalidateTag } from 'next/cache';
 
 const testMemories = [
   {
@@ -354,6 +355,10 @@ export async function POST(req: NextRequest) {
         createdCount++;
       }
     }
+
+    // Re-index photos and memories
+    revalidateTag('photos-index');
+    revalidateTag('memories-index');
 
     return Response.json({
       success: true,

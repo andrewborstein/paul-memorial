@@ -5,6 +5,7 @@ import {
   getHeroImageUrl,
   getGridImageUrl,
 } from '@/lib/cloudinary';
+import { revalidateTag } from 'next/cache';
 
 type PhotoInput = {
   public_id: string;
@@ -74,6 +75,10 @@ export async function POST(req: Request) {
       warmUpImages(warmUpUrls);
       console.log('Warming up', warmUpUrls.length, 'image URLs');
     }
+
+    // Re-index photos and memories
+    revalidateTag('photos-index');
+    revalidateTag('memories-index');
 
     return Response.json(
       { id: createdMemory.id, updated_at: createdMemory.updated_at },
