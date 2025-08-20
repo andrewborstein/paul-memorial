@@ -4,6 +4,7 @@ import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
+import SquareThumb from '@/components/SquareThumb';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
@@ -92,14 +93,13 @@ export default async function AllPhotosPage() {
                 <Link
                   key={photo.public_id}
                   href={`/memories/photos/${photo.public_id}`}
-                  className="aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity group"
+                  className="block"
                 >
-                  <ImageWithFallback
+                  <SquareThumb
                     publicId={photo.public_id}
                     alt={`Photo from ${photo.memoryTitle}`}
-                    className="w-full h-full object-cover"
-                    width={300}
-                    quality="auto"
+                    className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-end">
                     <div className="p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
