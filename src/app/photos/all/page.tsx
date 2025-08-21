@@ -66,10 +66,10 @@ export default async function AllPhotosPage() {
 
         {allPhotos.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">No photos shared yet.</p>
+            <p className="text-stone-600 mb-4">No photos shared yet.</p>
             <Link
               href="/memories/new"
-              className="text-blue-600 hover:text-blue-800 font-medium"
+              className="text-[#184a86] hover:text-[#1a35b3] font-medium transition-colors"
             >
               Be the first to share photos
             </Link>
@@ -77,12 +77,12 @@ export default async function AllPhotosPage() {
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-xl text-stone-800">
                 All photos ({allPhotos.length})
               </h2>
               <Link
                 href="/photos"
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-amber-700 hover:text-amber-800 text-sm transition-colors"
               >
                 ← Back to photos overview
               </Link>
@@ -123,12 +123,12 @@ export default async function AllPhotosPage() {
         />
 
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">
+          <p className="text-stone-600 mb-4">
             Unable to load photos at this time.
           </p>
           <Link
             href="/memories/new"
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-amber-700 hover:text-amber-800 font-medium transition-colors"
           >
             Be the first to share photos
           </Link>

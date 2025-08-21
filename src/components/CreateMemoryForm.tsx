@@ -749,7 +749,7 @@ export default function CreateMemoryForm({
               <button
                 type="button"
                 onClick={() => setShowTitleField(false)}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm text-gray-500 hover:text-gray-700 uppercase tracking-widest text-xs"
               >
                 Hide
               </button>
@@ -797,10 +797,10 @@ export default function CreateMemoryForm({
                 <button
                   type="button"
                   onClick={() => setShowTitleField(!showTitleField)}
-                  className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition-colors shadow-sm ${
+                  className={`flex items-center gap-1 px-2 py-1.5 text-xs rounded-md transition-colors shadow-sm whitespace-nowrap uppercase tracking-widest ${
                     title.trim()
                       ? 'bg-green-50 border border-green-600 text-green-800 hover:bg-green-100'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'btn-secondary'
                   }`}
                 >
                   <svg
@@ -855,10 +855,10 @@ export default function CreateMemoryForm({
                   disabled={photos.some(
                     (p) => p.status === 'uploading' || p.status === 'queued'
                   )}
-                  className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition-colors shadow-sm ${
+                  className={`flex items-center gap-1 px-2 py-1.5 text-xs rounded-md transition-colors shadow-sm whitespace-nowrap uppercase tracking-widest ${
                     photos.length > 0
                       ? 'bg-green-50 border border-green-600 text-green-800 hover:bg-green-100'
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : 'btn-secondary'
                   }`}
                 >
                   <svg
@@ -905,7 +905,7 @@ export default function CreateMemoryForm({
         <div className="flex gap-4">
           <button
             type="button"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="btn disabled:opacity-50"
             disabled={
               isPublishing ||
               photos.some(
@@ -934,7 +934,7 @@ export default function CreateMemoryForm({
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              className="btn-secondary"
             >
               Cancel
             </button>
@@ -1043,7 +1043,7 @@ export default function CreateMemoryForm({
                     disabled={photos.some(
                       (p) => p.status === 'uploading' || p.status === 'queued'
                     )}
-                    className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className="btn disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Done
                   </button>
@@ -1053,7 +1053,7 @@ export default function CreateMemoryForm({
                     onClick={() =>
                       document.getElementById('photos-modal')?.click()
                     }
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 uppercase tracking-widest text-xs"
                   >
                     + Add more photos
                   </button>

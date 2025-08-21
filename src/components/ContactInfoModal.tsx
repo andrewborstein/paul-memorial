@@ -251,7 +251,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={checkEmail}
                 disabled={isCheckingEmail}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn"
               >
                 {isCheckingEmail ? 'Checking...' : 'Continue'}
               </button>
@@ -260,7 +260,7 @@ export default function ContactInfoModal({
                   type="button"
                   onClick={handleSignOut}
                   disabled={isCheckingEmail}
-                  className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="btn-text"
                 >
                   Sign out
                 </button>
@@ -321,7 +321,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={handleNameSubmit}
                 disabled={isSubmitting}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn"
               >
                 {isSubmitting ? 'Saving...' : 'Continue'}
               </button>
@@ -329,7 +329,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={() => setStep('email')}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="btn-text"
               >
                 Back
               </button>
@@ -355,7 +355,7 @@ export default function ContactInfoModal({
                 type="button"
                 onClick={handleWelcomeContinue}
                 disabled={isSubmitting}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn"
               >
                 {isSubmitting ? 'Continuing...' : 'Continue'}
               </button>
@@ -364,7 +364,7 @@ export default function ContactInfoModal({
                   type="button"
                   onClick={handleSignOut}
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="btn-text"
                 >
                   Sign out
                 </button>

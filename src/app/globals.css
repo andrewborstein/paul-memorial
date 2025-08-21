@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom fonts */
+@layer base {
+  h1 {
+    font-family: 'Cormorant Garamond', cursive;
+  }
+
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+  }
+
+  body {
+    font-family: Montserrat, sans-serif;
+    font-weight: 400;
+  }
+}
+
 /* Masonry layout styles */
 .memory-card {
   break-inside: avoid;
@@ -16,21 +37,40 @@
 :root {
   color-scheme: light;
 }
+
 body {
-  @apply bg-white text-gray-900;
+  @apply bg-[#fffdf8] text-stone-800;
 }
+
 .container {
   @apply mx-auto max-w-4xl px-4;
 }
+
 .card {
-  @apply rounded-2xl border border-gray-200 p-4;
+  @apply rounded-2xl border border-stone-200 p-4 bg-white shadow-sm;
 }
+
 .btn {
-  @apply inline-flex items-center justify-center rounded-md bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 font-medium;
+  @apply inline-flex items-center justify-center rounded-md bg-[#184a86] hover:bg-[#0d3669] text-white px-4 py-2 font-medium transition-colors uppercase tracking-widest text-xs;
 }
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-md bg-white border border-stone-200 hover:bg-stone-50 text-stone-800 px-4 py-2 font-medium transition-colors uppercase tracking-widest text-xs;
+}
+
+.btn-text {
+  @apply inline-flex items-center justify-center rounded-md text-stone-800 px-4 py-2 font-medium transition-colors uppercase tracking-widest text-xs;
+}
+
 .input {
-  @apply w-full rounded-md border border-gray-300 px-3 py-2;
+  @apply w-full rounded-md border border-stone-300 px-3 py-2 bg-white focus:border-[#184a86] focus:ring-1 focus:ring-[#184a86];
 }
+
 .label {
-  @apply block text-sm font-medium text-gray-700;
+  @apply block text-sm font-medium text-stone-700;
+}
+
+/* Link styles */
+.link {
+  @apply text-[#184a86] hover:text-[#0d3669] transition-colors;
 }

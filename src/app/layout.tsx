@@ -28,14 +28,24 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="flex flex-col min-h-screen">
         <SuperUserBanner />
-        <header className="border-b">
+        <header className="border-b border-stone-200 bg-white">
           <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2">
             <Link
               href="/"
-              className="font-semibold hover:text-blue-600 transition-colors"
+              className="font-[Montserrat] font-bold text-1xl text-[#184a86] hover:text-[#123a6b] transition-colors"
             >
               Paul Bedrosian
             </Link>
@@ -44,8 +54,8 @@ export default function RootLayout({
                 href="/memories"
                 className={
                   isActive('/memories')
-                    ? 'text-blue-600 border-b border-blue-600'
-                    : 'hover:text-blue-600'
+                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
+                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
                 }
               >
                 Memories
@@ -54,8 +64,8 @@ export default function RootLayout({
                 href="/photos"
                 className={
                   isActive('/photos')
-                    ? 'text-blue-600 border-b border-blue-600'
-                    : 'hover:text-blue-600'
+                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
+                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
                 }
               >
                 Photos
@@ -64,8 +74,8 @@ export default function RootLayout({
                 href="/donate"
                 className={
                   isActive('/donate')
-                    ? 'text-blue-600 border-b border-blue-600'
-                    : 'hover:text-blue-600'
+                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
+                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
                 }
               >
                 Donate
@@ -74,13 +84,13 @@ export default function RootLayout({
           </nav>
         </header>
         <main className="flex-1 py-8 px-2">{children}</main>
-        <footer className="max-w-4xl mx-auto py-8 text-sm text-gray-500 px-5 md:px-2">
-          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-0">
-            <span>Made with love by friends & family.</span>
-            <span className="hidden sm:inline text-gray-300">•</span>
+        <footer className="py-8 text-sm text-stone-500 px-5 md:px-2 border-t border-stone-200 bg-white">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:gap-2">
+            <span>Made with love by friends & family</span>
+            <span className="hidden sm:inline-flex text-stone-300">•</span>
             <a
               href="mailto:contact@paulbedrosian.com"
-              className="text-blue-600 hover:text-blue-800"
+              className="text-[#184a86] hover:text-[#1a35b3] transition-colors"
             >
               contact@paulbedrosian.com
             </a>

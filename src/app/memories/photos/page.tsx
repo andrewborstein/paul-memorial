@@ -34,9 +34,9 @@ export default async function PhotosPage() {
         </div>
         <Link
           href="/memories/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
+          className="btn whitespace-nowrap flex-shrink-0"
         >
-          Share memory
+          share a memory
         </Link>
       </div>
 

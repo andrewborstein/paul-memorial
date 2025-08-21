@@ -11,8 +11,12 @@ export default function Donate() {
 
       <div className="prose max-w-none">
         <p>
-          <a className="btn" href="https://gofundme.com/" target="_blank">
-            Go to GoFundMe
+          <a
+            className="btn"
+            href="https://gofundme.com/f/paul-bedrosian"
+            target="_blank"
+          >
+            Paul's GoFundMe
           </a>
         </p>
       </div>

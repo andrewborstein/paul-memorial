@@ -14,10 +14,10 @@ export default function PageHeader({
   return (
     <div className={`mb-6 ${visuallyHidden ? 'sr-only' : ''}`}>
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-semibold">{title}</h1>
+        <h1 className="text-4xl text-[#184a86]">{title}</h1>
         {children}
       </div>
-      {description && <p className="text-gray-600">{description}</p>}
+      {description && <p className="text-stone-600">{description}</p>}
     </div>
   );
 }

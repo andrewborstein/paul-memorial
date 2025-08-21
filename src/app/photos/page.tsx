@@ -114,9 +114,9 @@ export default function PhotosPage() {
               <div className="text-center mt-6">
                 <Link
                   href="/photos/all"
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-600 hover:text-blue-800 font-semibold uppercase tracking-widest text-xs "
                 >
-                  View all {photos.length} photos
+                  View all {photos.length} →
                 </Link>
               </div>
             )}
