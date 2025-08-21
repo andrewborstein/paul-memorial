@@ -63,7 +63,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
           {/* Name */}
-          <p className="text-sm font-medium text-gray-900 mb-2">
+          <p className="text-sm font-bold text-gray-900 mb-2">
             {memory.name || 'Anonymous'}
           </p>
 
@@ -103,7 +103,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
 
       {/* Title */}
       {displayTitle && (
-        <h2 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-3">
+        <h2 className="text-md text-gray-900 group-hover:text-blue-600 transition-colors mb-3">
           {displayTitle}
         </h2>
       )}

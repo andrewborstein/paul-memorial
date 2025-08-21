@@ -116,7 +116,7 @@ export default function PhotosPage() {
                   href="/photos/all"
                   className="text-blue-600 hover:text-blue-800 font-semibold uppercase tracking-widest text-xs "
                 >
-                  View all {photos.length} →
+                  Load all {photos.length} photos
                 </Link>
               </div>
             )}

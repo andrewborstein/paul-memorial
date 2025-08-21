@@ -150,7 +150,7 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
             {/* Header: Text items on left, thumbnail on right */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 mb-2">
+                <p className="text-sm font-semibold text-gray-900 mb-2">
                   {memory.name || 'Anonymous'}
                 </p>
 
@@ -185,7 +185,7 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
             <div className="border-t border-gray-200 mb-3"></div>
 
             {displayTitle(memory) && (
-              <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-3">
+              <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-3">
                 {displayTitle(memory)}
               </h3>
             )}

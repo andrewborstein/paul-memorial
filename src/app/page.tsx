@@ -68,7 +68,7 @@ export default async function HomePage() {
                       <article className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow group">
                         {/* Name and Date */}
                         <div className="flex items-center justify-between mb-3">
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-semibold text-gray-900">
                             {memory.name || 'Anonymous'}
                           </p>
                           <span className="text-gray-500 text-xs">
@@ -85,7 +85,7 @@ export default async function HomePage() {
 
                         {/* Title */}
                         {displayTitle && (
-                          <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          <h3 className="font-medium text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                             {displayTitle}
                           </h3>
                         )}
