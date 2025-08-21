@@ -43,7 +43,7 @@ export async function readBlobJson<T>(
   return (await r.json()) as T;
 }
 
-async function writeBlobJson(key: string, value: unknown) {
+export async function writeBlobJson(key: string, value: unknown) {
   const token =
     process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) throw new Error('No Blob write token');

@@ -1,34 +1,11 @@
 import { NextRequest } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
-
-interface User {
-  email: string;
-  name: string;
-  createdAt: string;
-}
-
-async function ensureUsersFile() {
-  try {
-    await fs.access(USERS_FILE);
-  } catch {
-    // Create the file if it doesn't exist
-    await fs.writeFile(USERS_FILE, JSON.stringify([], null, 2));
-  }
-}
-
-async function readUsers(): Promise<User[]> {
-  await ensureUsersFile();
-  const data = await fs.readFile(USERS_FILE, 'utf-8');
-  return JSON.parse(data);
-}
-
-async function writeUsers(users: User[]) {
-  await ensureUsersFile();
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-}
+import {
+  readUsers,
+  writeUsers,
+  findUserByEmail,
+  createUser,
+  type User,
+} from '@/lib/user';
 
 export async function GET() {
   try {
@@ -49,10 +26,9 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const users = await readUsers();
 
     // Check if user already exists
-    const existingUser = users.find((user) => user.email === normalizedEmail);
+    const existingUser = await findUserByEmail(normalizedEmail);
     if (existingUser) {
       return Response.json({
         exists: true,
@@ -62,14 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Add new user
-    const newUser: User = {
-      email: normalizedEmail,
-      name: name.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-    await writeUsers(users);
+    const newUser = await createUser(normalizedEmail, name);
 
     return Response.json({
       exists: false,

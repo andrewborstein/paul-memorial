@@ -1,3 +1,52 @@
+import { readBlobJson, writeBlobJson } from './data';
+
+const USERS_KEY = 'users.json';
+
+export interface User {
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+// Server-side Blob functions
+export async function readUsers(): Promise<User[]> {
+  return (await readBlobJson<User[]>(USERS_KEY)) ?? [];
+}
+
+export async function writeUsers(users: User[]) {
+  await writeBlobJson(USERS_KEY, users);
+}
+
+export async function findUserByEmail(email: string): Promise<User | null> {
+  const users = await readUsers();
+  const normalizedEmail = email.trim().toLowerCase();
+  return users.find((user) => user.email === normalizedEmail) ?? null;
+}
+
+export async function createUser(email: string, name: string): Promise<User> {
+  const users = await readUsers();
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const newUser: User = {
+    email: normalizedEmail,
+    name: name.trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  users.push(newUser);
+  await writeUsers(users);
+
+  return newUser;
+}
+
+// Client-side user management functions
+export interface UserInfo {
+  email: string;
+  emailHash: string;
+  name: string;
+  signedInAt: string;
+}
+
 // Simple hash function for email
 function hashEmail(email: string): string {
   let hash = 0;
@@ -9,16 +58,8 @@ function hashEmail(email: string): string {
   return Math.abs(hash).toString(36);
 }
 
-// User identification utilities
 export const USER_STORAGE_KEY = 'paul-memorial-user';
 export const SUPER_USER_KEY = 'paul-memorial-super-user';
-
-export interface UserInfo {
-  email: string;
-  emailHash: string;
-  name: string;
-  signedInAt: string;
-}
 
 export function setCurrentUser(email: string, name: string): UserInfo {
   const emailHash = hashEmail(email);

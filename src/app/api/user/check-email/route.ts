@@ -1,17 +1,5 @@
 import { aggregateIndex } from '@/lib/data';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const USERS_FILE = path.join(process.cwd(), 'data', 'users.json');
-
-async function readUsers() {
-  try {
-    const data = await fs.readFile(USERS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
+import { findUserByEmail } from '@/lib/user';
 
 export async function POST(request: Request) {
   try {
@@ -25,12 +13,7 @@ export async function POST(request: Request) {
     console.log('Checking email:', normalizedEmail);
 
     // First check the users file
-    const users = await readUsers();
-    console.log('Found users:', users.length);
-
-    const existingUser = users.find(
-      (user: any) => user.email === normalizedEmail
-    );
+    const existingUser = await findUserByEmail(normalizedEmail);
     if (existingUser) {
       console.log('Existing user found in users file:', existingUser);
       return Response.json({
