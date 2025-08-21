@@ -11,11 +11,8 @@ export default function PageContainer({
   className = '',
   fullWidth = false,
 }: PageContainerProps) {
-  return (
-    <section
-      className={`${fullWidth ? 'w-full px-2' : 'max-w-4xl mx-auto px-2'} ${className}`}
-    >
-      {children}
-    </section>
-  );
+  const containerClassName =
+    `${fullWidth ? 'w-full px-2' : 'max-w-4xl mx-auto px-2'} ${String(className || '')}`.trim();
+
+  return <section className={containerClassName}>{children}</section>;
 }

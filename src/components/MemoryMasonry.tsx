@@ -141,7 +141,7 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
       {memories.map((memory) => (
         <div
           key={memory.id}
-          className="memory-card w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 mb-6 px-3"
+          className="memory-card w-full md:w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 mb-6 px-3"
         >
           <Link
             href={`/memories/${memory.id}`}

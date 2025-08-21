@@ -7,7 +7,19 @@ export default function SuperUserBanner() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    setShowBanner(isSuperUser());
+    const updateBanner = () => {
+      setShowBanner(isSuperUser());
+    };
+
+    // Check initial state
+    updateBanner();
+
+    // Listen for user updates
+    window.addEventListener('userUpdated', updateBanner);
+
+    return () => {
+      window.removeEventListener('userUpdated', updateBanner);
+    };
   }, []);
 
   if (!showBanner) return null;
@@ -15,9 +27,7 @@ export default function SuperUserBanner() {
   return (
     <div className="bg-green-600 text-white text-center py-2 px-4">
       <div className="max-w-4xl mx-auto flex items-center justify-center gap-2">
-        <span className="text-sm font-medium">
-          🛡️ Super User Mode Active
-        </span>
+        <span className="text-sm font-medium">🛡️ Super User Mode Active</span>
         <span className="text-xs opacity-90">
           You can edit and delete any memory
         </span>

@@ -18,9 +18,33 @@ export async function writeUsers(users: User[]) {
 }
 
 export async function findUserByEmail(email: string): Promise<User | null> {
-  const users = await readUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-  return users.find((user) => user.email === normalizedEmail) ?? null;
+  try {
+    // Check memories for user instead of separate users database
+    const response = await fetch('/api/memories');
+    if (!response.ok) {
+      return null;
+    }
+
+    const memories = await response.json();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const userMemory = memories.find(
+      (memory: any) => memory.email?.toLowerCase() === normalizedEmail
+    );
+
+    if (userMemory) {
+      return {
+        email: userMemory.email,
+        name: userMemory.name,
+        createdAt: userMemory.created_at || new Date().toISOString(),
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error finding user by email:', error);
+    return null;
+  }
 }
 
 export async function createUser(email: string, name: string): Promise<User> {
@@ -47,8 +71,10 @@ export interface UserInfo {
   signedInAt: string;
 }
 
+// ... existing code ...
+
 // Simple hash function for email
-function hashEmail(email: string): string {
+export function hashEmail(email: string): string {
   let hash = 0;
   for (let i = 0; i < email.length; i++) {
     const char = email.charCodeAt(i);
@@ -58,10 +84,16 @@ function hashEmail(email: string): string {
   return Math.abs(hash).toString(36);
 }
 
+// ... existing code ...
+
 export const USER_STORAGE_KEY = 'paul-memorial-user';
 export const SUPER_USER_KEY = 'paul-memorial-super-user';
 
-export function setCurrentUser(email: string, name: string): UserInfo {
+export function setCurrentUser(
+  email: string,
+  name: string,
+  shouldRefresh: boolean = true
+): UserInfo {
   const emailHash = hashEmail(email);
   const userInfo: UserInfo = {
     email,
@@ -72,8 +104,14 @@ export function setCurrentUser(email: string, name: string): UserInfo {
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userInfo));
+    // Clear super user mode when logging in as regular user
+    localStorage.removeItem(SUPER_USER_KEY);
     // Dispatch event to notify components of user update
     window.dispatchEvent(new CustomEvent('userUpdated'));
+    // Only refresh if explicitly requested (not during form submissions)
+    if (shouldRefresh) {
+      window.location.reload();
+    }
   }
 
   return userInfo;
@@ -90,11 +128,15 @@ export function getCurrentUser(): UserInfo | null {
   }
 }
 
-export function clearCurrentUser(): void {
+export function clearCurrentUser(shouldRefresh: boolean = true): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(USER_STORAGE_KEY);
     // Dispatch event to notify components of user update
     window.dispatchEvent(new CustomEvent('userUpdated'));
+    // Only refresh if explicitly requested (not during form submissions)
+    if (shouldRefresh) {
+      window.location.reload();
+    }
   }
 }
 
@@ -141,9 +183,43 @@ export function isSuperUser(): boolean {
   return true;
 }
 
-export function clearSuperUser(): void {
+export function clearSuperUser(shouldRefresh: boolean = true): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(SUPER_USER_KEY);
+    // Only refresh if explicitly requested (not during form submissions)
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+  }
+}
+
+// Auto-login via email hash
+export async function loginWithEmailHash(emailHash: string): Promise<boolean> {
+  try {
+    // Find user by email hash from memories
+    const response = await fetch('/api/memories');
+    if (!response.ok) {
+      return false;
+    }
+
+    const memories = await response.json();
+    const user = memories.find((memory: any) => {
+      if (memory.email) {
+        const userHash = hashEmail(memory.email);
+        return userHash === emailHash;
+      }
+      return false;
+    });
+
+    if (user) {
+      setCurrentUser(user.email, user.name, false); // Don't refresh during auto-login
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error logging in with email hash:', error);
+    return false;
   }
 }
 

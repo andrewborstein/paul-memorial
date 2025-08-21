@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import MemoryMasonry from '@/components/MemoryMasonry';
+import { getCurrentUser, type UserInfo } from '@/lib/user';
 import type { MemoryIndexItem } from '@/types/memory';
 
 function MemorySkeleton({ height = 'h-48' }: { height?: string }) {
@@ -40,6 +42,26 @@ function MemorySkeleton({ height = 'h-48' }: { height?: string }) {
 export default function MemoriesPage() {
   const [memories, setMemories] = useState<MemoryIndexItem[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const searchParams = useSearchParams();
+  const filter = searchParams.get('filter');
+
+  useEffect(() => {
+    // Only run on client side
+    const user = getCurrentUser();
+    setCurrentUser(user);
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      setCurrentUser(getCurrentUser());
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    return () => window.removeEventListener('userUpdated', handleUserUpdate);
+  }, []);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -72,6 +94,19 @@ export default function MemoriesPage() {
   }, []);
 
   const hasMemories = (memories?.length ?? 0) > 0;
+
+  // Filter memories if "my" filter is applied
+  const filteredMemories = useMemo(() => {
+    if (!memories || !isLoaded) return memories;
+
+    if (filter === 'my' && currentUser) {
+      return memories.filter((memory) => memory.email === currentUser.email);
+    }
+
+    return memories;
+  }, [memories, filter, currentUser, isLoaded]);
+
+  const hasFilteredMemories = (filteredMemories?.length ?? 0) > 0;
   const skeletons = useMemo(() => {
     // Create varied skeleton heights to simulate real content
     const heights = [
@@ -98,8 +133,23 @@ export default function MemoriesPage() {
     <>
       <PageContainer>
         <PageHeader
-          title="Memories"
-          description="Read memories shared by friends and family."
+          title={filter === 'my' ? 'My Memories' : 'Memories'}
+          description={
+            filter === 'my' ? (
+              <>
+                Memories you have shared.{' '}
+                <Link
+                  href="/memories"
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  View all memories
+                </Link>
+                .
+              </>
+            ) : (
+              'Read memories shared by friends and family.'
+            )
+          }
         >
           <Link
             href="/memories/new"
@@ -119,14 +169,20 @@ export default function MemoriesPage() {
               Be the first to share a memory
             </Link>
           </div>
-        ) : !hasMemories && memories !== null ? (
+        ) : !hasFilteredMemories && memories !== null ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">No memories shared yet.</p>
+            <p className="text-gray-500 mb-4">
+              {filter === 'my'
+                ? "You haven't shared any memories yet."
+                : 'No memories shared yet.'}
+            </p>
             <Link
               href="/memories/new"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              Be the first to share a memory
+              {filter === 'my'
+                ? 'Share your first memory'
+                : 'Be the first to share a memory'}
             </Link>
           </div>
         ) : null}
@@ -140,9 +196,9 @@ export default function MemoriesPage() {
             ))}
           </div>
         </div>
-      ) : hasMemories ? (
+      ) : hasFilteredMemories ? (
         <div className="w-full px-2">
-          <MemoryMasonry memories={memories!} />
+          <MemoryMasonry memories={filteredMemories!} />
         </div>
       ) : null}
     </>

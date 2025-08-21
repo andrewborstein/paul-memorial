@@ -3,7 +3,10 @@ import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import { Suspense } from 'react';
 import SuperUserBanner from '@/components/SuperUserBanner';
+import AutoLoginHandler from '@/components/AutoLoginHandler';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function RootLayout({
   children,
@@ -34,22 +37,26 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className="flex flex-col min-h-screen">
+        <Suspense fallback={null}>
+          <AutoLoginHandler />
+        </Suspense>
         <SuperUserBanner />
         <header className="border-b border-stone-200 bg-white">
-          <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2">
+          <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2 flex-nowrap">
             <Link
               href="/"
               className="font-[Montserrat] font-bold text-1xl text-[#184a86] hover:text-[#123a6b] transition-colors"
             >
               Paul Bedrosian
             </Link>
-            <div className="space-x-4 text-sm">
+            <div className="flex items-center space-x-4 text-sm">
               <Link
                 href="/memories"
                 className={
@@ -80,6 +87,7 @@ export default function RootLayout({
               >
                 Donate
               </Link>
+              <UserAvatar />
             </div>
           </nav>
         </header>
