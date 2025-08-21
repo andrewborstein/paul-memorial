@@ -101,6 +101,7 @@ export async function PUT(
         taken_at: p.taken_at ?? null,
         sort_index: i,
       })),
+      ...(body.created_at && { created_at: body.created_at }),
     };
 
     // Perform immutable update (creates new memory, deletes old one)

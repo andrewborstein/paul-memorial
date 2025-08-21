@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
@@ -39,7 +39,7 @@ function MemorySkeleton({ height = 'h-48' }: { height?: string }) {
   );
 }
 
-export default function MemoriesPage() {
+function MemoriesPageContent() {
   const [memories, setMemories] = useState<MemoryIndexItem[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
@@ -202,5 +202,35 @@ export default function MemoriesPage() {
         </div>
       ) : null}
     </>
+  );
+}
+
+function MemoriesPageSkeleton() {
+  const skeletons = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    height: ['h-32', 'h-40', 'h-48', 'h-56', 'h-64', 'h-72'][i % 6],
+  }));
+
+  return (
+    <>
+      <PageContainer>
+        <PageHeader title="Memories" description="Loading memories..." />
+      </PageContainer>
+      <div className="w-full px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+          {skeletons.map((skeleton) => (
+            <MemorySkeleton key={skeleton.id} height={skeleton.height} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function MemoriesPage() {
+  return (
+    <Suspense fallback={<MemoriesPageSkeleton />}>
+      <MemoriesPageContent />
+    </Suspense>
   );
 }

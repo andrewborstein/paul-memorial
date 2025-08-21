@@ -137,7 +137,7 @@ export async function immutableUpdateMemory(
   const newDoc = await createMemory({
     ...oldDocWithoutIds,
     ...changes,
-    created_at: oldDoc.created_at, // preserve
+    created_at: changes.created_at || oldDoc.created_at, // use new created_at if provided, otherwise preserve
   });
 
   console.log(

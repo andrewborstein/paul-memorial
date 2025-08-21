@@ -234,6 +234,7 @@ export default function CreateMemoryForm({
   const [showTitleField, setShowTitleField] = React.useState(false);
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [createdAt, setCreatedAt] = React.useState(memory?.created_at || '');
 
   // Initialize form with current user data if signed in
   React.useEffect(() => {
@@ -637,6 +638,9 @@ export default function CreateMemoryForm({
           sort_index: i,
         }))
         .filter((p) => !!p.public_id),
+      ...(isEditMode && createdAt.trim()
+        ? { created_at: createdAt.trim() }
+        : {}),
       ...(isEditMode ? {} : { turnstileToken }),
     };
 
@@ -764,6 +768,30 @@ export default function CreateMemoryForm({
               maxLength={200}
               autoFocus
             />
+          </div>
+        )}
+
+        {/* Created At Field - Only for super users in edit mode */}
+        {isEditMode && isSuperUser() && (
+          <div className="space-y-2">
+            <label
+              htmlFor="created_at"
+              className="block text-sm font-semibold text-gray-700"
+            >
+              Created At (ISO Date)
+            </label>
+            <input
+              id="created_at"
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="2024-01-15T10:30:00.000Z"
+              value={createdAt}
+              onChange={(e) => setCreatedAt(e.target.value)}
+            />
+            <p className="text-xs text-gray-500">
+              Format: YYYY-MM-DDTHH:MM:SS.sssZ (leave empty to preserve
+              original)
+            </p>
           </div>
         )}
 
