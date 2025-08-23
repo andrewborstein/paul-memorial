@@ -54,7 +54,7 @@ export default function PhotosPage() {
     <PageContainer>
       <PageHeader
         title="Photos"
-        description="Browse all photos shared in memories."
+        description="Every photo matters—whether it's a candid snapshot, a grainy selfie, or a treasured portrait. Together they reveal the many communities, friendships, and everyday moments that shaped Paul's life. Please share yours, no matter how small, so we can see the whole picture."
       />
 
       {err ? (

@@ -39,7 +39,7 @@ export default function RootLayout({
         />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -78,14 +78,14 @@ export default function RootLayout({
                 Photos
               </Link>
               <Link
-                href="/donate"
+                href="/more"
                 className={
-                  isActive('/donate')
+                  isActive('/more')
                     ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
                     : 'text-stone-600 hover:text-[#123a6b] transition-colors'
                 }
               >
-                Donate
+                More
               </Link>
               <UserAvatar />
             </div>

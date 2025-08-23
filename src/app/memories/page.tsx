@@ -147,7 +147,7 @@ function MemoriesPageContent() {
                 .
               </>
             ) : (
-              'Read memories shared by friends and family.'
+              'Read the reflections of those who knew Paul—and add your own. Every memory, big or small, helps paint a fuller picture of his life and keeps his spirit close.'
             )
           }
         >

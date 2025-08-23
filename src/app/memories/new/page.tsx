@@ -25,7 +25,7 @@ export default function NewMemoryPage() {
 
       <PageHeader
         title="Share a memory"
-        description="This can include condolences, memories, stories, or messages of support."
+        description="Whether it's a funny story, a favorite photo, or a simple reflection, your memory of Paul matters. By sharing, you help weave a living tribute that will comfort and inspire his family and friends for years to come."
       />
 
       <CreateMemoryForm />

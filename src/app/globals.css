@@ -5,7 +5,7 @@
 /* Custom fonts */
 @layer base {
   h1 {
-    font-family: 'Cormorant Garamond', cursive;
+    font-family: 'Montserrat', sans-serif;
   }
 
   h2,
@@ -72,5 +72,5 @@ body {
 
 /* Link styles */
 .link {
-  @apply text-[#184a86] hover:text-[#0d3669] transition-colors;
+  @apply text-[#184a86] hover:text-[#0d3669] transition-colors uppercase tracking-widest text-xs font-semibold;
 }

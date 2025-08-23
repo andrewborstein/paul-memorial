@@ -80,33 +80,28 @@ export default async function AllPhotosPage() {
               <h2 className="text-xl text-stone-800">
                 All photos ({allPhotos.length})
               </h2>
-              <Link
-                href="/photos"
-                className="text-amber-700 hover:text-amber-800 text-sm transition-colors"
-              >
-                ← Back to photos overview
-              </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {allPhotos.map((photo) => (
-                <Link
-                  key={photo.public_id}
-                  href={`/memories/photos/${photo.public_id}`}
-                  className="block"
-                >
-                  <SquareThumb
-                    publicId={photo.public_id}
-                    alt={`Photo from ${photo.memoryTitle}`}
-                    className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-end">
+                <div key={photo.public_id} className="group relative">
+                  <Link
+                    href={`/memories/photos/${photo.public_id}`}
+                    className="block"
+                  >
+                    <SquareThumb
+                      publicId={photo.public_id}
+                      alt={`Photo from ${photo.memoryTitle}`}
+                      className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    />
+                  </Link>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-end pointer-events-none">
                     <div className="p-2 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {photo.memoryTitle}
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>

@@ -33,7 +33,7 @@ export default function UploadPage() {
       <div className="mb-6">
         <Link
           href="/photos"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-4"
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 text-xs font-semibold tracking-widest uppercase"
         >
           ← Back to Photos
         </Link>
