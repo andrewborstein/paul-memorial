@@ -4,16 +4,27 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <section className="w-screen -ml-2 -mr-4 -mt-8 pb-8 pr-2">
-      <Image
-        src={getHeroImageUrl(CLOUDINARY_IMAGES.HERO_IMAGE_PHOTO)}
-        alt="Paul Bedrosian Memorial"
-        width={1920}
-        height={1080}
-        className="w-screen h-auto object-contain max-w-none"
-        priority
-        sizes="100vw"
-      />
+    <section
+      className="relative h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-8"
+      style={{
+        backgroundImage: `url(${getHeroImageUrl(CLOUDINARY_IMAGES.HERO_IMAGE_TWO_FLAGS)})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center top',
+        backgroundSize: '100% 115%',
+        width: 'calc(100% + 2rem)',
+      }}
+    >
+      {/* Paul's portrait - always centered */}
+      <div className="relative z-10 flex items-center justify-center h-full">
+        <Image
+          src={getHeroImageUrl(CLOUDINARY_IMAGES.HERO_IMAGE_PAUL)}
+          alt="Paul Bedrosian"
+          width={351}
+          height={341}
+          className="h-full w-auto object-contain"
+          priority
+        />
+      </div>
     </section>
   );
 }

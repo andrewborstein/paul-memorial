@@ -17,7 +17,11 @@ export default function PageHeader({
         <h1 className="text-4xl font-semibold text-[#184a86]">{title}</h1>
         {children}
       </div>
-      {description && <p className="text-stone-600">{description}</p>}
+      {typeof description === 'string' ? (
+        <p className="text-stone-600">{description}</p>
+      ) : (
+        <div className="text-stone-600">{description}</div>
+      )}
     </div>
   );
 }

@@ -7,12 +7,12 @@ export default async function HomePage() {
   try {
     return (
       <>
-        <Hero />
         <PageContainer>
+          <Hero />
           <PageHeader
             title="Remembering Paul"
             description={
-              <p className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4">
                 <p>
                   Paul Nshan Bedrosian was a devoted father, partner, son,
                   brother, and friend whose kindness touched countless lives.
@@ -28,7 +28,7 @@ export default async function HomePage() {
                   together, giving Oli, and all of us, a lasting picture of the
                   life he made so full.
                 </p>
-              </p>
+              </div>
             }
           />
 

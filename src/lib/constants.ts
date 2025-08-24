@@ -3,6 +3,9 @@ export const CLOUDINARY_IMAGES = {
   // Hero images
   HERO_IMAGE_TEXT: 'Paul/hero-image-text',
   HERO_IMAGE_PHOTO: 'Paul/hero-image-photo',
+  HERO_IMAGE_PAUL: 'Paul/hero-image-paul',
+  HERO_IMAGE_RASTA_FLAG: 'Paul/hero-image-rasta-flag',
+  HERO_IMAGE_TWO_FLAGS: 'Paul/hero-image-two-flags',
 
   // Flyer images
   FLYER_FRONT: 'Paul/flyer-front',
