@@ -27,7 +27,7 @@ export default async function HomePage() {
                   His young son, Olì, will grow up without the chance to know
                   him firsthand. By sharing our stories, photos, and memories,
                   we give Olì — and one another — the gift of knowing Paul more
-                  fully than any of us could alone.
+                  fully than any one person could give alone.
                 </p>
                 <p>
                   From his roots in Cranston to his years in Vermont, from
