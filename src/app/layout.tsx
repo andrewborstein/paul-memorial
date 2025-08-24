@@ -7,6 +7,9 @@ import { Suspense } from 'react';
 import SuperUserBanner from '@/components/SuperUserBanner';
 import AutoLoginHandler from '@/components/AutoLoginHandler';
 import UserAvatar from '@/components/UserAvatar';
+import { CLOUDINARY_IMAGES } from '@/lib/constants';
+import { getHeroImageUrl } from '@/lib/cloudinary';
+import Image from 'next/image';
 
 export default function RootLayout({
   children,
@@ -48,48 +51,62 @@ export default function RootLayout({
           <AutoLoginHandler />
         </Suspense>
         <SuperUserBanner />
-        <header className="border-b border-stone-200 bg-white">
-          <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2 flex-nowrap">
-            <Link
-              href="/"
-              className="font-[Montserrat] font-bold text-1xl text-[#184a86] hover:text-[#123a6b] transition-colors"
+        <header className="h-20">
+          <div className="h-full flex flex-col">
+            <div className="h-1/4" style={{ backgroundColor: '#55aa4d' }}></div>
+            <div
+              className="h-1/2 flex items-center"
+              style={{ backgroundColor: '#fdd02b' }}
             >
-              Paul Bedrosian
-            </Link>
-            <div className="flex items-center space-x-4 text-sm">
-              <Link
-                href="/memories"
-                className={
-                  isActive('/memories')
-                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
-                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
-                }
-              >
-                Memories
-              </Link>
-              <Link
-                href="/photos"
-                className={
-                  isActive('/photos')
-                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
-                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
-                }
-              >
-                Photos
-              </Link>
-              <Link
-                href="/more"
-                className={
-                  isActive('/more')
-                    ? 'text-[#184a86] border-b-2 border-[#184a86] font-medium'
-                    : 'text-stone-600 hover:text-[#123a6b] transition-colors'
-                }
-              >
-                More
-              </Link>
-              <UserAvatar />
+              <nav className="max-w-4xl mx-auto flex items-center justify-between py-4 px-2 flex-nowrap w-full">
+                <Link
+                  href="/"
+                  className="font-[Montserrat] text-black hover:text-gray-800 transition-colors"
+                >
+                  <div className="text-xl font-bold leading-none mb-[2px]">
+                    PAUL BEDROSIAN
+                  </div>
+                  <div className="text-xs font-normal leading-none">
+                    ONE LOVE ALWAYS 1983 - 2025
+                  </div>
+                </Link>
+                <div className="flex items-center space-x-4 text-sm">
+                  <Link
+                    href="/memories"
+                    className={
+                      isActive('/memories')
+                        ? 'text-black border-b-2 border-black font-medium'
+                        : 'text-black hover:text-gray-800 transition-colors'
+                    }
+                  >
+                    Memories
+                  </Link>
+                  <Link
+                    href="/photos"
+                    className={
+                      isActive('/photos')
+                        ? 'text-black border-b-2 border-black font-medium'
+                        : 'text-black hover:text-gray-800 transition-colors'
+                    }
+                  >
+                    Photos
+                  </Link>
+                  <Link
+                    href="/more"
+                    className={
+                      isActive('/more')
+                        ? 'text-black border-b-2 border-black font-medium'
+                        : 'text-black hover:text-gray-800 transition-colors'
+                    }
+                  >
+                    More
+                  </Link>
+                  <UserAvatar />
+                </div>
+              </nav>
             </div>
-          </nav>
+            <div className="h-1/4" style={{ backgroundColor: '#da2849' }}></div>
+          </div>
         </header>
         <main className="flex-1 py-8 px-2">{children}</main>
         <footer className="py-8 text-sm text-stone-500 px-5 md:px-2 border-t border-stone-200 bg-white">
