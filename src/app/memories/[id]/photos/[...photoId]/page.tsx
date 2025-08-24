@@ -4,29 +4,41 @@ import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoImage from '@/components/PhotoImage';
 import { getFullSizeUrl } from '@/lib/cloudinary';
-import type { MemoryDetail } from '@/types/memory';
+import { readMemory } from '@/lib/data';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
-async function getPhotoData(photoId: string) {
-  const res = await serverFetch(`/api/photo/${photoId}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error('Not found');
-  return res.json();
+async function getPhotoData(memoryId: string, photoId: string) {
+  try {
+    // Direct memory lookup - no scanning needed!
+    const memory = await readMemory(memoryId);
+    if (!memory) throw new Error('Memory not found');
+
+    const photo = memory.photos.find((p) => p.public_id === photoId);
+    if (!photo) throw new Error('Photo not found');
+
+    const photoIndex = memory.photos.findIndex((p) => p.public_id === photoId);
+
+    return { memory, photo, photoIndex };
+  } catch (error) {
+    throw new Error('Not found');
+  }
 }
 
 export default async function PhotoPage({
   params,
 }: {
-  params: Promise<{ id: string[] }>;
+  params: Promise<{ id: string; photoId: string[] }>;
 }) {
-  const { id } = await params;
-  const photoId = id.join('/'); // Join the segments back together
+  const { id: memoryId, photoId } = await params;
+  const fullPhotoId = photoId.join('/'); // Join the segments back together
 
   try {
-    const { memory, photo, photoIndex } = await getPhotoData(photoId);
+    const { memory, photo, photoIndex } = await getPhotoData(
+      memoryId,
+      fullPhotoId
+    );
     const displayTitle = memory.title || memory.name;
 
     const prevPhoto = photoIndex > 0 ? memory.photos[photoIndex - 1] : null;
@@ -99,7 +111,7 @@ export default async function PhotoPage({
               <div className="flex items-center gap-2 py-4 w-full sm:w-auto">
                 {prevPhoto ? (
                   <Link
-                    href={`/memories/photos/${prevPhoto.public_id}`}
+                    href={`/memories/${memoryId}/photos/${prevPhoto.public_id}`}
                     prefetch={true}
                     className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
                   >
@@ -113,7 +125,7 @@ export default async function PhotoPage({
 
                 {nextPhoto ? (
                   <Link
-                    href={`/memories/photos/${nextPhoto.public_id}`}
+                    href={`/memories/${memoryId}/photos/${nextPhoto.public_id}`}
                     prefetch={true}
                     className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
                   >

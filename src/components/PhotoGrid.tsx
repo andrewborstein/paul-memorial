@@ -9,15 +9,20 @@ interface Photo {
 
 interface PhotoGridProps {
   photos: Photo[];
+  memoryId?: string; // Optional for backward compatibility
 }
 
-export default function PhotoGrid({ photos }: PhotoGridProps) {
+export default function PhotoGrid({ photos, memoryId }: PhotoGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {photos.map((photo) => (
         <Link
           key={photo.public_id}
-          href={`/memories/photos/${photo.public_id}`}
+          href={
+            memoryId
+              ? `/memories/${memoryId}/photos/${photo.public_id}`
+              : `/memories/photos/${photo.public_id}`
+          }
           className="aspect-square overflow-hidden rounded-lg group cursor-pointer border border-gray-200 bg-gray-50 relative"
         >
           <SquareThumb

@@ -6,6 +6,18 @@ const BLOB_PREFIX = process.env.BLOB_PREFIX || '';
 const INDEX_ITEM_PREFIX = 'index-items';
 const REDIRECT_PREFIX = 'redirects'; // oldId -> newId pointer
 
+// Memory cache for readMemory function
+const memoryCache = new Map<
+  string,
+  { data: MemoryDetail; timestamp: number }
+>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+// Cache invalidation function
+function invalidateMemoryCache(id: string) {
+  memoryCache.delete(id);
+}
+
 const k = (key: string) => (BLOB_PREFIX ? `${BLOB_PREFIX}/${key}` : key);
 
 type BlobFile = { pathname: string; downloadUrl: string };
@@ -61,12 +73,29 @@ export async function readMemory(
   id: string,
   opts?: { forceFresh?: boolean; updated_at?: string }
 ) {
-  return await readBlobJson<MemoryDetail>(`memories/${id}.json`, opts);
+  // Check cache first (unless forceFresh is true)
+  if (!opts?.forceFresh) {
+    const cached = memoryCache.get(id);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+  }
+
+  // Fetch from blob storage
+  const data = await readBlobJson<MemoryDetail>(`memories/${id}.json`, opts);
+
+  // Cache the result if successful
+  if (data) {
+    memoryCache.set(id, { data, timestamp: Date.now() });
+  }
+
+  return data;
 }
 
 export async function writeMemory(doc: MemoryDetail) {
   const payload = { ...doc, updated_at: new Date().toISOString() };
   await writeBlobJson(`memories/${doc.id}.json`, payload);
+  invalidateMemoryCache(doc.id);
 }
 
 export async function deleteMemory(id: string) {
@@ -75,6 +104,7 @@ export async function deleteMemory(id: string) {
   if (!token) throw new Error('No Blob write token');
   await del(k(`memories/${id}.json`), { token }).catch(() => {});
   await del(k(`${INDEX_ITEM_PREFIX}/${id}.json`), { token }).catch(() => {});
+  invalidateMemoryCache(id);
 }
 
 // ✅ New: per-item index summaries
@@ -88,6 +118,7 @@ export async function deleteMemoryAndIndex(id: string) {
   if (!token) throw new Error('No Blob write token');
   await del(k(`memories/${id}.json`), { token }).catch(() => {});
   await del(k(`${INDEX_ITEM_PREFIX}/${id}.json`), { token }).catch(() => {});
+  invalidateMemoryCache(id);
 }
 
 export async function createMemory(
@@ -104,6 +135,7 @@ export async function createMemory(
     updated_at: now,
   };
   await writeBlobJson(`memories/${id}.json`, payload);
+  invalidateMemoryCache(id);
 
   const indexItem: MemoryIndexItem = {
     id,
@@ -161,6 +193,10 @@ export async function immutableUpdateMemory(
   // remove old artifacts
   await deleteMemoryAndIndex(oldId);
   console.log('Deleted old memory and index for:', oldId);
+
+  // Invalidate cache for both old and new IDs
+  invalidateMemoryCache(oldId);
+  invalidateMemoryCache(newDoc.id);
 
   return newDoc;
 }

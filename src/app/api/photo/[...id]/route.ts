@@ -2,12 +2,20 @@ import { aggregateIndex, readMemory } from '@/lib/data';
 
 export const revalidate = 60;
 
+// Cache for photo lookups to avoid repeated database scans
+const photoCache = new Map<string, any>();
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string[] }> }
 ) {
   const { id } = await params;
   const photoId = id.join('/'); // Join the segments back together
+
+  // Check cache first
+  if (photoCache.has(photoId)) {
+    return Response.json(photoCache.get(photoId));
+  }
 
   try {
     // Get all memories
@@ -23,11 +31,16 @@ export async function GET(
         const photoIndex = memory.photos.findIndex(
           (p) => p.public_id === photoId
         );
-        return Response.json({
+        const result = {
           memory,
           photo,
           photoIndex,
-        });
+        };
+
+        // Cache the result
+        photoCache.set(photoId, result);
+
+        return Response.json(result);
       }
     }
 

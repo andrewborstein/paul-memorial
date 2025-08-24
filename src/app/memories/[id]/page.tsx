@@ -95,7 +95,7 @@ export default async function MemoryPage({
           {/* Photos */}
           {memory.photos.length > 0 && (
             <div>
-              <PhotoGrid photos={memory.photos} />
+              <PhotoGrid photos={memory.photos} memoryId={memory.id} />
             </div>
           )}
         </div>
