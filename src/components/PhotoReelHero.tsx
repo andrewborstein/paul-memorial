@@ -57,9 +57,9 @@ export default function PhotoReelHero() {
   useEffect(() => {
     const getVisiblePhotoCount = () => {
       const width = window.innerWidth;
-      if (width < 640) return 12; // Mobile: 4 per row × 3 rows
-      if (width < 768) return 18; // Small: 6 per row × 3 rows
-      if (width < 1024) return 24; // Medium: 8 per row × 3 rows
+      if (width < 640) return 8; // Mobile: 4 per row × 2 rows
+      if (width < 768) return 12; // Small: 6 per row × 2 rows
+      if (width < 1024) return 16; // Medium: 8 per row × 2 rows
       if (width < 1280) return 20; // Large: 10 per row × 2 rows
       if (width < 1536) return 24; // XL: 12 per row × 2 rows
       return 32; // 2XL: 16 per row × 2 rows
@@ -67,9 +67,9 @@ export default function PhotoReelHero() {
 
     const getStartingIndexIncrement = () => {
       const width = window.innerWidth;
-      if (width < 640) return 12; // Mobile: 4 per row × 3 rows
-      if (width < 768) return 18; // Small: 6 per row × 3 rows
-      if (width < 1024) return 24; // Medium: 8 per row × 3 rows
+      if (width < 640) return 8; // Mobile: 4 per row × 2 rows
+      if (width < 768) return 12; // Small: 6 per row × 2 rows
+      if (width < 1024) return 16; // Medium: 8 per row × 2 rows
       if (width < 1280) return 20; // Large: 10 per row × 2 rows
       if (width < 1536) return 24; // XL: 12 per row × 2 rows
       return 32; // 2XL: 16 per row × 2 rows
