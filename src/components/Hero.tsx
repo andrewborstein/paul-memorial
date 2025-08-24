@@ -28,3 +28,35 @@ export default function Hero() {
     </section>
   );
 }
+
+type SimpleHeroProps = {
+  imageKey: keyof typeof CLOUDINARY_IMAGES;
+  alt?: string;
+  className?: string;
+  objectPosition?: string;
+};
+
+export function SimpleHero({
+  imageKey,
+  alt = 'Hero image',
+  className = '',
+  objectPosition = 'center',
+}: SimpleHeroProps) {
+  return (
+    <section
+      className={`h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 pb-8 ${className}`}
+      style={{ width: 'calc(100% + 2rem)' }}
+    >
+      <Image
+        src={getHeroImageUrl(CLOUDINARY_IMAGES[imageKey])}
+        alt={alt}
+        width={872}
+        height={384}
+        className="w-full h-full object-cover max-w-none"
+        style={{ objectPosition }}
+        priority
+        sizes="100vw"
+      />
+    </section>
+  );
+}

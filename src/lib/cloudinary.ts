@@ -143,10 +143,21 @@ export function getGridImageUrl(publicId: string, version?: string | number) {
 
 export function getHeroImageUrl(publicId: string, version?: string | number) {
   return cldUrl(publicId, {
-    w: 1200,
+    w: 912,
     q: 'auto',
     version,
   });
+}
+
+export function getPosterizedHeroImageUrl(
+  publicId: string,
+  version?: string | number
+) {
+  const parts = ['f_auto', 'q_auto', 'w_1200', 'e_posterize:4'];
+  const transform = parts.join(',');
+  const v = version !== undefined ? `v${String(version)}/` : '';
+
+  return `${BASE}/${v}${transform}/${publicId}`;
 }
 
 export function getFullSizeUrl(publicId: string, version?: string | number) {
@@ -192,69 +203,6 @@ export async function warmUpImages(urls: string[]): Promise<void> {
 }
 
 // ---------- Next.js loader (preserves crop/height from explicit URLs) ----------
-export const cloudinaryLoader: ImageLoader = ({ src, width, quality }) => {
-  const qToken = normalizeQualityToken(quality, 'auto');
-
-  // If src is a full Cloudinary URL, preserve crop/height/gravity, replace width/quality
-  if (src.startsWith('http')) {
-    if (!isCloudinaryUrl(src)) return src;
-
-    const idx = src.indexOf(UPLOAD);
-    if (idx === -1) return src;
-
-    const after = src.slice(idx + UPLOAD.length);
-    // Extract potential transform segment (first part), version, and public id
-    const firstSlash = after.indexOf('/');
-    const firstSeg = firstSlash === -1 ? after : after.slice(0, firstSlash);
-    const rest = firstSlash === -1 ? '' : after.slice(firstSlash + 1);
-
-    let transformSeg = '';
-    let remainder = after;
-
-    // If the first segment looks like transforms, keep it separately
-    const looksLikeTransform =
-      firstSeg.includes(',') ||
-      /^t_/.test(firstSeg) ||
-      /^(?:c_|w_|q_|f_|dpr_|g_)/.test(firstSeg);
-
-    if (looksLikeTransform) {
-      transformSeg = firstSeg;
-      remainder = rest; // version/publicId live after the transform segment
-    }
-
-    const { version, publicId } = parseCloudinaryPath(remainder);
-
-    // Parse existing transforms and keep only crop/gravity/height (+ any others you want to preserve)
-    const preserved: string[] = [];
-    if (transformSeg) {
-      for (const tok of transformSeg.split(',')) {
-        if (
-          tok.startsWith('c_') || // crop
-          tok.startsWith('g_') || // gravity
-          tok.startsWith('h_') || // height
-          tok.startsWith('ar_') // aspect-ratio (optional to preserve)
-        ) {
-          preserved.push(tok);
-        }
-        // We intentionally DROP any existing w_*, q_*, f_*, dpr_* so the loader can control them
-      }
-    }
-
-    const v = version ? `${version}/` : '';
-
-    // Build final transform: f_auto, q_{token}, w_{width}, then preserved crop/height/gravity
-    // (Order is fine for Cloudinary; including c_* and h_* after/before w_* both work.)
-    const finalParts = [`f_auto`, `q_${qToken}`, `w_${width}`, ...preserved];
-    const finalTransform = finalParts.join(',');
-
-    return `${BASE}/${v}${finalTransform}/${publicId}`;
-  }
-
-  // Treat as publicId (no explicit transforms): we emit width + auto quality/format
-  return `${BASE}/f_auto,q_${qToken},w_${width}/${src}`;
-};
-
-// Square-specific loader: forces server-side square crop
 export const cloudinarySquareLoader: ImageLoader = ({
   src,
   width,

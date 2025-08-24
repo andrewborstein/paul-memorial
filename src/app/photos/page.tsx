@@ -6,6 +6,7 @@ import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import SquareThumb from '@/components/SquareThumb';
+import { SimpleHero } from '@/components/Hero';
 
 type PhotosIndexItem =
   | string
@@ -51,78 +52,80 @@ export default function PhotosPage() {
   const hasMorePhotos = (photos?.length ?? 0) > 10;
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Photos"
-        description="Every photo matters—whether it's a candid snapshot, a grainy selfie, or a treasured portrait. Together they reveal the many communities, friendships, and everyday moments that shaped Paul's life. Please share yours, no matter how small, so we can see the whole picture."
-      />
+    <>
+      <PageContainer>
+        <SimpleHero
+          imageKey="HERO_IMAGE_OLI_AND_PAUL"
+          alt="Paul and Oli"
+          objectPosition="center 20%"
+        />
+        <PageHeader
+          title="Photos"
+          description="Every photo matters—whether it's a candid snapshot, a grainy selfie, or a treasured portrait. Together they reveal the many communities, friendships, and everyday moments that shaped Paul's life. Please share yours, no matter how small, so we can see the whole picture."
+        />
 
-      {err ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">Unable to load photos.</p>
-        </div>
-      ) : photos === null ? (
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-lg font-semibold mb-4">All photos</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <PhotoSkeleton key={i} />
-              ))}
-            </div>
+        {err ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">Unable to load photos.</p>
           </div>
-        </div>
-      ) : photos.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">No photos shared yet.</p>
-          <Link
-            href="/memories/new"
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Be the first to share photos
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-lg font-semibold mb-4">
-              All photos ({photos.length})
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {displayPhotos.map((photo, index) => {
-                const id = typeof photo === 'string' ? photo : photo.public_id;
-                if (!id) return null;
-
-                return (
-                  <Link
-                    key={id}
-                    href={`/memories/photos/${id}`}
-                    className="block"
-                  >
-                    <SquareThumb
-                      publicId={id}
-                      alt={`Photo ${index + 1} of ${photos.length}`}
-                      className="overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-
-            {hasMorePhotos && (
-              <div className="text-center mt-6">
-                <Link
-                  href="/photos/all"
-                  className="text-blue-600 hover:text-blue-800 font-semibold uppercase tracking-widest text-xs "
-                >
-                  Load all {photos.length} photos
-                </Link>
+        ) : photos === null ? (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-lg font-semibold mb-4">All photos</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <PhotoSkeleton key={i} />
+                ))}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
-    </PageContainer>
+        ) : photos.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">No photos shared yet.</p>
+            <Link
+              href="/memories/new"
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Be the first to share photos
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-lg font-semibold mb-4">
+                All photos ({photos.length})
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {displayPhotos.map((photo, index) => {
+                  const id =
+                    typeof photo === 'string' ? photo : photo.public_id;
+                  if (!id) return null;
+
+                  return (
+                    <Link
+                      key={id}
+                      href={`/memories/photos/${id}`}
+                      className="block"
+                    >
+                      <SquareThumb publicId={id} alt={`Photo ${index + 1}`} />
+                    </Link>
+                  );
+                })}
+              </div>
+              {hasMorePhotos && (
+                <div className="text-center mt-8">
+                  <Link
+                    href="/photos/all"
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    View all {photos.length} photos
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </PageContainer>
+    </>
   );
 }

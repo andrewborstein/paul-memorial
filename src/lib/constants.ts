@@ -6,6 +6,9 @@ export const CLOUDINARY_IMAGES = {
   HERO_IMAGE_PAUL: 'Paul/hero-image-paul',
   HERO_IMAGE_RASTA_FLAG: 'Paul/hero-image-rasta-flag',
   HERO_IMAGE_TWO_FLAGS: 'Paul/hero-image-two-flags',
+  HERO_IMAGE_DJ: 'Paul/hero-image-dj',
+  HERO_IMAGE_OLI_AND_PAUL: 'Paul/hero-image-oli-and-paul',
+  HERO_IMAGE_PAUL_AND_OLI: 'Paul/hero-image-paul-and-oli',
 
   // Flyer images
   FLYER_FRONT: 'Paul/flyer-front',

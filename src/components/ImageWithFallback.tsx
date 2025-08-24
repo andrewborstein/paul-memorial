@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { cloudinaryLoader, getSmallThumbnailUrl } from '@/lib/cloudinary';
+import { getSmallThumbnailUrl } from '@/lib/cloudinary';
 
 interface ImageWithFallbackProps {
   publicId?: string;
@@ -101,7 +101,6 @@ export default function ImageWithFallback({
       )}
 
       <Image
-        loader={cloudinaryLoader}
         src={effectiveSrc}
         alt={alt}
         fill={useFill || undefined}

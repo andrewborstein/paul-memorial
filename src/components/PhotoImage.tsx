@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { cloudinaryLoader } from '@/lib/cloudinary';
 
 export default function PhotoImage({
   publicId,
@@ -16,7 +15,6 @@ export default function PhotoImage({
 }) {
   return (
     <Image
-      loader={cloudinaryLoader}
       src={publicId}
       alt={alt}
       // Large display; Next will emit a responsive srcset for these widths

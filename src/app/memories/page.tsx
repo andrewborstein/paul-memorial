@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import MemoryMasonry from '@/components/MemoryMasonry';
+import { SimpleHero } from '@/components/Hero';
 import { getCurrentUser, type UserInfo } from '@/lib/user';
 import type { MemoryIndexItem } from '@/types/memory';
 
@@ -132,6 +133,7 @@ function MemoriesPageContent() {
   return (
     <>
       <PageContainer>
+        <SimpleHero imageKey="HERO_IMAGE_DJ" alt="Paul DJ'ing" />
         <PageHeader
           title={filter === 'my' ? 'My Memories' : 'Memories'}
           description={
