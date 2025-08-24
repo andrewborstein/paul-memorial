@@ -70,7 +70,7 @@ export default function RootLayout({
                     ONE LOVE ALWAYS 1983 - 2025
                   </div>
                 </Link>
-                <div className="flex items-center space-x-3 text-black hover:text-gray-800 transition-colors font-semibold uppercase text-xs border-b-2 border-transparent pt-[2px]">
+                <div className="flex items-center space-x-2 md:space-x-3 lg:space-x-4 text-black hover:text-gray-800 transition-colors font-semibold uppercase text-xs border-b-2 border-transparent pt-[2px]">
                   <Link
                     href="/memories"
                     className={

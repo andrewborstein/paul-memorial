@@ -18,9 +18,13 @@ interface MemoryMasonryProps {
     cover_public_id?: string;
     photo_count: number;
   }[];
+  singleColumn?: boolean;
 }
 
-export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
+export default function MemoryMasonry({
+  memories,
+  singleColumn = false,
+}: MemoryMasonryProps) {
   const [userStates, setUserStates] = useState<Record<string, boolean>>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>(
@@ -141,7 +145,9 @@ export default function MemoryMasonry({ memories }: MemoryMasonryProps) {
       {memories.map((memory) => (
         <div
           key={memory.id}
-          className="memory-card w-full md:w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5 mb-6 px-3"
+          className={`memory-card w-full mb-6  ${
+            singleColumn ? '' : 'px-3 md:w-1/2 xl:w-1/3 2xl:w-1/4 3xl:w-1/5'
+          }`}
         >
           <Link
             href={`/memories/${memory.id}`}

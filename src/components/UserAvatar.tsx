@@ -65,7 +65,7 @@ export default function UserAvatar() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="w-8 h-8 rounded-full border border-blue-400 text-blue-600 text-sm font-medium flex items-center justify-center hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="w-7 h-7 rounded-full border border-black text-black text-xs font-semibold flex items-center justify-center hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         title={`${currentUser.name} (${currentUser.email})`}
       >
         {getInitials(currentUser.name)}
@@ -73,16 +73,15 @@ export default function UserAvatar() {
 
       {isDropdownOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
-          <div className="px-4 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900">
+          <div className="px-4 py-2 border-b border-gray-100 bg-stone-100">
+            <p className="text-sm font-semibold text-gray-900">
               {currentUser.name}
             </p>
-            <p className="text-xs text-gray-500">{currentUser.email}</p>
           </div>
 
           <Link
             href="/profile"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors link"
             onClick={() => setIsDropdownOpen(false)}
           >
             Profile Settings
@@ -90,7 +89,7 @@ export default function UserAvatar() {
 
           <Link
             href="/memories?filter=your"
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors link"
             onClick={() => setIsDropdownOpen(false)}
           >
             Your Memories
@@ -98,7 +97,7 @@ export default function UserAvatar() {
 
           <button
             onClick={handleSignOut}
-            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="block w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors link"
           >
             Sign Out
           </button>

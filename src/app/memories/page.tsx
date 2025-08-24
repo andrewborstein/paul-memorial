@@ -199,9 +199,15 @@ function MemoriesPageContent() {
           </div>
         </div>
       ) : hasFilteredMemories ? (
-        <div className="w-full">
-          <MemoryMasonry memories={filteredMemories!} />
-        </div>
+        filter === 'your' ? (
+          <PageContainer>
+            <MemoryMasonry memories={filteredMemories!} singleColumn={true} />
+          </PageContainer>
+        ) : (
+          <div className="w-full">
+            <MemoryMasonry memories={filteredMemories!} singleColumn={false} />
+          </div>
+        )
       ) : null}
     </>
   );
