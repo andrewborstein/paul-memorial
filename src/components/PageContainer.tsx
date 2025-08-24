@@ -12,7 +12,7 @@ export default function PageContainer({
   fullWidth = false,
 }: PageContainerProps) {
   const containerClassName =
-    `${fullWidth ? 'w-full px-2' : 'max-w-4xl mx-auto px-2'} ${String(className || '')}`.trim();
+    `px-4 ${fullWidth ? 'w-full' : 'max-w-4xl mx-auto '} ${String(className || '')}`.trim();
 
   return <section className={containerClassName}>{children}</section>;
 }

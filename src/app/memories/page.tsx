@@ -191,7 +191,7 @@ function MemoriesPageContent() {
       </PageContainer>
 
       {memories === null ? (
-        <div className="w-full px-2">
+        <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-4 xl:grid-cols-4 gap-6">
             {skeletons.map((skeleton) => (
               <MemorySkeleton key={skeleton.id} height={skeleton.height} />
@@ -199,7 +199,7 @@ function MemoriesPageContent() {
           </div>
         </div>
       ) : hasFilteredMemories ? (
-        <div className="w-full px-2">
+        <div className="w-full">
           <MemoryMasonry memories={filteredMemories!} />
         </div>
       ) : null}
@@ -218,7 +218,7 @@ function MemoriesPageSkeleton() {
       <PageContainer>
         <PageHeader title="Memories" description="Loading memories..." />
       </PageContainer>
-      <div className="w-full px-2">
+      <div className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-4 xl:grid-cols-4 gap-6">
           {skeletons.map((skeleton) => (
             <MemorySkeleton key={skeleton.id} height={skeleton.height} />

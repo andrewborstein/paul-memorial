@@ -18,9 +18,9 @@ export default function PageHeader({
         {children}
       </div>
       {typeof description === 'string' ? (
-        <p className="text-stone-600">{description}</p>
+        <p className="text-stone-600 text-sm">{description}</p>
       ) : (
-        <div className="text-stone-600">{description}</div>
+        <div className="text-stone-600 text-sm">{description}</div>
       )}
     </div>
   );

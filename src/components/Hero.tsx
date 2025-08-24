@@ -5,7 +5,7 @@ import Image from 'next/image';
 export default function Hero() {
   return (
     <section
-      className="relative h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-8"
+      className="relative h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-6"
       style={{
         backgroundImage: `url(${getHeroImageUrl(CLOUDINARY_IMAGES.HERO_IMAGE_TWO_FLAGS)})`,
         backgroundRepeat: 'no-repeat',
@@ -44,7 +44,7 @@ export function SimpleHero({
 }: SimpleHeroProps) {
   return (
     <section
-      className={`h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-8 ${className}`}
+      className={`h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-6 ${className}`}
       style={{ width: 'calc(100% + 2rem)' }}
     >
       <Image

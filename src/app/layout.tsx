@@ -108,7 +108,7 @@ export default function RootLayout({
             <div className="h-1/4" style={{ backgroundColor: '#da2849' }}></div>
           </div>
         </header>
-        <main className="flex-1 py-8 px-2">{children}</main>
+        <main className="flex-1 py-8">{children}</main>
         <footer className="py-8 text-sm text-stone-500 px-5 md:px-2 border-t border-stone-200 bg-white">
           <div className="flex flex-col sm:flex-row items-center justify-center sm:gap-2">
             <span>Made with love by friends & family</span>
