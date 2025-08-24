@@ -49,6 +49,7 @@ export default function PhotoReelHero() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [visiblePhotoCount, setVisiblePhotoCount] = useState(8); // Default for SSR
   const [increment, setIncrement] = useState(8); // Default for SSR
+  const [timerDuration, setTimerDuration] = useState(5000); // Default for SSR
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [visiblePhotoIndices, setVisiblePhotoIndices] = useState<number[]>([]);
   const [progress, setProgress] = useState(0);
@@ -75,8 +76,14 @@ export default function PhotoReelHero() {
       return 32; // 2XL: 16 per row × 2 rows
     };
 
+    const getTimerDuration = () => {
+      const photoCount = getVisiblePhotoCount();
+      return photoCount * 500; // 500ms per photo
+    };
+
     setVisiblePhotoCount(getVisiblePhotoCount());
     setIncrement(getStartingIndexIncrement());
+    setTimerDuration(getTimerDuration());
 
     // Preload all images
     const preloadImages = async () => {
@@ -207,10 +214,10 @@ export default function PhotoReelHero() {
       };
 
       loadNewPhotos();
-    }, 5000); // Swap every 5 seconds
+    }, timerDuration); // Dynamic timer duration
 
     return () => clearInterval(interval);
-  }, [startingIndex, visiblePhotoCount, increment]);
+  }, [startingIndex, visiblePhotoCount, increment, timerDuration]);
 
   // Progress bar effect
   useEffect(() => {
@@ -219,12 +226,12 @@ export default function PhotoReelHero() {
         if (prev >= 100) {
           return 0; // Reset when complete
         }
-        return prev + 100 / 50; // Increment to reach 100% in 5 seconds (50 * 100ms)
+        return prev + 100 / (timerDuration / 100); // Dynamic increment based on timer duration
       });
     }, 100);
 
     return () => clearInterval(progressInterval);
-  }, []);
+  }, [timerDuration]);
 
   return (
     <section className="relative w-screen h-88 overflow-hidden -mr-4 mb-6 -mt-8">
