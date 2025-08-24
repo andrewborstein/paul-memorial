@@ -17,7 +17,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
       (memory: any) => memory.email?.toLowerCase() === normalizedEmail
     );
 
-    if (userMemory) {
+    if (userMemory && userMemory.email && userMemory.name) {
       return {
         email: userMemory.email,
         name: userMemory.name,
