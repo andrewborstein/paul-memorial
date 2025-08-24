@@ -63,20 +63,20 @@ export default function RootLayout({
                   href="/"
                   className="font-[Montserrat] text-black hover:text-gray-800 transition-colors"
                 >
-                  <div className="text-xl font-bold leading-none mb-[2px]">
+                  <div className="text-lg font-bold leading-none mb-[2px]">
                     PAUL BEDROSIAN
                   </div>
-                  <div className="text-xs font-normal leading-none">
+                  <div className="text-[11px] font-normal leading-none">
                     ONE LOVE ALWAYS 1983 - 2025
                   </div>
                 </Link>
-                <div className="flex items-center space-x-4 text-sm">
+                <div className="flex items-center space-x-3 text-black hover:text-gray-800 transition-colors font-semibold uppercase text-xs border-b-2 border-transparent pt-[2px]">
                   <Link
                     href="/memories"
                     className={
                       isActive('/memories')
-                        ? 'text-black border-b-2 border-black font-medium'
-                        : 'text-black hover:text-gray-800 transition-colors'
+                        ? 'border-b-2 border-black pt-[2px]'
+                        : ''
                     }
                   >
                     Memories
@@ -85,8 +85,8 @@ export default function RootLayout({
                     href="/photos"
                     className={
                       isActive('/photos')
-                        ? 'text-black border-b-2 border-black font-medium'
-                        : 'text-black hover:text-gray-800 transition-colors'
+                        ? 'border-b-2 border-black pt-[2px]'
+                        : ''
                     }
                   >
                     Photos
@@ -95,8 +95,8 @@ export default function RootLayout({
                     href="/more"
                     className={
                       isActive('/more')
-                        ? 'text-black border-b-2 border-black font-medium'
-                        : 'text-black hover:text-gray-800 transition-colors'
+                        ? 'border-b-2 border-black pt-[2px]'
+                        : ''
                     }
                   >
                     More
