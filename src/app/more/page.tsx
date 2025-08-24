@@ -1,7 +1,14 @@
-import ImageWithFallback from '@/components/ImageWithFallback';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { SimpleHero } from '@/components/Hero';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'More • Paul Bedrosian',
+  description:
+    'Find links, events, flyers, playlists, and resources about Paul. To share something for this page, email contact@paulbedrosian.com.',
+  alternates: { canonical: '/more' },
+};
 
 export default function More() {
   return (
@@ -14,7 +21,20 @@ export default function More() {
         />
         <PageHeader
           title="More"
-          description="More information about Paul (TBA))"
+          description={
+            <>
+              Explore more about Paul's life through articles, events, flyers,
+              playlists, and other resources. If you'd like to share something
+              here, please get in touch at{' '}
+              <a
+                href="mailto:contact@paulbedrosian.com"
+                className="text-[#184a86] hover:text-[#0d3669] transition-colors underline"
+              >
+                contact@paulbedrosian.com
+              </a>
+              .
+            </>
+          }
         />
 
         <div className="space-y-6">

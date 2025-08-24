@@ -45,6 +45,42 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
           rel="stylesheet"
         />
+
+        {/* HTML Meta Tags */}
+        <title>Remembering Paul Bedrosian</title>
+        <meta
+          name="description"
+          content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
+        />
+
+        {/* Facebook Meta Tags */}
+        <meta property="og:url" content="https://paulbedrosian.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Remembering Paul Bedrosian" />
+        <meta
+          property="og:description"
+          content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
+        />
+        <meta
+          property="og:image"
+          content="https://opengraph.b-cdn.net/production/images/9a0bfdd6-c86a-4391-952b-a9f4827ab23d.png?token=q2jOi2cIsG9KnH6XVfOdO1XT6PQuEnsgC1Y4TU8Gwt4&height=514&width=1200&expires=33292063661"
+        />
+
+        {/* Twitter Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="paulbedrosian.com" />
+        <meta property="twitter:url" content="https://paulbedrosian.com" />
+        <meta name="twitter:title" content="Remembering Paul Bedrosian" />
+        <meta
+          name="twitter:description"
+          content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
+        />
+        <meta
+          name="twitter:image"
+          content="https://opengraph.b-cdn.net/production/images/9a0bfdd6-c86a-4391-952b-a9f4827ab23d.png?token=q2jOi2cIsG9KnH6XVfOdO1XT6PQuEnsgC1Y4TU8Gwt4&height=514&width=1200&expires=33292063661"
+        />
+
+        {/* Meta Tags Generated via https://www.opengraph.xyz */}
       </head>
       <body className="flex flex-col min-h-screen">
         <Suspense fallback={null}>
@@ -108,8 +144,10 @@ export default function RootLayout({
             <div className="h-1/4" style={{ backgroundColor: '#da2849' }}></div>
           </div>
         </header>
-        <main className="flex-1 py-8">{children}</main>
-        <footer className="py-8 text-sm text-stone-500 px-5 md:px-2 border-t border-stone-200 bg-white">
+        <main className="flex-1">
+          <div className="pt-8 pb-4">{children}</div>
+        </main>
+        <footer className="py-4 text-xs text-stone-500 px-5 md:px-2 border-t border-stone-200 bg-white">
           <div className="flex flex-col sm:flex-row items-center justify-center sm:gap-2">
             <span>Made with love by friends & family</span>
             <span className="hidden sm:inline-flex text-stone-300">•</span>

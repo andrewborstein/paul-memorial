@@ -801,7 +801,7 @@ export default function CreateMemoryForm({
             ref={textareaRef}
             id="body"
             className="w-full px-3 py-2 border-0 rounded-md focus:outline-none focus:ring-0 resize-y min-h-[120px]"
-            placeholder="What will you remember about Paul?"
+            placeholder="I remember when..."
             value={body}
             onChange={(e) => {
               setBody(e.target.value);

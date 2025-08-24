@@ -2,6 +2,14 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import Hero from '@/components/Hero';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Remembering Paul Bedrosian',
+  description:
+    'A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories to help keep his legacy alive.',
+  alternates: { canonical: '/' },
+};
 
 export default async function HomePage() {
   try {
@@ -17,22 +25,24 @@ export default async function HomePage() {
                   Paul Nshan Bedrosian was a devoted father, partner, son,
                   brother, and friend whose kindness touched countless lives.
                   His young son, Olì, will grow up without the chance to know
-                  him firsthand — so our task now is to capture Paul's life
-                  through the stories, photos, and memories we share.{' '}
+                  him firsthand. By sharing our stories, photos, and memories,
+                  we give Olì — and one another — the gift of knowing Paul more
+                  fully than any of us could alone.
                 </p>
                 <p>
                   From his roots in Cranston to his years in Vermont, from
-                  family spread across the world to friends in Providence's
-                  nightlife and beyond, each perspective adds another side to
-                  who he was. Paul's spirit will live on in what we collect
-                  together, giving Oli, and all of us, a lasting picture of the
-                  life he made so full.
+                  family spread across the world to friends from Providence's
+                  nightlife and beyond, each perspective adds another dimension
+                  to his legacy. Together, these contributions form a living
+                  portrait of Paul's life, one that will continue to grow as
+                  more memories are shared. Thank you for keeping Paul's memory
+                  alive.
                 </p>
               </div>
             }
           />
 
-          <div className="text-center mb-8">
+          <div className="text-center">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/memories/new" className="btn">
                 Share a memory
