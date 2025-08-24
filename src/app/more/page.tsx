@@ -10,7 +10,7 @@ export default function More() {
         <SimpleHero
           imageKey="FLYER_BACK"
           alt="Paul Bedrosian Flyer Back"
-          objectPosition="center 20%"
+          objectPosition="center 27%"
         />
         <PageHeader
           title="More"

@@ -44,7 +44,7 @@ export function SimpleHero({
 }: SimpleHeroProps) {
   return (
     <section
-      className={`h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 pb-8 ${className}`}
+      className={`h-60 sm:h-80 md:h-96 overflow-hidden -ml-4 -mt-8 mb-8 ${className}`}
       style={{ width: 'calc(100% + 2rem)' }}
     >
       <Image
