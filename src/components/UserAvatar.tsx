@@ -89,11 +89,11 @@ export default function UserAvatar() {
           </Link>
 
           <Link
-            href="/memories?filter=my"
+            href="/memories?filter=your"
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             onClick={() => setIsDropdownOpen(false)}
           >
-            My Memories
+            Your Memories
           </Link>
 
           <button

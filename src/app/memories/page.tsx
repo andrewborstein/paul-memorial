@@ -100,7 +100,7 @@ function MemoriesPageContent() {
   const filteredMemories = useMemo(() => {
     if (!memories || !isLoaded) return memories;
 
-    if (filter === 'my' && currentUser) {
+    if (filter === 'your' && currentUser) {
       return memories.filter((memory) => memory.email === currentUser.email);
     }
 
@@ -135,9 +135,9 @@ function MemoriesPageContent() {
       <PageContainer>
         <SimpleHero imageKey="HERO_IMAGE_DJ" alt="Paul DJ'ing" />
         <PageHeader
-          title={filter === 'my' ? 'My Memories' : 'Memories'}
+          title={filter === 'your' ? 'Your memories' : 'Memories'}
           description={
-            filter === 'my' ? (
+            filter === 'your' ? (
               <>
                 Memories you have shared.{' '}
                 <Link
@@ -174,7 +174,7 @@ function MemoriesPageContent() {
         ) : !hasFilteredMemories && memories !== null ? (
           <div className="text-center py-12">
             <p className="text-gray-500 mb-4">
-              {filter === 'my'
+              {filter === 'your'
                 ? "You haven't shared any memories yet."
                 : 'No memories shared yet.'}
             </p>
@@ -182,7 +182,7 @@ function MemoriesPageContent() {
               href="/memories/new"
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              {filter === 'my'
+              {filter === 'your'
                 ? 'Share your first memory'
                 : 'Be the first to share a memory'}
             </Link>
