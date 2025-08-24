@@ -17,36 +17,6 @@ export async function writeUsers(users: User[]) {
   await writeBlobJson(USERS_KEY, users);
 }
 
-export async function findUserByEmail(email: string): Promise<User | null> {
-  try {
-    // Check memories for user instead of separate users database
-    const response = await fetch('/api/memories');
-    if (!response.ok) {
-      return null;
-    }
-
-    const memories = await response.json();
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const userMemory = memories.find(
-      (memory: any) => memory.email?.toLowerCase() === normalizedEmail
-    );
-
-    if (userMemory) {
-      return {
-        email: userMemory.email,
-        name: userMemory.name,
-        createdAt: userMemory.created_at || new Date().toISOString(),
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error finding user by email:', error);
-    return null;
-  }
-}
-
 export async function createUser(email: string, name: string): Promise<User> {
   const users = await readUsers();
   const normalizedEmail = email.trim().toLowerCase();

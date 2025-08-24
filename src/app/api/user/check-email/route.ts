@@ -1,4 +1,4 @@
-import { findUserByEmail } from '@/lib/user';
+import { findUserByEmail } from '@/lib/user-server';
 
 export async function POST(request: Request) {
   try {

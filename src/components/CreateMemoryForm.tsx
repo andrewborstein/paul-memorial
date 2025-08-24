@@ -258,7 +258,7 @@ export default function CreateMemoryForm({
 
   const handleSignIn = (name: string, email: string) => {
     // Store in localStorage first
-    setCurrentUser(email, name);
+    setCurrentUser(email, name, false); // Don't refresh during sign-in
 
     // Update form state
     setName(name);
@@ -665,6 +665,10 @@ export default function CreateMemoryForm({
     }
 
     const { id, updated_at } = await r.json();
+    console.log(
+      'Memory created successfully, redirecting to:',
+      `/memories?t=${updated_at}`
+    );
 
     if (isEditMode) {
       // Force hard reload to memory page to clear any cached photo URLs
