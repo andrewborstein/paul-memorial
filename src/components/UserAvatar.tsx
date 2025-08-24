@@ -65,7 +65,7 @@ export default function UserAvatar() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="w-7 h-7 rounded-full border border-black text-black text-xs font-semibold flex items-center justify-center hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        className="w-7 h-7 rounded-full border border-black text-black text-xs font-semibold flex items-center justify-center hover:bg-black hover:bg-opacity-10 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         title={`${currentUser.name} (${currentUser.email})`}
       >
         {getInitials(currentUser.name)}
