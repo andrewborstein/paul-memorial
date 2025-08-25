@@ -48,7 +48,7 @@ export default function NewMemoryPageClient() {
                       Suggestions for writing a good memory
                     </span>
                   </summary>
-                  <ul className="list py-4 space-y-2">
+                  <ul className="list pt-4 space-y-2">
                     <li>
                       <span className="font-semibold">
                         Tell us how you know Paul.
