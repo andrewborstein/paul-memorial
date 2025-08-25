@@ -13,6 +13,9 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
       { protocol: 'https', hostname: 'img.youtube.com' },
+      { protocol: 'https', hostname: 'www.jwsfh.com' },
+      { protocol: 'https', hostname: 'www.motifri.com' },
+      { protocol: 'https', hostname: 'motifri.com' },
     ],
 
     // Useful for the built-in optimizer (Cloudinary already negotiates via f_auto)

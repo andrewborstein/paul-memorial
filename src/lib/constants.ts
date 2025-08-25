@@ -13,6 +13,9 @@ export const CLOUDINARY_IMAGES = {
   // Flyer images
   FLYER_FRONT: 'Paul/flyer-front',
   FLYER_BACK: 'Paul/flyer-back',
+
+  // Link preview images
+  PAUL_OBIT: 'Paul/paul-obit',
 } as const;
 
 // Type for the image keys
