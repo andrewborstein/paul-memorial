@@ -30,8 +30,28 @@ export default function MemoryMasonry({
   const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>(
     {}
   );
+  const [shouldUseMasonry, setShouldUseMasonry] = useState(false);
   const masonryRef = useRef<HTMLDivElement>(null);
   const masonryInstance = useRef<any | null>(null);
+
+  // Check if viewport supports multi-column layout
+  useEffect(() => {
+    const checkViewport = () => {
+      if (singleColumn) {
+        setShouldUseMasonry(false);
+        return;
+      }
+
+      // Check if viewport is wide enough for multi-column layout
+      // md breakpoint is 768px, which is where 2-column layout starts
+      const isMultiColumn = window.innerWidth >= 768;
+      setShouldUseMasonry(isMultiColumn);
+    };
+
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, [singleColumn]);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -43,9 +63,18 @@ export default function MemoryMasonry({
     setIsLoaded(true);
   }, [memories]);
 
-  // Initialize Masonry (no imagesloaded)
+  // Initialize Masonry only when viewport supports multi-column layout
   useEffect(() => {
-    if (!masonryRef.current || memories.length === 0) return;
+    if (!shouldUseMasonry || !masonryRef.current || memories.length === 0) {
+      // Clean up existing masonry instance if switching to single column
+      if (masonryInstance.current) {
+        try {
+          masonryInstance.current.destroy();
+        } catch {}
+        masonryInstance.current = null;
+      }
+      return;
+    }
 
     let destroyed = false;
 
@@ -94,21 +123,21 @@ export default function MemoryMasonry({
         masonryInstance.current = null;
       }
     };
-  }, [memories]);
+  }, [memories, shouldUseMasonry]);
 
-  // Relayout when content expands/collapses
+  // Relayout when content expands/collapses (only if masonry is active)
   useEffect(() => {
-    if (masonryInstance.current) {
+    if (shouldUseMasonry && masonryInstance.current) {
       try {
         masonryInstance.current.layout();
       } catch {}
     }
-  }, [expandedStates]);
+  }, [expandedStates, shouldUseMasonry]);
 
-  // Relayout on window resize
+  // Relayout on window resize (only if masonry is active)
   useEffect(() => {
     const handleResize = () => {
-      if (masonryInstance.current) {
+      if (shouldUseMasonry && masonryInstance.current) {
         try {
           masonryInstance.current.layout();
         } catch {}
@@ -116,7 +145,7 @@ export default function MemoryMasonry({
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [shouldUseMasonry]);
 
   const displayTitle = (memory: any) => memory.title?.trim() || undefined;
   const bodyText = (memory: any) => memory.body || '';
