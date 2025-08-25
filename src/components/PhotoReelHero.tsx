@@ -53,9 +53,13 @@ export default function PhotoReelHero() {
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
   const [visiblePhotoIndices, setVisiblePhotoIndices] = useState<number[]>([]);
   const [progress, setProgress] = useState(0);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   // Calculate responsive values and preload images on mount
   useEffect(() => {
+    // Check screen size for progress bar
+    setIsLargeScreen(window.innerWidth >= 1536);
+
     const getVisiblePhotoCount = () => {
       const width = window.innerWidth;
       if (width < 640) return 8; // Mobile: 4 per row × 2 rows
@@ -256,7 +260,7 @@ export default function PhotoReelHero() {
   return (
     <section className="relative w-screen h-88 overflow-hidden -mr-4 mb-6 -mt-8">
       {/* Progress bar - hidden on 2XL screens */}
-      {window.innerWidth < 1536 && (
+      {!isLargeScreen && (
         <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 z-10">
           <div
             className="h-full bg-gray-600 transition-all duration-100 ease-linear"
