@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       screens: {
-        xs: '380px',
+        xs: '404px',
       },
       colors: {
         brand: {
