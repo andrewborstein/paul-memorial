@@ -132,7 +132,17 @@ export default function PhotoReelHero() {
       setRow1Photos(row1PhotosArray);
       setRow2Photos(row2PhotosArray);
 
-      // Sequential visual reveal
+      // On 2XL screens, show all photos immediately without sequential reveal
+      if (window.innerWidth >= 1536) {
+        const allIndices = Array.from(
+          { length: visiblePhotoCount },
+          (_, i) => i
+        );
+        setVisiblePhotoIndices(allIndices);
+        return;
+      }
+
+      // Sequential visual reveal for smaller screens
       setVisiblePhotoIndices([]);
 
       // Calculate delay to fit all photos in 1 second
@@ -155,8 +165,13 @@ export default function PhotoReelHero() {
     loadInitialPhotos();
   }, [startingIndex, visiblePhotoCount, imagesPreloaded]);
 
-  // Photo transition timer
+  // Photo transition timer - disabled on 2XL screens
   useEffect(() => {
+    // Don't start timer on 2XL screens (1536px and up)
+    if (window.innerWidth >= 1536) {
+      return;
+    }
+
     const interval = setInterval(() => {
       setIsTransitioning(true);
 
@@ -219,8 +234,13 @@ export default function PhotoReelHero() {
     return () => clearInterval(interval);
   }, [startingIndex, visiblePhotoCount, increment, timerDuration]);
 
-  // Progress bar effect
+  // Progress bar effect - disabled on 2XL screens
   useEffect(() => {
+    // Don't show progress bar on 2XL screens (1536px and up)
+    if (window.innerWidth >= 1536) {
+      return;
+    }
+
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -235,13 +255,15 @@ export default function PhotoReelHero() {
 
   return (
     <section className="relative w-screen h-88 overflow-hidden -mr-4 mb-6 -mt-8">
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 z-10">
-        <div
-          className="h-full bg-gray-600 transition-all duration-100 ease-linear"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      {/* Progress bar - hidden on 2XL screens */}
+      {window.innerWidth < 1536 && (
+        <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 z-10">
+          <div
+            className="h-full bg-gray-600 transition-all duration-100 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col w-full h-full overflow-hidden">
         {/* First row */}
