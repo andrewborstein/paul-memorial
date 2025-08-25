@@ -4,7 +4,7 @@ import NewMemoryPageClient from './NewMemoryPageClient';
 export const metadata: Metadata = {
   title: 'Share a Memory • Remembering Paul',
   description:
-    'What will you remember about Paul? Add your story, photo, or reflection to help create a lasting tribute for his family and son, Olì.',
+    'What will you remember about Paul? Add your story, photo, or reflection to help create a lasting tribute for his family and son, Ólì.',
   alternates: { canonical: '/new-memory' },
 };
 

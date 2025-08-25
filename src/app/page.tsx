@@ -24,9 +24,9 @@ export default async function HomePage() {
                 <p>
                   Paul Nshan Bedrosian was a devoted father, partner, son,
                   brother, and friend whose kindness touched countless lives.
-                  His young son, Olì, will grow up without the chance to know
+                  His young son, Ólì, will grow up without the chance to know
                   him firsthand. By sharing our stories, photos, and memories,
-                  we give Olì — and one another — the gift of knowing Paul more
+                  we give Ólì — and one another — the gift of knowing Paul more
                   fully than any one person could give alone.
                 </p>
                 <p>
