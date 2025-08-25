@@ -4,7 +4,7 @@ import { SimpleHero } from '@/components/Hero';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'More • Paul Bedrosian',
+  title: 'More • Remembering Paul',
   description:
     'Find links, events, flyers, playlists, and resources about Paul. To share something for this page, email contact@paulbedrosian.com.',
   alternates: { canonical: '/more' },

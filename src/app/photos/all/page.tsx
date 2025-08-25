@@ -5,11 +5,20 @@ import { serverFetch } from '@/lib/utils';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 import SquareThumb from '@/components/SquareThumb';
+import { SimpleHero } from '@/components/Hero';
+import { Metadata } from 'next';
 
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
 export const fetchCache = 'force-no-store';
+
+export const metadata: Metadata = {
+  title: 'Photos • Remembering Paul',
+  description:
+    'Browse and contribute photos of Paul. From candid selfies to treasured portraits, every snapshot matters in telling his story.',
+  alternates: { canonical: '/photos' },
+};
 
 async function getMemories(): Promise<MemoryIndexItem[]> {
   const res = await serverFetch('/api/memories', {
@@ -59,10 +68,19 @@ export default async function AllPhotosPage() {
 
     return (
       <PageContainer>
-        <PageHeader
-          title="All Photos"
-          description={`Browse all ${allPhotos.length} photos shared in memories.`}
+        <SimpleHero
+          imageKey="HERO_IMAGE_OLI_AND_PAUL"
+          alt="Paul and Oli"
+          objectPosition="center 20%"
         />
+        <PageHeader
+          title="Photos"
+          description="Whether you have a candid snapshot, a grainy selfie, or a treasured portrait, every photo matters. Collectively they show the many communities, friendships, and everyday moments that shaped Paul's life. Please share yours, no matter how ordinary it may seem, so we can see the whole picture."
+        >
+          <Link href="/memories/new" className="btn">
+            Share a memory
+          </Link>
+        </PageHeader>
 
         {allPhotos.length === 0 ? (
           <div className="text-center py-12">

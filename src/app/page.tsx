@@ -5,7 +5,7 @@ import Hero from '@/components/Hero';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Remembering Paul Bedrosian',
+  title: 'Remembering Paul',
   description:
     'A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories to help keep his legacy alive.',
   alternates: { canonical: '/' },

@@ -46,8 +46,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
+        <link
+          rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>✌</text></svg>"
+        />
+
         {/* HTML Meta Tags */}
-        <title>Remembering Paul Bedrosian</title>
+        <title>Remembering Paul</title>
         <meta
           name="description"
           content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
@@ -56,7 +61,7 @@ export default function RootLayout({
         {/* Facebook Meta Tags */}
         <meta property="og:url" content="https://paulbedrosian.com" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Remembering Paul Bedrosian" />
+        <meta property="og:title" content="Remembering Paul" />
         <meta
           property="og:description"
           content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
@@ -70,7 +75,7 @@ export default function RootLayout({
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="paulbedrosian.com" />
         <meta property="twitter:url" content="https://paulbedrosian.com" />
-        <meta name="twitter:title" content="Remembering Paul Bedrosian" />
+        <meta name="twitter:title" content="Remembering Paul" />
         <meta
           name="twitter:description"
           content="A memorial to Paul Nshan Bedrosian. Share stories, photos, and memories."
