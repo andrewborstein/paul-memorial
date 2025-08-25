@@ -248,7 +248,7 @@ export default function More() {
             <p>
               <a
                 className="link underline"
-                href="https://open.spotify.com/playlist/00000000000000000000000000000000?si=0000000000000000"
+                href="https://www.upsetta.com/"
                 target="_blank"
               >
                 Upsetta Tribute Album
