@@ -1105,7 +1105,7 @@ export default function CreateMemoryForm({
         }}
         onSubmit={handleSignIn}
         title="Contact info"
-        description="Enter a valid email to create and edit your memories."
+        description="Enter a valid email to create and edit your memories. It will not be displayed publicly."
       />
     </>
   );

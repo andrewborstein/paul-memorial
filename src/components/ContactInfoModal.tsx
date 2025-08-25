@@ -211,7 +211,7 @@ export default function ContactInfoModal({
           {title}
         </h2>
         {step === 'email' && (
-          <p className="text-gray-600 mb-2">{description}</p>
+          <p className="text-gray-600 text-sm mb-2">{description}</p>
         )}
 
         {errors.length > 0 && (
