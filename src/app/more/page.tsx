@@ -237,7 +237,7 @@ export default function More() {
             </p>
             <iframe
               data-testid="embed-iframe"
-              style={{ borderRadius: '12px' }}
+              style={{ borderRadius: '12px', maxWidth: '100%' }}
               src="https://open.spotify.com/embed/playlist/3gHF1zFYgbVp57ELWZRLhT?utm_source=generator"
               width="380"
               height="352"

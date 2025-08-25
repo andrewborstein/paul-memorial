@@ -11,51 +11,20 @@ export default function GoFundMeIframe({ className }: GoFundMeIframeProps) {
   const src = `https://www.gofundme.com/f/paul-bedrosian/widget/medium`;
 
   return (
-    <>
-      <div
-        className="bg-white shadow-md rounded-md block md:hidden"
+    <div className="w-full sm:w-[478px] h-[173px] overflow-hidden">
+      <iframe
+        src={src}
+        title="'GoFundMe donation widget'"
+        loading="lazy"
         style={{
           width: '100%',
-          height: 223,
-          maxWidth: '100%',
+          height: '100%',
+          minHeight: 173,
+          border: 0,
         }}
-      >
-        <iframe
-          src={src}
-          title="'GoFundMe donation widget'"
-          loading="lazy"
-          style={{
-            width: '100%',
-            border: 0,
-            minHeight: 223,
-            maxWidth: '100%',
-          }}
-          className={className}
-          allow="clipboard-write"
-        />
-      </div>
-      <div
-        className="bg-white shadow-md rounded-md hidden md:block"
-        style={{
-          width: 478,
-          height: 173,
-          maxWidth: 478,
-        }}
-      >
-        <iframe
-          src={src}
-          title="'GoFundMe donation widget'"
-          loading="lazy"
-          style={{
-            width: 478,
-            border: 0,
-            minHeight: 173,
-            maxWidth: '100%',
-          }}
-          className={className}
-          allow="clipboard-write"
-        />
-      </div>
-    </>
+        className={className}
+        allow="clipboard-write"
+      />
+    </div>
   );
 }
