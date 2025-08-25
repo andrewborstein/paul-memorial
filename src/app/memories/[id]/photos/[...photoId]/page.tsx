@@ -80,26 +80,30 @@ export default async function PhotoPage({
         <PageContainer>
           <div className="space-y-6">
             {/* Breadcrumbs and Navigation */}
-            <div className="flex items-center justify-between flex-wrap">
-              <nav>
-                <ol className="flex items-center space-x-2 text-sm">
-                  <li className="flex items-center gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <nav className="min-w-0 flex-1">
+                <ol className="flex flex-wrap items-center gap-2 text-sm">
+                  <li className="flex items-center">
                     <Link
                       href="/memories"
                       className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
                     >
                       Memories
                     </Link>
-                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-400 ml-2 whitespace-nowrap">
+                      /
+                    </span>
                   </li>
-                  <li className="flex items-center gap-2">
+                  <li className="flex items-center">
                     <Link
                       href={`/memories/${memory.id}`}
                       className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
                     >
                       {displayTitle}
                     </Link>
-                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-400 ml-2 whitespace-nowrap">
+                      /
+                    </span>
                   </li>
                   <li className="text-gray-600 font-medium whitespace-nowrap">
                     Photo {photoIndex + 1} of {memory.photos.length}
