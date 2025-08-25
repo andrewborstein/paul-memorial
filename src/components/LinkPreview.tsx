@@ -43,7 +43,7 @@ export default function LinkPreview({
             target="_blank"
             rel="noopener noreferrer"
           >
-            Read more →
+            Read more
           </a>
         </div>
       </div>

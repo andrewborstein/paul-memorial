@@ -119,11 +119,8 @@ export default function PhotosPageClient() {
                 })}
               </div>
               {hasMorePhotos && (
-                <div className="text-center mt-8">
-                  <Link
-                    href="/photos/all"
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
+                <div className="text-center my-8">
+                  <Link href="/photos/all" className="btn">
                     View all {photos.length} photos
                   </Link>
                 </div>

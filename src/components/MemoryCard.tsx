@@ -109,7 +109,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
       )}
 
       {/* Memory Body */}
-      <div className="text-gray-700 select-text relative z-10">
+      <div className="text-gray-700 select-text relative z-10 space-y-4">
         <p className="whitespace-pre-wrap">
           {isExpanded ? bodyText : truncatedBody}
         </p>
@@ -120,7 +120,7 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm mt-2"
+            className="link underline"
           >
             {isExpanded ? 'Show less' : 'Read more'}
           </button>

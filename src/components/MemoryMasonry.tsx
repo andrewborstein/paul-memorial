@@ -196,7 +196,7 @@ export default function MemoryMasonry({
               </h3>
             )}
 
-            <div className="text-gray-700 text-sm select-text relative z-10">
+            <div className="text-gray-700 text-sm select-text relative z-10 space-y-4">
               <p className="whitespace-pre-wrap">
                 {expandedStates[memory.id]
                   ? bodyText(memory)
@@ -209,7 +209,7 @@ export default function MemoryMasonry({
                     e.stopPropagation();
                     toggleExpanded(memory.id);
                   }}
-                  className="text-blue-600 hover:text-blue-800 font-medium text-xs mt-2"
+                  className="link underline"
                 >
                   {expandedStates[memory.id] ? 'Show less' : 'Read more'}
                 </button>
