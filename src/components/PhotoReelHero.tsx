@@ -81,8 +81,7 @@ export default function PhotoReelHero() {
     };
 
     const getTimerDuration = () => {
-      const photoCount = getVisiblePhotoCount();
-      return photoCount * 500; // 500ms per photo
+      return 8000; // Fixed 8 seconds for all screen sizes
     };
 
     setVisiblePhotoCount(getVisiblePhotoCount());
