@@ -11,7 +11,7 @@ export default function GoFundMeIframe({ className }: GoFundMeIframeProps) {
   const src = `https://www.gofundme.com/f/paul-bedrosian/widget/medium`;
 
   return (
-    <div className="w-full sm:w-[478px] h-[173px] overflow-hidden">
+    <div className="w-full sm:w-[478px] h-[223px] xs:h-[173px] overflow-hidden">
       <iframe
         src={src}
         title="'GoFundMe donation widget'"
@@ -19,7 +19,6 @@ export default function GoFundMeIframe({ className }: GoFundMeIframeProps) {
         style={{
           width: '100%',
           height: '100%',
-          minHeight: 173,
           border: 0,
         }}
         className={className}
