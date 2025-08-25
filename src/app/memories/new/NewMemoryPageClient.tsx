@@ -41,7 +41,7 @@ export default function NewMemoryPageClient() {
                 his family and give Ólì a richer sense of the father he never
                 got to know.
               </p>
-              <p>
+              <div>
                 <details>
                   <summary>
                     <span className="font-semibold underline text-[#184a86]">
@@ -87,7 +87,7 @@ export default function NewMemoryPageClient() {
                     </li>
                   </ul>
                 </details>
-              </p>
+              </div>
             </div>
           }
         />
