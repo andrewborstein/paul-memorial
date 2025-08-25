@@ -3,6 +3,7 @@ import PageHeader from '@/components/PageHeader';
 import { SimpleHero } from '@/components/Hero';
 import { Metadata } from 'next';
 import LinkPreview from '@/components/LinkPreview';
+import GoFundMeEmbed from '@/components/GoFundMeEmbed';
 
 export const metadata: Metadata = {
   title: 'More • Remembering Paul',
@@ -57,10 +58,7 @@ export default function More() {
                 Paul's GoFundMe
               </a>
             </p>
-            <script
-              defer
-              src="https://www.gofundme.com/static/js/embed.js"
-            ></script>
+            <GoFundMeEmbed />
           </section>
 
           <section className="flex flex-col gap-3">
