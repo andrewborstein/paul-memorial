@@ -7,6 +7,7 @@ import { serverFetch } from '@/lib/utils';
 import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
 import MemoryMetadata from '@/components/MemoryMetadata';
+import LinkifiedText from '@/components/LinkifiedText';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -87,9 +88,10 @@ export default async function MemoryPage({
                 {memory.title}
               </h2>
             )}
-            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {memory.body}
-            </p>
+            <LinkifiedText
+              text={memory.body}
+              className="text-gray-700 whitespace-pre-wrap leading-relaxed"
+            />
           </div>
 
           {/* Photos */}
