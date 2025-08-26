@@ -77,16 +77,17 @@ export default async function PhotoPage({
           </div>
         )}
 
-        <PageContainer>
-          <div className="space-y-6">
-            {/* Breadcrumbs and Navigation */}
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <nav className="min-w-0 flex-1">
-                <ol className="flex flex-wrap items-center gap-2 text-sm">
+        {/* Modal overlay */}
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col">
+          {/* Breadcrumbs at top */}
+          <PageContainer className="flex-shrink-0 w-full">
+            <div className="py-4">
+              <nav>
+                <ol className="flex flex-wrap items-center gap-2 text-sm text-white">
                   <li className="flex items-center">
                     <Link
                       href="/memories"
-                      className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                      className="text-blue-300 hover:text-blue-100 whitespace-nowrap"
                     >
                       Memories
                     </Link>
@@ -97,7 +98,7 @@ export default async function PhotoPage({
                   <li className="flex items-center">
                     <Link
                       href={`/memories/${memory.id}`}
-                      className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                      className="text-blue-300 hover:text-blue-100 whitespace-nowrap"
                     >
                       {displayTitle}
                     </Link>
@@ -105,24 +106,49 @@ export default async function PhotoPage({
                       /
                     </span>
                   </li>
-                  <li className="text-gray-600 font-medium whitespace-nowrap">
+                  <li className="text-gray-300 font-medium whitespace-nowrap">
                     Photo {photoIndex + 1} of {memory.photos.length}
                   </li>
                 </ol>
               </nav>
+            </div>
+          </PageContainer>
 
-              {/* Navigation Buttons */}
-              <div className="flex items-center gap-2 py-4 w-full sm:w-auto">
+          {/* Photo area - takes remaining space */}
+          <div className="flex-1 flex items-center justify-center">
+            {/* Photo */}
+            <div className="flex items-center justify-center">
+              <PhotoImage
+                publicId={photo.public_id}
+                alt={photo.caption || 'Photo'}
+                className="max-h-[calc(100vh-120px)] max-w-screen object-contain"
+                priority={true}
+              />
+            </div>
+
+            {/* Photo caption overlay */}
+            {photo.caption && (
+              <div className="absolute bottom-4 left-4 right-4 text-white text-center">
+                <div className="bg-black bg-opacity-50 rounded-lg p-3">
+                  <p className="text-sm">{photo.caption}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Controls at bottom */}
+          <PageContainer className="flex-shrink-0 w-full">
+            <div className="flex items-center justify-between gap-4 py-4">
+              <div className="flex items-center gap-4">
                 {prevPhoto ? (
                   <Link
                     href={`/memories/${memoryId}/photos/${prevPhoto.public_id}`}
-                    prefetch={true}
-                    className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
+                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 text-center"
                   >
                     ← Previous
                   </Link>
                 ) : (
-                  <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-sm text-center">
                     ← Previous
                   </div>
                 )}
@@ -130,30 +156,25 @@ export default async function PhotoPage({
                 {nextPhoto ? (
                   <Link
                     href={`/memories/${memoryId}/photos/${nextPhoto.public_id}`}
-                    prefetch={true}
-                    className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
+                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 text-center"
                   >
                     Next →
                   </Link>
                 ) : (
-                  <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-sm text-center">
                     Next →
                   </div>
                 )}
               </div>
+              <Link
+                href={`/memories/${memory.id}`}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 text-center"
+              >
+                Exit
+              </Link>
             </div>
-
-            {/* Photo Display */}
-            <div className="flex justify-center">
-              <PhotoImage
-                publicId={photo.public_id}
-                alt={photo.caption || 'Photo'}
-                className="max-w-full h-auto rounded-lg shadow-lg"
-                priority={true}
-              />
-            </div>
-          </div>
-        </PageContainer>
+          </PageContainer>
+        </div>
       </>
     );
   } catch (error) {
