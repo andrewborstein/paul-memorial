@@ -775,27 +775,86 @@ export default function CreateMemoryForm({
           </div>
         )}
 
-        {/* Created At Field - Only for super users in edit mode */}
+        {/* Super User Edit Fields - Only for super users in edit mode */}
         {isEditMode && isSuperUser() && (
-          <div className="space-y-2">
-            <label
-              htmlFor="created_at"
-              className="block text-sm font-semibold text-gray-700"
-            >
-              Created At (ISO Date)
-            </label>
-            <input
-              id="created_at"
-              type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="2024-01-15T10:30:00.000Z"
-              value={createdAt}
-              onChange={(e) => setCreatedAt(e.target.value)}
-            />
-            <p className="text-xs text-gray-500">
-              Format: YYYY-MM-DDTHH:MM:SS.sssZ (leave empty to preserve
-              original)
-            </p>
+          <div className="space-y-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+            <div className="flex items-center gap-2 text-amber-800">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+              <h3 className="text-sm font-medium">
+                Super User: Edit Memory Owner
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="edit_name"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Name
+                </label>
+                <input
+                  id="edit_name"
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="edit_email"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Email
+                </label>
+                <input
+                  id="edit_email"
+                  type="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={100}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="created_at"
+                className="block text-sm font-semibold text-gray-700"
+              >
+                Created At (ISO Date)
+              </label>
+              <input
+                id="created_at"
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="2024-01-15T10:30:00.000Z"
+                value={createdAt}
+                onChange={(e) => setCreatedAt(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Format: YYYY-MM-DDTHH:MM:SS.sssZ (leave empty to preserve
+                original)
+              </p>
+            </div>
           </div>
         )}
 
