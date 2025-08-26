@@ -17,6 +17,15 @@ async function getPhotoData(photoId: string) {
   return res.json();
 }
 
+async function getAllPhotos() {
+  const res = await serverFetch('/api/photos-index', {
+    cache: 'no-store',
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.photos || [];
+}
+
 export default async function PhotoPage({
   params,
 }: {
@@ -29,10 +38,17 @@ export default async function PhotoPage({
     const { memory, photo, photoIndex } = await getPhotoData(photoId);
     const displayTitle = memory.title || memory.name;
 
-    const prevPhoto = photoIndex > 0 ? memory.photos[photoIndex - 1] : null;
+    // Get all photos for global navigation
+    const allPhotos = await getAllPhotos();
+    const currentPhotoIndex = allPhotos.findIndex(
+      (p: any) => p.public_id === photoId
+    );
+
+    const prevPhoto =
+      currentPhotoIndex > 0 ? allPhotos[currentPhotoIndex - 1] : null;
     const nextPhoto =
-      photoIndex < memory.photos.length - 1
-        ? memory.photos[photoIndex + 1]
+      currentPhotoIndex < allPhotos.length - 1
+        ? allPhotos[currentPhotoIndex + 1]
         : null;
 
     return (
@@ -65,48 +81,78 @@ export default async function PhotoPage({
           </div>
         )}
 
-        <PageContainer>
-          <div className="space-y-6">
-            {/* Breadcrumbs and Navigation */}
-            <div className="flex items-center justify-between flex-wrap">
+        {/* Modal overlay */}
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col">
+          {/* Breadcrumbs at top */}
+          <PageContainer className="flex-shrink-0 w-full">
+            <div className="py-4">
               <nav>
-                <ol className="flex items-center space-x-2 text-sm">
-                  <li className="flex items-center gap-2">
+                <ol className="flex flex-wrap items-center gap-2 text-sm text-white">
+                  <li className="flex items-center">
                     <Link
                       href="/memories"
-                      className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                      className="text-blue-300 hover:text-blue-100 whitespace-nowrap"
                     >
                       Memories
                     </Link>
-                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-400 ml-2 whitespace-nowrap">
+                      /
+                    </span>
                   </li>
-                  <li className="flex items-center gap-2">
+                  <li className="flex items-center">
                     <Link
                       href={`/memories/${memory.id}`}
-                      className="text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                      className="text-blue-300 hover:text-blue-100 whitespace-nowrap"
                     >
                       {displayTitle}
                     </Link>
-                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-400 ml-2 whitespace-nowrap">
+                      /
+                    </span>
                   </li>
-                  <li className="text-gray-600 font-medium whitespace-nowrap">
-                    Photo {photoIndex + 1} of {memory.photos.length}
+                  <li className="text-gray-300 font-medium whitespace-nowrap">
+                    Photo {currentPhotoIndex + 1} of {allPhotos.length}
                   </li>
                 </ol>
               </nav>
+            </div>
+          </PageContainer>
 
-              {/* Navigation Buttons */}
-              <div className="flex items-center gap-2 py-4 w-full sm:w-auto">
+          {/* Photo area - takes remaining space */}
+          <div className="flex-1 flex items-center justify-center">
+            {/* Photo */}
+            <div className="flex items-center justify-center">
+              <PhotoImage
+                publicId={photo.public_id}
+                alt={photo.caption || 'Photo'}
+                className="max-h-[calc(100vh-120px)] max-w-screen object-contain"
+                priority={true}
+              />
+            </div>
+
+            {/* Photo caption overlay */}
+            {photo.caption && (
+              <div className="absolute bottom-4 left-4 right-4 text-white text-center">
+                <div className="bg-black bg-opacity-50 rounded-lg p-3">
+                  <p className="text-sm">{photo.caption}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Controls at bottom */}
+          <PageContainer className="flex-shrink-0 w-full">
+            <div className="flex items-center justify-between gap-4 py-4">
+              <div className="flex items-center gap-4">
                 {prevPhoto ? (
                   <Link
                     href={`/memories/photos/${prevPhoto.public_id}`}
-                    prefetch={true}
-                    className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center whitespace-nowrap uppercase tracking-widest text-xs font-semibold"
                   >
                     ← Previous
                   </Link>
                 ) : (
-                  <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
                     ← Previous
                   </div>
                 )}
@@ -114,30 +160,25 @@ export default async function PhotoPage({
                 {nextPhoto ? (
                   <Link
                     href={`/memories/photos/${nextPhoto.public_id}`}
-                    prefetch={true}
-                    className="flex-1 sm:flex-none px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 text-center link"
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center uppercase tracking-widest text-xs font-semibold"
                   >
                     Next →
                   </Link>
                 ) : (
-                  <div className="flex-1 sm:flex-none px-3 py-1 text-gray-400 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
                     Next →
                   </div>
                 )}
               </div>
+              <Link
+                href={`/memories/${memory.id}`}
+                className="px-4 py-2 bg-transparent border border-white text-white rounded hover:bg-white hover:text-black text-center uppercase tracking-widest text-xs font-semibold"
+              >
+                Exit
+              </Link>
             </div>
-
-            {/* Photo Display */}
-            <div className="flex justify-center">
-              <PhotoImage
-                publicId={photo.public_id}
-                alt={photo.caption || 'Photo'}
-                className="max-w-full h-auto rounded-lg shadow-lg"
-                priority={true}
-              />
-            </div>
-          </div>
-        </PageContainer>
+          </PageContainer>
+        </div>
       </>
     );
   } catch (error) {
