@@ -42,49 +42,45 @@ export default function More() {
         <div className="space-y-12">
           <section className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <span>💝</span>
-              Donate
+              <span>🎵</span>
+              Music
             </h2>
             <p className="text-sm text-gray-500">
-              Support Paul's family and ease the burden of funeral and
-              hospitalization costs.
+              Playlists and music celebrating Paul's life — more to come!
             </p>
             <p>
               <a
                 className="link underline"
-                href="https://gofundme.com/f/paul-bedrosian"
+                href="https://www.upsetta.com/"
                 target="_blank"
               >
-                Paul's GoFundMe
+                Upsetta Tribute Album
               </a>
             </p>
-            <GoFundMeEmbed />
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <span>🔗</span>
-              Links
-            </h2>
-            <p className="text-sm text-gray-500">
-              A collection of articles or other online tributes to Paul.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              <LinkPreview
-                url="https://www.jwsfh.com/obituary/paul-bedrosian"
-                title="Obituary"
-                description="Official obituary from J.W. Smith Funeral Home"
-                icon="📰"
-                imageKey="PAUL_OBIT"
-              />
-              <LinkPreview
-                url="https://motifri.com/obit-pauly-danger/"
-                title="Motif Magazine"
-                description="Local arts and culture magazine tribute to Paul"
-                icon="🎵"
-                imageKey="HERO_IMAGE_DJ"
-              />
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#fdd02b] to-[#55aa4d] border border-amber-200 rounded-full text-white text-sm w-fit font-medium tracking-widest">
+              <span className="animate-pulse">🚨</span>
+              COMING SOON
+              <span className="animate-pulse">🚨</span>
             </div>
+            <p>
+              <a
+                className="link underline"
+                href="https://open.spotify.com/playlist/3gHF1zFYgbVp57ELWZRLhT?si=G9UmxK1dR9m37miRbZpdYQ"
+                target="_blank"
+              >
+                Spotify Playlist
+              </a>
+            </p>
+            <iframe
+              data-testid="embed-iframe"
+              style={{ borderRadius: '12px', maxWidth: '100%' }}
+              src="https://open.spotify.com/embed/playlist/3gHF1zFYgbVp57ELWZRLhT?utm_source=generator"
+              width="380"
+              height="352"
+              allowFullScreen
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
           </section>
 
           <section className="flex flex-col gap-3">
@@ -163,6 +159,32 @@ export default function More() {
 
           <section className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold flex items-center gap-2">
+              <span>🔗</span>
+              Links
+            </h2>
+            <p className="text-sm text-gray-500">
+              A collection of articles or other online tributes to Paul.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <LinkPreview
+                url="https://www.jwsfh.com/obituary/paul-bedrosian"
+                title="Obituary"
+                description="Official obituary from J.W. Smith Funeral Home"
+                icon="📰"
+                imageKey="PAUL_OBIT"
+              />
+              <LinkPreview
+                url="https://motifri.com/obit-pauly-danger/"
+                title="Motif Magazine"
+                description="Local arts and culture magazine tribute to Paul"
+                icon="🎵"
+                imageKey="HERO_IMAGE_DJ"
+              />
+            </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
               <span>📄</span>
               Downloads
             </h2>
@@ -220,41 +242,23 @@ export default function More() {
 
           <section className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <span>🎵</span>
-              Music
+              <span>💝</span>
+              Donate
             </h2>
             <p className="text-sm text-gray-500">
-              Playlists and music celebrating Paul's life — more to come!
+              Support Paul's family and ease the burden of funeral and
+              hospitalization costs.
             </p>
             <p>
               <a
                 className="link underline"
-                href="https://open.spotify.com/playlist/3gHF1zFYgbVp57ELWZRLhT?si=G9UmxK1dR9m37miRbZpdYQ"
+                href="https://gofundme.com/f/paul-bedrosian"
                 target="_blank"
               >
-                Spotify Playlist
+                Paul's GoFundMe
               </a>
             </p>
-            <iframe
-              data-testid="embed-iframe"
-              style={{ borderRadius: '12px', maxWidth: '100%' }}
-              src="https://open.spotify.com/embed/playlist/3gHF1zFYgbVp57ELWZRLhT?utm_source=generator"
-              width="380"
-              height="352"
-              allowFullScreen
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            ></iframe>
-            <p>
-              <a
-                className="link underline"
-                href="https://www.upsetta.com/"
-                target="_blank"
-              >
-                Upsetta Tribute Album
-              </a>
-            </p>
-            <p className="text-gray-500 text-sm">COMING SOON</p>
+            <GoFundMeEmbed />
           </section>
 
           <section className="flex flex-col gap-3 pb-12">
