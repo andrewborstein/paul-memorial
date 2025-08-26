@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { unstable_cache as cache } from 'next/cache';
 import { aggregateIndex } from '@/lib/data';
 
-export const dynamic = 'force-static';
-export const revalidate = 300;
+export const dynamic = 'force-dynamic'; // this route depends on search params
+// (no global revalidate; let unstable_cache + headers control caching)
 
 const getCachedMemories = cache(
   async () => {
