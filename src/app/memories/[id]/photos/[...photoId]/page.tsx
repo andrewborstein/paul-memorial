@@ -143,12 +143,12 @@ export default async function PhotoPage({
                 {prevPhoto ? (
                   <Link
                     href={`/memories/${memoryId}/photos/${prevPhoto.public_id}`}
-                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 text-center"
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center whitespace-nowrap uppercase tracking-widest text-xs font-semibold"
                   >
                     ← Previous
                   </Link>
                 ) : (
-                  <div className="px-4 py-2 text-gray-500 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
                     ← Previous
                   </div>
                 )}
@@ -156,19 +156,19 @@ export default async function PhotoPage({
                 {nextPhoto ? (
                   <Link
                     href={`/memories/${memoryId}/photos/${nextPhoto.public_id}`}
-                    className="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 text-center"
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center uppercase tracking-widest text-xs font-semibold"
                   >
                     Next →
                   </Link>
                 ) : (
-                  <div className="px-4 py-2 text-gray-500 text-sm text-center">
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
                     Next →
                   </div>
                 )}
               </div>
               <Link
                 href={`/memories/${memory.id}`}
-                className="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 text-center"
+                className="px-4 py-2 bg-transparent border border-white text-white rounded hover:bg-white hover:text-black text-center uppercase tracking-widest text-xs font-semibold"
               >
                 Exit
               </Link>
