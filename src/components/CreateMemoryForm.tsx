@@ -674,8 +674,8 @@ export default function CreateMemoryForm({
       // Force hard reload to memory page to clear any cached photo URLs
       window.location.replace(`/memories/${id}?t=${updated_at}`);
     } else {
-      // Redirect to memories page with updated_at timestamp for cache busting
-      window.location.href = `/memories?t=${updated_at}`;
+      // Force hard reload to memories page to ensure fresh data
+      window.location.replace(`/memories?t=${updated_at}`);
     }
   }
 
