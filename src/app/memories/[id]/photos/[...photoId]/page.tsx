@@ -78,10 +78,10 @@ export default async function PhotoPage({
         )}
 
         {/* Modal overlay */}
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col">
-          {/* Breadcrumbs at top */}
+        <div className="fixed inset-0 bg-black bg-opacity-[0.93] z-50 flex flex-col">
+          {/* Header with breadcrumbs and desktop controls */}
           <PageContainer className="flex-shrink-0 w-full">
-            <div className="py-4">
+            <div className="py-4 flex items-center justify-between">
               <nav>
                 <ol className="flex flex-wrap items-center gap-2 text-sm text-white">
                   <li className="flex items-center">
@@ -111,6 +111,41 @@ export default async function PhotoPage({
                   </li>
                 </ol>
               </nav>
+
+              {/* Desktop controls */}
+              <div className="hidden md:flex items-center gap-4">
+                <Link
+                  href={`/memories/${memory.id}`}
+                  className="px-4 py-2 bg-transparent border border-white text-white rounded hover:bg-white hover:text-black text-center uppercase tracking-widest text-xs font-semibold"
+                >
+                  Exit
+                </Link>
+                {prevPhoto ? (
+                  <Link
+                    href={`/memories/${memoryId}/photos/${prevPhoto.public_id}`}
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center whitespace-nowrap uppercase tracking-widest text-xs font-semibold"
+                  >
+                    ← Previous
+                  </Link>
+                ) : (
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
+                    ← Previous
+                  </div>
+                )}
+
+                {nextPhoto ? (
+                  <Link
+                    href={`/memories/${memoryId}/photos/${nextPhoto.public_id}`}
+                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 text-center uppercase tracking-widest text-xs font-semibold"
+                  >
+                    Next →
+                  </Link>
+                ) : (
+                  <div className="px-4 py-2 text-gray-500 text-center uppercase tracking-widest text-xs font-semibold">
+                    Next →
+                  </div>
+                )}
+              </div>
             </div>
           </PageContainer>
 
@@ -136,8 +171,8 @@ export default async function PhotoPage({
             )}
           </div>
 
-          {/* Controls at bottom */}
-          <PageContainer className="flex-shrink-0 w-full">
+          {/* Mobile controls at bottom */}
+          <PageContainer className="flex-shrink-0 w-full md:hidden">
             <div className="flex items-center justify-between gap-4 py-4">
               <div className="flex items-center gap-4">
                 {prevPhoto ? (
