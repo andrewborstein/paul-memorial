@@ -25,9 +25,12 @@ export default async function HomePage() {
                   Paul Nshan Bedrosian was a devoted father, partner, son,
                   brother, and friend whose kindness touched countless lives.
                   His young son, Ólì, will grow up without the chance to know
-                  him firsthand. By sharing our stories, photos, and memories,
-                  we give Ólì — and one another — the gift of knowing Paul more
-                  fully than any one person could give alone.
+                  him firsthand.{' '}
+                  <span className="font-semibold">
+                    By sharing our stories, photos, and memories, we give Ólì —
+                    and one another — the gift of knowing Paul more fully than
+                    any one person could give alone.
+                  </span>
                 </p>
                 <p>
                   From his roots in Cranston to his years in Vermont, from
