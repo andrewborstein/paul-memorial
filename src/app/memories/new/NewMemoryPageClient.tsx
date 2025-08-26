@@ -45,7 +45,7 @@ export default function NewMemoryPageClient() {
                 <details>
                   <summary>
                     <span className="font-semibold underline text-[#184a86]">
-                      Suggestions for writing a good memory
+                      Want suggestions for writing a good memory?
                     </span>
                   </summary>
                   <ul className="list pt-4 space-y-2">
