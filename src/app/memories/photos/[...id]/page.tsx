@@ -119,7 +119,7 @@ export default async function PhotoPage({
               {/* Desktop controls */}
               <div className="hidden md:flex items-center gap-4">
                 <Link
-                  href={`/memories/${memory.id}`}
+                  href="/photos/all"
                   className="px-4 py-2 bg-transparent border border-white text-white rounded hover:bg-white hover:text-black text-center uppercase tracking-widest text-xs font-semibold"
                 >
                   Exit
@@ -206,7 +206,7 @@ export default async function PhotoPage({
                 )}
               </div>
               <Link
-                href={`/memories/${memory.id}`}
+                href="/photos/all"
                 className="px-4 py-2 bg-transparent border border-white text-white rounded hover:bg-white hover:text-black text-center uppercase tracking-widest text-xs font-semibold"
               >
                 Exit
