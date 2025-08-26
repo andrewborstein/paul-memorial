@@ -13,6 +13,7 @@ import {
   isSuperUser,
   clearSuperUser,
 } from '@/lib/user';
+import { useCallback } from 'react';
 
 type PhotoState = {
   id: string; // Unique identifier
@@ -24,12 +25,33 @@ type PhotoState = {
   caption?: string;
 };
 
+type SerializedPhotoState = {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  preview: string;
+  progress: number;
+  status: 'queued' | 'uploading' | 'done' | 'error';
+  public_id?: string;
+  caption?: string;
+};
+
+type FormState = {
+  title: string;
+  body: string;
+  photos: SerializedPhotoState[];
+  timestamp: number;
+};
+
 interface CreateMemoryFormProps {
   memory?: MemoryDetail; // Optional - if provided, we're in edit mode
 }
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+const FORM_STATE_KEY = 'create-memory-form-state';
+const DEBOUNCE_DELAY = 500; // ms
 
 // Image resizing utility
 function resizeImage(
@@ -166,11 +188,11 @@ function PhotoItem({
 
         {/* Fallback for unsupported formats */}
         <div
-          className={`hidden w-24 h-24 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500`}
+          className={`hidden w-24 h-24 bg-gray-100 rounded items-center justify-center text-xs text-gray-500`}
         >
           <div className="text-center">
             <div className="text-lg mb-1">📷</div>
-            <div className="text-xs text-gray-400">
+            <div className="text-gray-400">
               {photo.status === 'done'
                 ? 'Loading...'
                 : photo.file.type || 'Unknown format'}
@@ -235,8 +257,132 @@ export default function CreateMemoryForm({
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
   const [createdAt, setCreatedAt] = React.useState(memory?.created_at || '');
+  const [isRestoringState, setIsRestoringState] = React.useState(false);
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize form with current user data if signed in
+  // Serialize photos for localStorage
+  const serializePhotos = useCallback(
+    (photos: PhotoState[]): SerializedPhotoState[] => {
+      return photos.map((photo) => ({
+        id: photo.id,
+        fileName: photo.file.name,
+        fileType: photo.file.type,
+        fileSize: photo.file.size,
+        preview: photo.preview,
+        progress: photo.progress,
+        status: photo.status,
+        public_id: photo.public_id,
+        caption: photo.caption,
+      }));
+    },
+    []
+  );
+
+  // Deserialize photos from localStorage
+  const deserializePhotos = useCallback(
+    async (serializedPhotos: SerializedPhotoState[]): Promise<PhotoState[]> => {
+      const restoredPhotos: PhotoState[] = [];
+
+      for (const serialized of serializedPhotos) {
+        // For uploaded photos (with public_id), create a dummy file
+        if (serialized.public_id) {
+          restoredPhotos.push({
+            id: serialized.id,
+            file: new File([], serialized.fileName, {
+              type: serialized.fileType,
+            }),
+            preview: serialized.preview,
+            progress: serialized.progress,
+            status: serialized.status,
+            public_id: serialized.public_id,
+            caption: serialized.caption,
+          });
+        }
+        // Skip photos that were only queued/uploading as they can't be restored
+      }
+
+      return restoredPhotos;
+    },
+    []
+  );
+
+  // Save form state to localStorage with debouncing
+  const saveFormState = useCallback(() => {
+    if (isEditMode) return; // Don't save state in edit mode
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        const formState: FormState = {
+          title,
+          body,
+          photos: serializePhotos(photos),
+          timestamp: Date.now(),
+        };
+        localStorage.setItem(FORM_STATE_KEY, JSON.stringify(formState));
+      } catch (error) {
+        console.warn('Failed to save form state:', error);
+      }
+    }, DEBOUNCE_DELAY);
+  }, [title, body, photos, serializePhotos, isEditMode]);
+
+  // Clear form state from localStorage
+  const clearFormState = useCallback(() => {
+    try {
+      localStorage.removeItem(FORM_STATE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear form state:', error);
+    }
+  }, []);
+
+  // Restore form state from localStorage
+  const restoreFormState = useCallback(async () => {
+    if (isEditMode) return; // Don't restore state in edit mode
+
+    try {
+      const saved = localStorage.getItem(FORM_STATE_KEY);
+      if (!saved) return;
+
+      const formState: FormState = JSON.parse(saved);
+
+      // Check if the saved state is not too old (24 hours)
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours in ms
+      if (Date.now() - formState.timestamp > maxAge) {
+        clearFormState();
+        return;
+      }
+
+      setIsRestoringState(true);
+
+      // Restore text fields
+      if (formState.title) {
+        setTitle(formState.title);
+        setShowTitleField(true);
+      }
+      if (formState.body) {
+        setBody(formState.body);
+      }
+
+      // Restore photos
+      if (formState.photos.length > 0) {
+        const restoredPhotos = await deserializePhotos(formState.photos);
+        if (restoredPhotos.length > 0) {
+          setPhotos(restoredPhotos);
+        }
+      }
+
+      setIsRestoringState(false);
+    } catch (error) {
+      console.warn('Failed to restore form state:', error);
+      clearFormState();
+      setIsRestoringState(false);
+    }
+  }, [isEditMode, clearFormState, deserializePhotos]);
+
+  // Initialize form with current user data if signed in, and restore saved state
   React.useEffect(() => {
     if (!isEditMode) {
       const currentUser = getCurrentUser();
@@ -244,8 +390,27 @@ export default function CreateMemoryForm({
         setName(currentUser.name);
         setEmail(currentUser.email);
       }
+
+      // Restore saved form state
+      restoreFormState();
     }
-  }, [isEditMode]);
+  }, [isEditMode, restoreFormState]);
+
+  // Save form state whenever relevant fields change
+  React.useEffect(() => {
+    if (!isRestoringState) {
+      saveFormState();
+    }
+  }, [title, body, photos, saveFormState, isRestoringState]);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auto-resize textarea as content is added
   React.useEffect(() => {
@@ -670,6 +835,11 @@ export default function CreateMemoryForm({
       `/memories?t=${updated_at}`
     );
 
+    // Clear saved form state on successful publish
+    if (!isEditMode) {
+      clearFormState();
+    }
+
     if (isEditMode) {
       // Force hard reload to memory page to clear any cached photo URLs
       window.location.replace(`/memories/${id}?t=${updated_at}`);
@@ -757,7 +927,7 @@ export default function CreateMemoryForm({
               <button
                 type="button"
                 onClick={() => setShowTitleField(false)}
-                className="text-sm text-gray-500 hover:text-gray-700 uppercase tracking-widest text-xs"
+                className="text-xs text-gray-500 hover:text-gray-700 uppercase tracking-widest"
               >
                 Hide
               </button>
