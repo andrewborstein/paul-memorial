@@ -2,14 +2,11 @@
 import './globals.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Script from 'next/script';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import SuperUserBanner from '@/components/SuperUserBanner';
 import AutoLoginHandler from '@/components/AutoLoginHandler';
 import UserAvatar from '@/components/UserAvatar';
-import { CLOUDINARY_IMAGES } from '@/lib/constants';
-import { getHeroImageUrl } from '@/lib/cloudinary';
-import Image from 'next/image';
+import { getCurrentUser, type UserInfo } from '@/lib/user';
 
 export default function RootLayout({
   children,
@@ -17,6 +14,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Only run on client side
+    const user = getCurrentUser();
+    setCurrentUser(user);
+    setIsLoaded(true);
+
+    const handleUserUpdate = () => {
+      setCurrentUser(getCurrentUser());
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    return () => window.removeEventListener('userUpdated', handleUserUpdate);
+  }, []);
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -24,6 +37,8 @@ export default function RootLayout({
     }
     return pathname.startsWith(path);
   };
+
+  const isSignedIn = isLoaded && !!currentUser;
 
   return (
     <html lang="en">
@@ -104,10 +119,14 @@ export default function RootLayout({
                   href="/"
                   className="font-[Montserrat] text-black hover:text-gray-800 transition-colors"
                 >
-                  <div className="text-lg font-bold leading-none mb-[2px]">
+                  <div
+                    className={`${isSignedIn ? 'text-md' : 'text-lg'} xs:text-lg font-bold leading-none xs:leading-none mb-[2px]`}
+                  >
                     PAUL BEDROSIAN
                   </div>
-                  <div className="text-[11px] font-normal leading-none">
+                  <div
+                    className={`${isSignedIn ? 'text-[10px]' : 'text-[11px]'} xs:text-[11px] font-normal leading-none xs:leading-none`}
+                  >
                     ONE LOVE ALWAYS 1983 - 2025
                   </div>
                 </Link>
