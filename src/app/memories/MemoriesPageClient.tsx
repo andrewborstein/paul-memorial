@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import MemoryMasonry from '@/components/MemoryMasonry';
@@ -20,17 +20,13 @@ function MemorySkeleton({ height = 'h-48' }: { height?: string }) {
             <div className="h-4 w-24 bg-gray-200/60 animate-pulse rounded mb-2" />
             <div className="h-3 w-16 bg-gray-200/60 animate-pulse rounded" />
           </div>
-          {/* Thumbnail skeleton */}
           <div className="w-12 h-12 rounded-lg bg-gray-200/60 animate-pulse flex-shrink-0 ml-4" />
         </div>
 
-        {/* Divider */}
         <div className="border-t border-gray-200 mb-3" />
 
-        {/* Title skeleton (sometimes present) */}
         <div className="h-5 w-3/4 bg-gray-200/60 animate-pulse rounded mb-3" />
 
-        {/* Content skeleton with varied heights */}
         <div className="space-y-2">
           <div className={`${height} bg-gray-200/60 animate-pulse rounded`} />
           <div className="h-4 w-1/3 bg-gray-200/60 animate-pulse rounded" />
@@ -41,12 +37,22 @@ function MemorySkeleton({ height = 'h-48' }: { height?: string }) {
 }
 
 function MemoriesPageContent() {
+  const router = useRouter();
   const [memories, setMemories] = useState<MemoryIndexItem[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const searchParams = useSearchParams();
   const filter = searchParams.get('filter');
+
+  useEffect(() => {
+    // Optional belt-and-suspenders: if any server bits were prefetched,
+    // ensure we pull fresh RSC payload. Not strictly required since
+    // this page fetches client-side, but harmless.
+    if (process.env.NODE_ENV === 'production') {
+      router.refresh();
+    }
+  }, [router]);
 
   useEffect(() => {
     // Only run on client side
@@ -142,6 +148,7 @@ function MemoriesPageContent() {
                 Memories you have shared.{' '}
                 <Link
                   href="/memories"
+                  prefetch={false} // avoid stale prefetch just in case
                   className="text-blue-600 hover:text-blue-800 font-medium"
                 >
                   View all memories
@@ -155,6 +162,7 @@ function MemoriesPageContent() {
         >
           <Link
             href="/memories/new"
+            prefetch={false}
             className="btn whitespace-nowrap flex-shrink-0"
           >
             share a memory
@@ -166,6 +174,7 @@ function MemoriesPageContent() {
             <p className="text-gray-500 mb-4">Unable to load memories.</p>
             <Link
               href="/memories/new"
+              prefetch={false}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
               Be the first to share a memory
@@ -180,6 +189,7 @@ function MemoriesPageContent() {
             </p>
             <Link
               href="/memories/new"
+              prefetch={false}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
               {filter === 'your'

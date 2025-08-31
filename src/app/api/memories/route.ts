@@ -18,19 +18,19 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const t = searchParams.get('t');
 
+  const noStore = {
+    'Cache-Control': 'private, no-store',
+    // Vercel respects this too; nice belt-and-suspenders:
+    'CDN-Cache-Control': 'private, no-store',
+  };
+
   if (t) {
-    // “Fresh-read” path used right after create/update redirects (?t=updated_at)
+    // "Fresh-read" path used right after create/update redirects (?t=updated_at)
     const items = await aggregateIndex({ forceFresh: true });
-    return NextResponse.json(items, {
-      headers: { 'Cache-Control': 'no-store' },
-    });
+    return NextResponse.json(items, { headers: noStore });
   }
 
-  // Fast, edge-cached path
+  // Fast path via Next Data Cache (tagged). Do NOT cache at the CDN.
   const items = await getCachedMemories();
-  return NextResponse.json(items, {
-    headers: {
-      'Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
-    },
-  });
+  return NextResponse.json(items, { headers: noStore });
 }
