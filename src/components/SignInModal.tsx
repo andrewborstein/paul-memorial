@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string) => void;
+  onSubmit: (name: string, email: string) => Promise<void>;
   title?: string;
   description?: string;
 }
@@ -21,6 +21,7 @@ export default function SignInModal({
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingMemory, setIsCreatingMemory] = useState(false);
 
   if (!isOpen) return null;
 
@@ -47,9 +48,14 @@ export default function SignInModal({
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setIsCreatingMemory(true);
     try {
-      onSubmit(name.trim(), email.trim().toLowerCase());
-    } finally {
+      await onSubmit(name.trim(), email.trim().toLowerCase());
+      // Modal will be closed by parent component after successful submission
+      // (or we'll redirect away, so no need to reset states)
+    } catch (error) {
+      // Reset only form validation state, keep creating memory state
+      // since we might retry or show error state
       setIsSubmitting(false);
     }
   };
@@ -57,8 +63,14 @@ export default function SignInModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
-        <p className="text-gray-600 mb-6">{description}</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          {isCreatingMemory ? 'Creating memory...' : title}
+        </h2>
+        <p className="text-gray-600 mb-6">
+          {isCreatingMemory
+            ? 'Please wait while we save your memory.'
+            : description}
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {errors.length > 0 && (
@@ -85,7 +97,7 @@ export default function SignInModal({
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Your name"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCreatingMemory}
             />
           </div>
 
@@ -103,18 +115,26 @@ export default function SignInModal({
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="your.email@example.com"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCreatingMemory}
             />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting} className="btn">
-              {isSubmitting ? 'Signing in...' : 'Continue'}
+            <button
+              type="submit"
+              disabled={isSubmitting || isCreatingMemory}
+              className="btn disabled:opacity-50"
+            >
+              {isCreatingMemory
+                ? 'Creating memory...'
+                : isSubmitting
+                  ? 'Signing in...'
+                  : 'Continue'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCreatingMemory}
               className="btn-secondary disabled:opacity-50"
             >
               Cancel

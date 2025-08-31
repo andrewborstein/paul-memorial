@@ -251,7 +251,7 @@ export default function CreateMemoryForm({
   const [errors, setErrors] = React.useState<string[]>([]);
   const [showSignInModal, setShowSignInModal] = React.useState(false);
   const [pendingSubmission, setPendingSubmission] = React.useState<
-    ((signInName?: string, signInEmail?: string) => void) | null
+    ((signInName?: string, signInEmail?: string) => Promise<void>) | null
   >(null);
   const [showTitleField, setShowTitleField] = React.useState(false);
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
@@ -421,23 +421,18 @@ export default function CreateMemoryForm({
     }
   }, [body]);
 
-  const handleSignIn = (name: string, email: string) => {
+  const handleSignIn = async (name: string, email: string) => {
     // Store in localStorage first
     setCurrentUser(email, name, false); // Don't refresh during sign-in
 
     // Update form state
     setName(name);
     setEmail(email);
-    setShowSignInModal(false);
     setErrors([]); // Clear any existing errors
 
-    // Continue with the pending submission after state updates
+    // Continue with the pending submission
     if (pendingSubmission) {
-      // Use setTimeout to ensure state updates have taken effect
-      setTimeout(() => {
-        pendingSubmission(name, email);
-        setPendingSubmission(null);
-      }, 0);
+      await pendingSubmission(name, email);
     }
   };
   const errorRef = React.useRef<HTMLDivElement>(null);
@@ -738,9 +733,16 @@ export default function CreateMemoryForm({
           if (validationErrors.length > 0) {
             setErrors(validationErrors);
             setTimeout(scrollToErrors, 100);
-            return;
+            throw new Error('Validation failed'); // This will keep the modal open
           }
-          await submitMemory(signInName, signInEmail);
+          try {
+            await submitMemory(signInName, signInEmail);
+            // Don't close modal here - let the redirect handle it
+            // The modal will stay in "Creating memory..." state until redirect
+          } catch (error) {
+            // Let the error bubble up to keep modal open with error state
+            throw error;
+          }
         };
       });
       return;
@@ -831,8 +833,8 @@ export default function CreateMemoryForm({
 
     const { id, updated_at } = await r.json();
     console.log(
-      'Memory created successfully, redirecting to:',
-      `/memories?t=${updated_at}`
+      'Memory created successfully, navigating to:',
+      `/memories/${id}?t=${updated_at}&showThanks=true`
     );
 
     // Clear saved form state on successful publish
@@ -844,8 +846,12 @@ export default function CreateMemoryForm({
       // Force hard reload to memory page to clear any cached photo URLs
       window.location.replace(`/memories/${id}?t=${updated_at}`);
     } else {
-      // Force hard reload to memories page to ensure fresh data
-      window.location.replace(`/memories?t=${updated_at}`);
+      // Add 500ms delay before navigating to new memory page
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Navigate to the new memory page with thank you modal
+      window.location.replace(
+        `/memories/${id}?t=${updated_at}&showThanks=true`
+      );
     }
   }
 

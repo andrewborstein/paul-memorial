@@ -6,7 +6,7 @@ import { clearCurrentUser, getCurrentUser } from '@/lib/user';
 interface ContactInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string) => void;
+  onSubmit: (name: string, email: string) => Promise<void>;
   title?: string;
   description?: string;
 }
@@ -32,6 +32,7 @@ export default function ContactInfoModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [hasCurrentUser, setHasCurrentUser] = useState(false);
+  const [isCreatingMemory, setIsCreatingMemory] = useState(false);
 
   // Check if there's a current user on mount and when modal opens
   React.useEffect(() => {
@@ -129,6 +130,7 @@ export default function ContactInfoModal({
     }
 
     setIsSubmitting(true);
+    setIsCreatingMemory(true);
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`;
       const cleanEmail = email.trim().toLowerCase();
@@ -140,14 +142,18 @@ export default function ContactInfoModal({
         body: JSON.stringify({ email: cleanEmail, name: fullName }),
       });
 
-      onSubmit(fullName, cleanEmail);
-    } finally {
+      await onSubmit(fullName, cleanEmail);
+      // Modal will be closed by parent component after successful submission
+      // (or we'll redirect away, so no need to reset states)
+    } catch (error) {
+      // Reset only form validation state, keep creating memory state
       setIsSubmitting(false);
     }
   };
 
   const handleWelcomeContinue = async () => {
     setIsSubmitting(true);
+    setIsCreatingMemory(true);
     try {
       const fullName = `${firstName} ${lastName}`;
       const cleanEmail = email.trim().toLowerCase();
@@ -159,8 +165,11 @@ export default function ContactInfoModal({
         body: JSON.stringify({ email: cleanEmail, name: fullName }),
       });
 
-      onSubmit(fullName, cleanEmail);
-    } finally {
+      await onSubmit(fullName, cleanEmail);
+      // Modal will be closed by parent component after successful submission
+      // (or we'll redirect away, so no need to reset states)
+    } catch (error) {
+      // Reset only form validation state, keep creating memory state
       setIsSubmitting(false);
     }
   };
@@ -173,6 +182,7 @@ export default function ContactInfoModal({
     setErrors([]);
     setIsSubmitting(false);
     setIsCheckingEmail(false);
+    setIsCreatingMemory(false);
     onClose();
   };
 
@@ -208,10 +218,14 @@ export default function ContactInfoModal({
         </button>
 
         <h2 className="text-xl font-semibold text-gray-900 mb-2 pr-8">
-          {title}
+          {isCreatingMemory ? 'Creating memory...' : title}
         </h2>
         {step === 'email' && (
-          <p className="text-gray-600 text-sm mb-2">{description}</p>
+          <p className="text-gray-600 text-sm mb-2">
+            {isCreatingMemory
+              ? 'Please wait while we save your memory.'
+              : description}
+          </p>
         )}
 
         {errors.length > 0 && (
@@ -291,7 +305,7 @@ export default function ContactInfoModal({
                   onChange={(e) => setFirstName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="First name"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isCreatingMemory}
                   onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
                   autoFocus
                 />
@@ -310,7 +324,7 @@ export default function ContactInfoModal({
                   onChange={(e) => setLastName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Last name"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isCreatingMemory}
                   onKeyDown={(e) => e.key === 'Enter' && handleNameSubmit()}
                 />
               </div>
@@ -320,16 +334,20 @@ export default function ContactInfoModal({
               <button
                 type="button"
                 onClick={handleNameSubmit}
-                disabled={isSubmitting}
-                className="btn"
+                disabled={isSubmitting || isCreatingMemory}
+                className="btn disabled:opacity-50"
               >
-                {isSubmitting ? 'Saving...' : 'Continue'}
+                {isCreatingMemory
+                  ? 'Creating memory...'
+                  : isSubmitting
+                    ? 'Saving...'
+                    : 'Continue'}
               </button>
               <button
                 type="button"
                 onClick={() => setStep('email')}
-                disabled={isSubmitting}
-                className="btn-text"
+                disabled={isSubmitting || isCreatingMemory}
+                className="btn-text disabled:opacity-50"
               >
                 Back
               </button>
@@ -354,17 +372,21 @@ export default function ContactInfoModal({
               <button
                 type="button"
                 onClick={handleWelcomeContinue}
-                disabled={isSubmitting}
-                className="btn"
+                disabled={isSubmitting || isCreatingMemory}
+                className="btn disabled:opacity-50"
               >
-                {isSubmitting ? 'Continuing...' : 'Continue'}
+                {isCreatingMemory
+                  ? 'Creating memory...'
+                  : isSubmitting
+                    ? 'Continuing...'
+                    : 'Continue'}
               </button>
               {hasCurrentUser && (
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  disabled={isSubmitting}
-                  className="btn-text"
+                  disabled={isSubmitting || isCreatingMemory}
+                  className="btn-text disabled:opacity-50"
                 >
                   Sign out
                 </button>

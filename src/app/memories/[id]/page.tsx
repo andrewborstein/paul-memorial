@@ -8,6 +8,7 @@ import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
 import MemoryMetadata from '@/components/MemoryMetadata';
 import LinkifiedText from '@/components/LinkifiedText';
+import MemoryPageClient from './MemoryPageClient';
 
 import type { MemoryDetail } from '@/types/memory';
 
@@ -35,12 +36,20 @@ export default async function MemoryPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ t?: string }>;
+  searchParams?: Promise<{ t?: string; showThanks?: string }>;
 }) {
   const { id } = await params;
   const params2 = await searchParams;
   const t = params2?.t;
-  console.log('MemoryPage: Attempting to load memory with ID:', id, 't:', t);
+  const showThanks = params2?.showThanks === 'true';
+  console.log(
+    'MemoryPage: Attempting to load memory with ID:',
+    id,
+    't:',
+    t,
+    'showThanks:',
+    showThanks
+  );
 
   try {
     const memory = await getMemory(id, t);
@@ -48,60 +57,11 @@ export default async function MemoryPage({
     const displayTitle = memory.title || memory.name;
 
     return (
-      <PageContainer>
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
-          {/* Breadcrumbs */}
-          <nav>
-            <ol className="flex items-center space-x-2 text-sm flex-wrap">
-              <li>
-                <Link
-                  href="/memories"
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Memories
-                </Link>
-              </li>
-              <li className="text-gray-400">/</li>
-              <li className="text-gray-600 font-medium">{memory.name}</li>
-            </ol>
-          </nav>
-
-          {/* Edit/Delete Actions */}
-          <MemoryActions memoryId={memory.id} creatorEmail={memory.email} />
-        </div>
-
-        {/* Memory Content */}
-        <div className="space-y-6">
-          {/* Text Content */}
-          <div className="space-y-2">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <PageHeader title={displayTitle} visuallyHidden />
-            </div>
-            <MemoryMetadata
-              date={memory.created_at}
-              creatorEmail={memory.email}
-              creatorName={memory.name}
-            />
-            {memory.title && (
-              <h2 className="text-lg font-semibold text-gray-900">
-                {memory.title}
-              </h2>
-            )}
-            <LinkifiedText
-              text={memory.body}
-              className="text-gray-700 whitespace-pre-wrap leading-relaxed"
-            />
-          </div>
-
-          {/* Photos */}
-          {memory.photos.length > 0 && (
-            <div>
-              <PhotoGrid photos={memory.photos} memoryId={memory.id} />
-            </div>
-          )}
-        </div>
-      </PageContainer>
+      <MemoryPageClient
+        memory={memory}
+        showThanks={showThanks}
+        timestamp={t || memory.updated_at}
+      />
     );
   } catch (error) {
     console.error('MemoryPage: Error loading memory:', error);
