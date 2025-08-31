@@ -51,17 +51,17 @@ export default function ThankYouModal({
         </div>
 
         {/* Body */}
-        <div className="px-6 pb-6">
-          <p className="text-gray-700 mb-6">
+        <div className="px-6 pb-6 space-y-6">
+          <p className="text-gray-700">
             Your memory means the world to Paul's family and loved ones. You can
             edit or delete the memory and its content (both text and photos) at
             any time on this device.
           </p>
-          <p className="text-gray-700 mb-6">
+          <p className="text-gray-700">
             Email{' '}
             <a
               href="mailto:contact@paulbedrosian.com"
-              className="text-blue-600 hover:text-blue-800"
+              className="text-blue-600 hover:text-blue-800 underline"
             >
               contact@paulbedrosian.com
             </a>{' '}
@@ -70,16 +70,10 @@ export default function ThankYouModal({
 
           {/* Footer buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
-            >
+            <button onClick={onClose} className="btn">
               View your memory
             </button>
-            <button
-              onClick={handleViewAllMemories}
-              className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 font-medium"
-            >
+            <button onClick={handleViewAllMemories} className="btn-secondary">
               View all memories
             </button>
           </div>
