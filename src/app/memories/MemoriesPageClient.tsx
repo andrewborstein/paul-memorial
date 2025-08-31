@@ -85,13 +85,6 @@ function MemoriesPageContent() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: MemoryIndexItem[] = await res.json();
         setMemories(Array.isArray(data) ? data : []);
-
-        // Clean up the cache-busting parameter from URL after successful load
-        if (t && typeof window !== 'undefined') {
-          const url = new URL(window.location.href);
-          url.searchParams.delete('t');
-          window.history.replaceState({}, '', url.toString());
-        }
       } catch (e: any) {
         if (e?.name !== 'AbortError')
           setErr(e?.message ?? 'Failed to load memories');
