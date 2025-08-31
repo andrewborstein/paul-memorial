@@ -43,7 +43,7 @@ export default function MemoryPageClient({
   return (
     <>
       <PageContainer>
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-6 line">
           {/* Breadcrumbs */}
           <nav>
             <ol className="flex items-center space-x-2 text-sm flex-wrap">
