@@ -38,7 +38,7 @@ export default function NewMemoryPageClient() {
                 We each had a unique window into his life. Whether funny,
                 heartfelt, or ordinary, your memory of Paul matters. By sharing,
                 you help weave a living tribute that will comfort and inspire
-                his family and give Ólì a richer sense of the father he never
+                his family and give Óli a richer sense of the father he never
                 got to know.
               </p>
               <div>

@@ -24,10 +24,10 @@ export default async function HomePage() {
                 <p>
                   Paul Nshan Bedrosian was a devoted father, partner, son,
                   brother, and friend whose kindness touched countless lives.
-                  His young son, Ólì, will grow up without the chance to know
+                  His young son, Óli, will grow up without the chance to know
                   him firsthand.{' '}
                   <span className="font-semibold">
-                    By sharing our stories, photos, and memories, we give Ólì —
+                    By sharing our stories, photos, and memories, we give Óli —
                     and one another — the gift of knowing Paul more fully than
                     any one person could give alone.
                   </span>
