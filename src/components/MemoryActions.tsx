@@ -24,7 +24,6 @@ export default function MemoryActions({
     const isSuperResult = isSuperUser();
 
     setCanEdit(canEditResult);
-    setIsSuper(isSuperResult);
     setIsLoaded(true);
 
     // Debug logging

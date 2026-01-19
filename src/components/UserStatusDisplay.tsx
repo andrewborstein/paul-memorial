@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentUser, isSignedIn, type UserInfo } from '@/lib/user';
+import { getCurrentUser, type UserInfo } from '@/lib/user';
 
 interface UserStatusDisplayProps {
   onEditContactInfo: () => void;

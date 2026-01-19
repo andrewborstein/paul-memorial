@@ -175,8 +175,6 @@ export default function PhotoReelHero() {
     }
 
     const interval = setInterval(() => {
-      setIsTransitioning(true);
-
       // Move to next starting index
       const nextStartingIndex = (startingIndex + increment) % PHOTO_IDS.length;
       setStartingIndex(nextStartingIndex);
@@ -226,8 +224,6 @@ export default function PhotoReelHero() {
             transitionPhotosPerRow + i,
           ]);
         }
-
-        setIsTransitioning(false);
       };
 
       loadNewPhotos();
