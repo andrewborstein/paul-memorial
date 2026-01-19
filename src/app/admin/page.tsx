@@ -64,7 +64,7 @@ export default function AdminPage() {
       });
       const result = await response.json();
       setMessage(`Created ${result.count} test memories`);
-    } catch (error) {
+    } catch (_error) {
       setMessage('Error creating test data');
     } finally {
       setIsLoading(false);
@@ -81,7 +81,7 @@ export default function AdminPage() {
       });
       const result = await response.json();
       setMessage(`Deleted ${result.count} memories`);
-    } catch (error) {
+    } catch (_error) {
       setMessage('Error deleting memories');
     } finally {
       setIsLoading(false);
@@ -117,7 +117,7 @@ export default function AdminPage() {
       } else {
         setMessage(result.message || 'Error creating custom memories');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('Invalid JSON format');
     } finally {
       setIsCreatingCustom(false);

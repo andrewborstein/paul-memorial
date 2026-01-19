@@ -1,6 +1,5 @@
 import { createMemory } from '@/lib/data';
 import {
-  cldUrl,
   warmUpImages,
   getHeroImageUrl,
   getGridImageUrl,

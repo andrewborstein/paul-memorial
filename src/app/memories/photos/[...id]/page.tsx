@@ -4,8 +4,6 @@ import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoImage from '@/components/PhotoImage';
 import { getFullSizeUrl } from '@/lib/cloudinary';
-import type { MemoryDetail } from '@/types/memory';
-
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +33,7 @@ export default async function PhotoPage({
   const photoId = id.join('/'); // Join the segments back together
 
   try {
-    const { memory, photo, photoIndex } = await getPhotoData(photoId);
+    const { memory, photo } = await getPhotoData(photoId);
     const displayTitle = memory.title || memory.name;
 
     // Get all photos for global navigation
@@ -216,7 +214,7 @@ export default async function PhotoPage({
         </div>
       </>
     );
-  } catch (error) {
+  } catch (_error) {
     notFound();
   }
 }

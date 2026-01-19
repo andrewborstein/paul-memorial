@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
-import { serverFetch } from '@/lib/utils';
 import PhotoImage from '@/components/PhotoImage';
 import { getFullSizeUrl } from '@/lib/cloudinary';
 import { readMemory } from '@/lib/data';
@@ -21,7 +20,7 @@ async function getPhotoData(memoryId: string, photoId: string) {
     const photoIndex = memory.photos.findIndex((p) => p.public_id === photoId);
 
     return { memory, photo, photoIndex };
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Not found');
   }
 }
@@ -148,7 +147,7 @@ export default async function PhotoPage({
         </PageContainer>
       </>
     );
-  } catch (error) {
+  } catch (_error) {
     notFound();
   }
 }

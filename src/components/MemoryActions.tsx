@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { canEditMemory, isSuperUser, getCurrentUser } from '@/lib/user';
 
 interface MemoryActionsProps {
@@ -17,9 +16,7 @@ export default function MemoryActions({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
-  const [isSuper, setIsSuper] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const router = useRouter();
 
   // Check permissions on client side only
   useEffect(() => {

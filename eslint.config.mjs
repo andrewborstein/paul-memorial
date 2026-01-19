@@ -16,7 +16,15 @@ const eslintConfig = [
     rules: {
       // Relax TypeScript rules for development
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'no-unused-vars': 'off', // Turn off base rule in favor of @typescript-eslint version
 
       // Relax Next.js rules
       '@next/next/no-img-element': 'off',

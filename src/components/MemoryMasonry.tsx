@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { getCurrentUser } from '@/lib/user';
-import ImageWithFallback from '@/components/ImageWithFallback';
 import MemoryMetadata from '@/components/MemoryMetadata';
 import SquareThumb from './SquareThumb';
 

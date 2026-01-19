@@ -22,9 +22,3 @@ export const CLOUDINARY_IMAGES = {
 export type CloudinaryImageKey = keyof typeof CLOUDINARY_IMAGES;
 
 // Helper function to get image URL with version
-export function getImageUrl(
-  key: CloudinaryImageKey,
-  version?: string | number
-) {
-  return CLOUDINARY_IMAGES[key];
-}

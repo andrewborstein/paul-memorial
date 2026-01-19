@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import ImageWithFallback from './ImageWithFallback';
 import SquareThumb from './SquareThumb';
 
 interface Photo {

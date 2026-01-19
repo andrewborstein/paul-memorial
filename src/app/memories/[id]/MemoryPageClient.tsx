@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import PhotoGrid from '@/components/PhotoGrid';
@@ -23,8 +22,6 @@ export default function MemoryPageClient({
   timestamp,
 }: MemoryPageClientProps) {
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(showThanks);
-  const router = useRouter();
-
   const displayTitle = memory.title || memory.name;
 
   // Clean up showThanks parameter immediately when modal should be shown

@@ -11,12 +11,6 @@ interface ContactInfoModalProps {
   description?: string;
 }
 
-interface UserInfo {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
 export default function ContactInfoModal({
   isOpen,
   onClose,
@@ -145,7 +139,7 @@ export default function ContactInfoModal({
       await onSubmit(fullName, cleanEmail);
       // Modal will be closed by parent component after successful submission
       // (or we'll redirect away, so no need to reset states)
-    } catch (error) {
+    } catch (_error) {
       // Reset only form validation state, keep creating memory state
       setIsSubmitting(false);
     }
@@ -168,7 +162,7 @@ export default function ContactInfoModal({
       await onSubmit(fullName, cleanEmail);
       // Modal will be closed by parent component after successful submission
       // (or we'll redirect away, so no need to reset states)
-    } catch (error) {
+    } catch (_error) {
       // Reset only form validation state, keep creating memory state
       setIsSubmitting(false);
     }

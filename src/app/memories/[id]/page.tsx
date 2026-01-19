@@ -1,13 +1,5 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { cldUrl } from '@/lib/cloudinary';
-import PageContainer from '@/components/PageContainer';
-import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
-import PhotoGrid from '@/components/PhotoGrid';
-import MemoryActions from '@/components/MemoryActions';
-import MemoryMetadata from '@/components/MemoryMetadata';
-import LinkifiedText from '@/components/LinkifiedText';
 import MemoryPageClient from './MemoryPageClient';
 
 import type { MemoryDetail } from '@/types/memory';
@@ -54,7 +46,6 @@ export default async function MemoryPage({
   try {
     const memory = await getMemory(id, t);
     console.log('MemoryPage: Successfully loaded memory:', memory.id);
-    const displayTitle = memory.title || memory.name;
 
     return (
       <MemoryPageClient

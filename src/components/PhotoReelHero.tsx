@@ -46,7 +46,6 @@ export default function PhotoReelHero() {
   const [startingIndex, setStartingIndex] = useState(0);
   const [row1Photos, setRow1Photos] = useState<number[]>([]);
   const [row2Photos, setRow2Photos] = useState<number[]>([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [visiblePhotoCount, setVisiblePhotoCount] = useState(8); // Default for SSR
   const [increment, setIncrement] = useState(8); // Default for SSR
   const [timerDuration, setTimerDuration] = useState(5000); // Default for SSR

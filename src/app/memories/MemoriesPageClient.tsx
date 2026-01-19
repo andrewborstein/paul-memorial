@@ -100,8 +100,6 @@ function MemoriesPageContent() {
     return () => ac.abort();
   }, [searchParams]); // Add searchParams dependency to refetch when URL changes
 
-  const hasMemories = (memories?.length ?? 0) > 0;
-
   // Filter memories if "my" filter is applied
   const filteredMemories = useMemo(() => {
     if (!memories || !isLoaded) return memories;

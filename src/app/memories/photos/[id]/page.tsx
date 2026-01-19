@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation';
 import PageContainer from '@/components/PageContainer';
 import { serverFetch } from '@/lib/utils';
 import PhotoImage from '@/components/PhotoImage';
-import type { MemoryDetail } from '@/types/memory';
-
 // Make this page dynamic to avoid build-time API calls
 export const dynamic = 'force-dynamic';
 
@@ -122,7 +120,7 @@ export default async function PhotoPage({
         </div>
       </PageContainer>
     );
-  } catch (error) {
+  } catch (_error) {
     notFound();
   }
 }

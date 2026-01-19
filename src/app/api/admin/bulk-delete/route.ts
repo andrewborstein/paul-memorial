@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { serverFetch } from '@/lib/utils';
 import { revalidateTag } from 'next/cache';
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(_req: NextRequest) {
   try {
     // First, get all memories
     const memoriesResponse = await serverFetch('/api/memories');

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentUser } from '@/lib/user';
 
 interface MemoryMetadataProps {
   date: string;
@@ -12,14 +11,10 @@ interface MemoryMetadataProps {
 export default function MemoryMetadata({
   date,
   creatorEmail,
-  creatorName,
 }: MemoryMetadataProps) {
-  const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setIsCurrentUser(currentUser?.email === creatorEmail);
     setIsLoaded(true);
   }, [creatorEmail]);
 

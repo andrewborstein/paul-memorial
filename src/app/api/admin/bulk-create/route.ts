@@ -326,7 +326,7 @@ const testMemories = [
   },
 ];
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     let createdCount = 0;
 

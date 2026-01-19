@@ -26,7 +26,7 @@ export default function DeleteMemoryButton({
       } else {
         alert('Failed to delete memory');
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to delete memory');
     } finally {
       setIsDeleting(false);

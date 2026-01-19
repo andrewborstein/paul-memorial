@@ -5,7 +5,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import ContactInfoModal from './ContactInfoModal';
 import UserStatusDisplay from './UserStatusDisplay';
 import { useRouter } from 'next/navigation';
-import type { MemoryDetail, MemoryPhoto } from '@/types/memory';
+import type { MemoryDetail } from '@/types/memory';
 import {
   setCurrentUser,
   getCurrentUser,
@@ -255,7 +255,6 @@ export default function CreateMemoryForm({
   >(null);
   const [showTitleField, setShowTitleField] = React.useState(false);
   const [showPhotoModal, setShowPhotoModal] = React.useState(false);
-  const [isDragging, setIsDragging] = React.useState(false);
   const [createdAt, setCreatedAt] = React.useState(memory?.created_at || '');
   const [isRestoringState, setIsRestoringState] = React.useState(false);
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);

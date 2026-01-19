@@ -55,7 +55,7 @@ export default function ProfilePage() {
       setCurrentUser(currentUser.email, name.trim());
       setMessage('Profile updated successfully!');
       setIsEditing(false);
-    } catch (error) {
+    } catch (_error) {
       setMessage('Error updating profile');
     } finally {
       setIsSaving(false);

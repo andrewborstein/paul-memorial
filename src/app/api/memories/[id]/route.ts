@@ -1,4 +1,3 @@
-import type { MemoryDetail } from '@/types/memory';
 import { readMemory } from '@/lib/data';
 
 export async function GET(

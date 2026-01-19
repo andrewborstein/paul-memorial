@@ -53,7 +53,7 @@ export default function SignInModal({
       await onSubmit(name.trim(), email.trim().toLowerCase());
       // Modal will be closed by parent component after successful submission
       // (or we'll redirect away, so no need to reset states)
-    } catch (error) {
+    } catch (_error) {
       // Reset only form validation state, keep creating memory state
       // since we might retry or show error state
       setIsSubmitting(false);

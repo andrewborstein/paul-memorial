@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { cldUrl } from '@/lib/cloudinary';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';

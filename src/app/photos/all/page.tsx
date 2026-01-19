@@ -2,7 +2,6 @@ import Link from 'next/link';
 import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import { serverFetch } from '@/lib/utils';
-import ImageWithFallback from '@/components/ImageWithFallback';
 import type { MemoryIndexItem, MemoryDetail } from '@/types/memory';
 import SquareThumb from '@/components/SquareThumb';
 import { SimpleHero } from '@/components/Hero';

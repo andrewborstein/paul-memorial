@@ -11,7 +11,6 @@ interface ThankYouModalProps {
 export default function ThankYouModal({
   isOpen,
   onClose,
-  memoryId,
   timestamp,
 }: ThankYouModalProps) {
   useEffect(() => {
