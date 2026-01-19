@@ -41,7 +41,7 @@ export default function RootLayout({
   const isSignedIn = isLoaded && !!currentUser;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="preconnect"
