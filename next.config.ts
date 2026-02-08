@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Keep if you use Server Actions (unrelated to images)
+  outputFileTracingIncludes: {
+    '/*': ['./src/data/**/*'],
+    '/api/**/*': ['./src/data/**/*'],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '25mb',

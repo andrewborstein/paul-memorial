@@ -7,35 +7,18 @@ import PhotoGrid from '@/components/PhotoGrid';
 import MemoryActions from '@/components/MemoryActions';
 import MemoryMetadata from '@/components/MemoryMetadata';
 import LinkifiedText from '@/components/LinkifiedText';
-import ThankYouModal from '@/components/ThankYouModal';
 import type { MemoryDetail } from '@/types/memory';
 
 interface MemoryPageClientProps {
   memory: MemoryDetail;
-  showThanks: boolean;
   timestamp: string;
 }
 
 export default function MemoryPageClient({
   memory,
-  showThanks,
   timestamp,
 }: MemoryPageClientProps) {
-  const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(showThanks);
   const displayTitle = memory.title || memory.name;
-
-  // Clean up showThanks parameter immediately when modal should be shown
-  useEffect(() => {
-    if (showThanks) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('showThanks');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [showThanks]);
-
-  const handleCloseThankYouModal = () => {
-    setIsThankYouModalOpen(false);
-  };
 
   return (
     <>
@@ -93,14 +76,6 @@ export default function MemoryPageClient({
           )}
         </div>
       </PageContainer>
-
-      {/* Thank You Modal */}
-      <ThankYouModal
-        isOpen={isThankYouModalOpen}
-        onClose={handleCloseThankYouModal}
-        memoryId={memory.id}
-        timestamp={timestamp}
-      />
     </>
   );
 }

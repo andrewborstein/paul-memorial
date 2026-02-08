@@ -28,31 +28,19 @@ export default async function MemoryPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ t?: string; showThanks?: string }>;
+  searchParams?: Promise<{ t?: string }>;
 }) {
   const { id } = await params;
   const params2 = await searchParams;
   const t = params2?.t;
-  const showThanks = params2?.showThanks === 'true';
-  console.log(
-    'MemoryPage: Attempting to load memory with ID:',
-    id,
-    't:',
-    t,
-    'showThanks:',
-    showThanks
-  );
+  console.log('MemoryPage: Attempting to load memory with ID:', id, 't:', t);
 
   try {
     const memory = await getMemory(id, t);
     console.log('MemoryPage: Successfully loaded memory:', memory.id);
 
     return (
-      <MemoryPageClient
-        memory={memory}
-        showThanks={showThanks}
-        timestamp={t || memory.updated_at}
-      />
+      <MemoryPageClient memory={memory} timestamp={t || memory.updated_at} />
     );
   } catch (error) {
     console.error('MemoryPage: Error loading memory:', error);

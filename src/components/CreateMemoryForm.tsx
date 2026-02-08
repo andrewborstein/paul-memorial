@@ -833,7 +833,7 @@ export default function CreateMemoryForm({
     const { id, updated_at } = await r.json();
     console.log(
       'Memory created successfully, navigating to:',
-      `/memories/${id}?t=${updated_at}&showThanks=true`
+      `/memories/success`
     );
 
     // Clear saved form state on successful publish
@@ -842,15 +842,19 @@ export default function CreateMemoryForm({
     }
 
     if (isEditMode) {
-      // Force hard reload to memory page to clear any cached photo URLs
-      window.location.replace(`/memories/${id}?t=${updated_at}`);
+      // For edits, we still redirect to the page, but let's add a "pending=true" param
+      // so the page can show a similar warning if it didn't update yet.
+      // But actually, for safety, let's just send them to the success page too?
+      // No, for edits, usually users want to see it.
+      // Let's stick to the success page for NEW memories for now as that's the main confusion point.
+      // Actually, user said "Users are almost never going to add new stories, or update them".
+      // Let's be consistent and safe.
+      window.location.replace(`/memories/success?action=updated`);
     } else {
-      // Add 500ms delay before navigating to new memory page
+      // Add 500ms delay before navigating
       await new Promise((resolve) => setTimeout(resolve, 500));
-      // Navigate to the new memory page with thank you modal
-      window.location.replace(
-        `/memories/${id}?t=${updated_at}&showThanks=true`
-      );
+      // Navigate to the success page instead of the 404ing memory page
+      window.location.replace(`/memories/success`);
     }
   }
 

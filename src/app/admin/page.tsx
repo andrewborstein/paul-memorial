@@ -15,11 +15,8 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isSuper, setIsSuper] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [customJson, setCustomJson] = useState('');
-  const [isCreatingCustom, setIsCreatingCustom] = useState(false);
   const [users, setUsers] = useState([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
@@ -54,74 +51,6 @@ export default function AdminPage() {
     clearSuperUser();
     setMessage('Super user mode deactivated');
     setIsSuper(false);
-  };
-
-  const handleBulkCreate = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/admin/bulk-create', {
-        method: 'POST',
-      });
-      const result = await response.json();
-      setMessage(`Created ${result.count} test memories`);
-    } catch (_error) {
-      setMessage('Error creating test data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (!confirm('Are you sure? This will delete ALL memories!')) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/admin/bulk-delete', {
-        method: 'DELETE',
-      });
-      const result = await response.json();
-      setMessage(`Deleted ${result.count} memories`);
-    } catch (_error) {
-      setMessage('Error deleting memories');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCustomBulkCreate = async () => {
-    if (!customJson.trim()) {
-      setMessage('Please paste JSON data');
-      return;
-    }
-
-    setIsCreatingCustom(true);
-    try {
-      const memories = JSON.parse(customJson);
-      if (!Array.isArray(memories)) {
-        setMessage('JSON must be an array of memory objects');
-        return;
-      }
-
-      const response = await fetch('/api/admin/bulk-create-custom', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ memories }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setMessage(`Created ${result.count} custom memories`);
-        setCustomJson('');
-      } else {
-        setMessage(result.message || 'Error creating custom memories');
-      }
-    } catch (_error) {
-      setMessage('Invalid JSON format');
-    } finally {
-      setIsCreatingCustom(false);
-    }
   };
 
   const loadUsers = async () => {
@@ -288,69 +217,6 @@ export default function AdminPage() {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {isSuper && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
-            <h2 className="text-lg font-medium mb-4">Bulk Data Management</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Create test data or clear all memories for testing.
-            </p>
-
-            <div className="space-y-3">
-              <button
-                onClick={handleBulkCreate}
-                disabled={isLoading}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? 'Creating...' : 'Create 32 Test Memories'}
-              </button>
-
-              <button
-                onClick={handleBulkDelete}
-                disabled={isLoading}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? 'Deleting...' : 'Delete ALL Memories'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {isSuper && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
-            <h2 className="text-lg font-medium mb-4">Custom Bulk Create</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Paste JSON array of memory objects. Each memory should have: name,
-              email, body, title (optional), photo_count, created_at (optional).
-            </p>
-
-            <div className="space-y-3">
-              <textarea
-                value={customJson}
-                onChange={(e) => setCustomJson(e.target.value)}
-                placeholder={`[
-  {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "title": "My Memory",
-    "body": "This is my memory about Paul...",
-    "photo_count": 0,
-    "created_at": "2024-01-15T10:30:00.000Z"
-  }
-]`}
-                className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-              />
-
-              <button
-                onClick={handleCustomBulkCreate}
-                disabled={isCreatingCustom || !customJson.trim()}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {isCreatingCustom ? 'Creating...' : 'Create Custom Memories'}
-              </button>
             </div>
           </div>
         )}

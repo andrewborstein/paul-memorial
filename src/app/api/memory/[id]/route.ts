@@ -3,18 +3,14 @@ import {
   immutableUpdateMemory,
   deleteMemoryAndIndex,
   readBlobJson,
+  deleteRedirect,
 } from '@/lib/data';
-import { del } from '@vercel/blob';
 import {
   warmUpImages,
   getHeroImageUrl,
   getGridImageUrl,
 } from '@/lib/cloudinary';
-import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
-
-const k = (key: string) =>
-  process.env.BLOB_PREFIX ? `${process.env.BLOB_PREFIX}/${key}` : key;
 
 export async function GET(
   req: Request,
@@ -186,12 +182,8 @@ export async function DELETE(
 
     // Also delete the redirect pointer if it exists
     if (actualId !== id) {
-      const token =
-        process.env.BLOB_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-      if (token) {
-        await del(k(`redirects/${id}.json`), { token }).catch(() => {});
-        console.log('Deleted redirect pointer:', id);
-      }
+      await deleteRedirect(id);
+      console.log('Deleted redirect pointer:', id);
     }
 
     // TODO: Delete photos from Cloudinary

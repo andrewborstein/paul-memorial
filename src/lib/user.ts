@@ -1,38 +1,3 @@
-import { readBlobJson, writeBlobJson } from './data';
-
-const USERS_KEY = 'users.json';
-
-export interface User {
-  email: string;
-  name: string;
-  createdAt: string;
-}
-
-// Server-side Blob functions
-export async function readUsers(): Promise<User[]> {
-  return (await readBlobJson<User[]>(USERS_KEY)) ?? [];
-}
-
-export async function writeUsers(users: User[]) {
-  await writeBlobJson(USERS_KEY, users);
-}
-
-export async function createUser(email: string, name: string): Promise<User> {
-  const users = await readUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-
-  const newUser: User = {
-    email: normalizedEmail,
-    name: name.trim(),
-    createdAt: new Date().toISOString(),
-  };
-
-  users.push(newUser);
-  await writeUsers(users);
-
-  return newUser;
-}
-
 // Client-side user management functions
 export interface UserInfo {
   email: string;
