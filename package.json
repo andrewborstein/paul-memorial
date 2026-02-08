@@ -27,7 +27,7 @@
     "dotenv": "^17.2.3",
     "masonry-layout": "^4.2.2",
     "nanoid": "^5.1.5",
-    "next": "15.4.6",
+    "next": "15.4.10",
     "p-limit": "^7.1.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
