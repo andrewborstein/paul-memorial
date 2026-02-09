@@ -1,13 +1,13 @@
-# Paul Memorial — Next.js + Notion + Cloudinary
+# Paul Memorial — Next.js + GitHub Storage + Cloudinary
 
-A ready-to-deploy memorial site that allows visitors to share tributes, photos, and memories.
+A memorial site that allows visitors to share memories and photos, with data stored directly in Git.
 
 ## Features
 
-- **Clean, minimal memorial site** with About, Events, Tributes, Memories, and Donate pages
-- **Tribute submissions** with name, email, message, photos, and YouTube links — no account required
+- **Clean, minimal memorial site** with About, Events, Memories, and Donate pages
+- **Memory submissions** with name, email, message, and photos — no account required
 - **Image optimization** via Cloudinary with automatic compression and format optimization
-- **Flexible data storage** - starts with Notion for easy setup, can export to JSON files for future-proofing
+- **Git-based storage** for long-term durability and easy backup
 - **Anti-spam protection** with Cloudflare Turnstile
 - **Modern tech stack** - Next.js 15, React 19, Tailwind CSS v4
 
@@ -26,10 +26,10 @@ A ready-to-deploy memorial site that allows visitors to share tributes, photos, 
    # Edit .env.local with your actual values
    ```
 
-3. **Required setup** (see PROJECT_DIRECTIONS.MD for detailed instructions):
+3. **Required setup** (see docs/PROJECT_DIRECTIONS.MD for detailed instructions):
    - Create a Cloudinary account and unsigned upload preset
-   - Create a Notion database for tributes
    - Set up Cloudflare Turnstile for anti-spam
+   - Configure GitHub token (for direct-to-git writes)
    - Configure environment variables
 
 4. **Run development server**
@@ -42,24 +42,14 @@ A ready-to-deploy memorial site that allows visitors to share tributes, photos, 
    - Deploy to Vercel (recommended) or any Next.js-compatible platform
    - Set environment variables in your deployment platform
 
-## Data Sources
+## Data Storage
 
-The site supports two data sources:
+- **Primary store:** `src/data/memories/*.json`
+- **Redirects:** `src/data/redirects/*.json` (used for immutable edits)
+- **Backups:** `backups/initial-migration-snapshot/`
 
-- **Notion** (default) - Easy to set up, great for MVP
-- **JSON files** - Future-proof, works with static hosting
-
-Switch between them by setting `DATA_SOURCE=notion` or `DATA_SOURCE=file` in your environment.
-
-## Export to JSON
-
-When ready to move away from Notion:
-
-```bash
-npm run export:json
-```
-
-This exports all tributes to `/data/tributes/*.json` files, then set `DATA_SOURCE=file` for a completely static site.
+Writes (create/edit/delete) are committed to GitHub via the GitHub API and trigger a redeploy.
+Reads are local JSON during runtime.
 
 ## Project Structure
 
@@ -69,15 +59,14 @@ src/
 │   ├── api/               # API routes
 │   ├── about/             # About page
 │   ├── events/            # Events page
-│   ├── tributes/          # Tributes page with form
-│   ├── memories/          # Media gallery
-│   └── donate/            # Donation page
+│   ├── memories/          # Memories pages
+│   └── photos/            # Photo pages
 ├── components/            # React components
 └── lib/                   # Utilities and integrations
 data/
-└── tributes/             # JSON export directory
-scripts/
-└── export-notion-to-json.ts  # Export script
+└── memories/             # Legacy folder (not used)
+backups/
+└── initial-migration-snapshot/  # Snapshot backup
 ```
 
 ## Environment Variables
@@ -91,6 +80,9 @@ This is a memorial site - please be respectful and thoughtful in any contributio
 ## License
 
 Private memorial project.
+
 # Mon Aug 18 14:26:21 EDT 2025
+
 # Mon Aug 18 14:49:05 EDT 2025 - Force redeploy for debugging
+
 # Mon Aug 18 18:09:53 EDT 2025
