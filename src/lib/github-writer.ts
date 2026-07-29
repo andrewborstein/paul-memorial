@@ -1,4 +1,16 @@
 import { Octokit } from '@octokit/rest';
+import { posix } from 'path';
+
+/**
+ * Resolve a caller-supplied filename to a repo path.
+ *
+ * Callers pass things like "abc.json" or "../redirects/abc.json". The latter
+ * must be normalised here: Octokit percent-encodes the path, and GitHub
+ * rejects an encoded ".." with "path contains a malformed path component".
+ */
+function repoPathFor(filename: string) {
+  return posix.normalize(`src/data/memories/${filename}`);
+}
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
@@ -35,8 +47,8 @@ export async function saveMemoryToRepo(filename: string, content: object) {
     return;
   }
 
-  const path = `src/data/memories/${filename}`;
-  const message = `Add/Update memory: ${filename}`;
+  const path = repoPathFor(filename);
+  const message = `Add/Update memory: ${posix.basename(filename)}`;
   const jsonContent = JSON.stringify(content, null, 2);
   const buffer = Buffer.from(jsonContent, 'utf-8');
   const contentBase64 = buffer.toString('base64');
@@ -108,8 +120,8 @@ export async function deleteFileFromRepo(filename: string) {
     return;
   }
 
-  const path = `src/data/memories/${filename}`;
-  const message = `Delete memory: ${filename}`;
+  const path = repoPathFor(filename);
+  const message = `Delete memory: ${posix.basename(filename)}`;
 
   try {
     // Get SHA first (required for delete)

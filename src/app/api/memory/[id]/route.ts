@@ -4,6 +4,7 @@ import {
   deleteMemoryAndIndex,
   readBlobJson,
   deleteRedirect,
+  MemoryStorageError,
 } from '@/lib/data';
 import {
   warmUpImages,
@@ -195,6 +196,14 @@ export async function DELETE(
     return new Response(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting memory:', error);
+
+    if (error instanceof MemoryStorageError) {
+      return new Response(
+        "This memory couldn't be deleted right now. Please try again in a few minutes.",
+        { status: 503 }
+      );
+    }
+
     return new Response('Internal server error', { status: 500 });
   }
 }

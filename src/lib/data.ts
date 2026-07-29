@@ -196,17 +196,31 @@ export async function createMemory(
 export async function deleteMemory(id: string) {
   const fileName = `${id}.json`;
 
-  // Local delete (always try)
-  const filePath = path.join(MEMORIES_DIR, fileName);
-  if (fs.existsSync(filePath)) {
-    await fs.promises.unlink(filePath);
+  // Local delete (always try). The deployment filesystem is read-only on
+  // Vercel, so this throws EROFS in production even though the file is right
+  // there in the bundle -- same reason createMemory guards its local write.
+  // Left unguarded, it aborted before the GitHub delete below ever ran, so
+  // deletes 500'd and edits left the old memory behind as a duplicate.
+  try {
+    const filePath = path.join(MEMORIES_DIR, fileName);
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath);
+    }
+  } catch (e) {
+    console.warn(
+      'Could not delete from local filesystem (expected in Vercel Prod)',
+      e
+    );
   }
 
-  // GitHub delete (if configured)
+  // GitHub is the real store, so a failure here means nothing was deleted.
   try {
     await deleteFileFromRepo(fileName);
   } catch (e) {
-    console.warn('Failed to delete from GitHub (might just be local dev):', e);
+    console.error('Failed to delete from GitHub:', e);
+    throw new MemoryStorageError(`Failed to delete ${fileName} from GitHub`, {
+      cause: e,
+    });
   }
 
   invalidateMemoryCache(id);
@@ -216,8 +230,18 @@ export async function deleteMemoryAndIndex(id: string) {
   await deleteMemory(id);
 }
 export async function deleteRedirect(id: string) {
-  const filePath = path.join(REDIRECTS_DIR, `${id}.json`);
-  if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+  try {
+    const filePath = path.join(REDIRECTS_DIR, `${id}.json`);
+    if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
+  } catch (e) {
+    console.warn('Could not delete redirect locally (read-only in prod)', e);
+  }
+
+  try {
+    await deleteFileFromRepo(`../redirects/${id}.json`);
+  } catch (e) {
+    console.warn('Could not delete redirect from GitHub:', e);
+  }
 }
 // This function was used for "Edit" - moving to new ID
 export async function immutableUpdateMemory(
@@ -259,16 +283,28 @@ export async function immutableUpdateMemory(
     );
   } catch (e) {}
 
-  // Also try to save redirect to GitHub?
+  // Redirect old id -> new id, so links shared before the edit keep working.
   try {
     await saveMemoryToRepo(`../redirects/${oldId}.json`, {
       id: newDoc.id,
       updated_at: newDoc.updated_at,
     });
-  } catch (e) {}
+  } catch (e) {
+    // Not fatal -- the edit itself succeeded -- but the old URL will 404.
+    console.error('Failed to write redirect for edited memory:', oldId, e);
+  }
 
-  // Delete old
-  await deleteMemory(oldId);
+  // Delete old. If this fails the edit still stands, and reporting failure
+  // here would only tempt a retry, which creates another duplicate.
+  try {
+    await deleteMemory(oldId);
+  } catch (e) {
+    console.error(
+      'Edited memory but could not remove the original -- duplicate left behind:',
+      oldId,
+      e
+    );
+  }
 
   return newDoc;
 }
