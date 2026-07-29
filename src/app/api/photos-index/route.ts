@@ -5,7 +5,10 @@ import pLimit from 'p-limit';
 import { aggregateIndex, readMemory } from '@/lib/data';
 
 export const dynamic = 'force-static';
-export const revalidate = 300;
+// 30s, not 300s: this index is what /photos renders from, and a newly
+// submitted memory's photos stay invisible for the whole window. Kept cached
+// (unlike /api/memories) because building it reads every memory detail.
+export const revalidate = 30;
 
 type PhotosIndexItem = {
   public_id: string;
@@ -44,7 +47,7 @@ const buildPhotosIndexCached = cache(
     return photos;
   },
   ['photos-index-cache-key'],
-  { tags: ['photos-index'], revalidate: 300 }
+  { tags: ['photos-index'], revalidate: 30 }
 );
 
 // ---------- Fresh builder (used when ?t=..., skips caches) ----------
@@ -94,7 +97,7 @@ export async function GET(req: Request) {
     { count: photos.length, photos },
     {
       headers: {
-        'Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
+        'Cache-Control': 's-maxage=30, stale-while-revalidate=300',
       },
     }
   );
