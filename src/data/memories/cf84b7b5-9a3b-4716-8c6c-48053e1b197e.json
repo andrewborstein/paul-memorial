@@ -1,0 +1,10 @@
+{
+  "name": "Lifecycle Test",
+  "email": "life@example.com",
+  "title": "Original title",
+  "body": "Original body text.",
+  "photos": [],
+  "id": "cf84b7b5-9a3b-4716-8c6c-48053e1b197e",
+  "created_at": "2026-07-29T15:51:15.489Z",
+  "updated_at": "2026-07-29T15:51:15.489Z"
+}
