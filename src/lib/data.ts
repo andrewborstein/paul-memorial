@@ -18,6 +18,14 @@ if (process.env.NODE_ENV === 'development' && !fs.existsSync(REDIRECTS_DIR)) {
   fs.mkdirSync(REDIRECTS_DIR, { recursive: true });
 }
 
+/** Thrown when a memory could not be persisted to the Git store. */
+export class MemoryStorageError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'MemoryStorageError';
+  }
+}
+
 // Memory cache (in-memory, per lambda instance)
 const memoryCache = new Map<
   string,
@@ -176,9 +184,9 @@ export async function createMemory(
     console.error('Failed to save to GitHub:', e);
     // Throwing error might be good to alert user, but if FS worked (in dev), maybe not?
     // In prod, if GitHub fails, data is lost.
-    throw new Error(
-      'Failed to save memory to persistent storage (GitHub). Please try again or contact admin.'
-    );
+    throw new MemoryStorageError('Failed to save memory to GitHub', {
+      cause: e,
+    });
   }
 
   invalidateMemoryCache(id);

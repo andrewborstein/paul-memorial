@@ -1,10 +1,11 @@
-import { createMemory } from '@/lib/data';
+import { createMemory, MemoryStorageError } from '@/lib/data';
 import {
   warmUpImages,
   getHeroImageUrl,
   getGridImageUrl,
 } from '@/lib/cloudinary';
 import { revalidateTag } from 'next/cache';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 type PhotoInput = {
   public_id: string;
@@ -28,6 +29,19 @@ export async function POST(req: Request) {
 
     if (!body?.body?.trim()) {
       return new Response('Memory is required', { status: 400 });
+    }
+
+    const captcha = await verifyTurnstile(
+      body.turnstileToken,
+      req.headers.get('cf-connecting-ip') ??
+        req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    );
+    if (!captcha.ok) {
+      console.warn('[memory] Turnstile rejected submission:', captcha.reason);
+      return new Response(
+        "We couldn't verify that you're human. Please reload the page and try again.",
+        { status: 403 }
+      );
     }
 
     const photos: PhotoInput[] = (body.photos || [])
@@ -54,7 +68,9 @@ export async function POST(req: Request) {
       ...(body.created_at && { created_at: body.created_at }),
     };
 
-    console.log('Creating memory with data:', JSON.stringify(detail, null, 2));
+    console.log(
+      `Creating memory from "${detail.name}" with ${detail.photos.length} photo(s)`
+    );
 
     const createdMemory = await createMemory(detail);
     console.log('Memory created successfully with ID:', createdMemory.id);
@@ -85,6 +101,18 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error('Error creating memory:', error);
-    return new Response('Internal server error', { status: 500 });
+
+    if (error instanceof MemoryStorageError) {
+      return new Response(
+        "Your memory couldn't be saved right now — this is a problem on our end, not yours. " +
+          'Please copy your text somewhere safe and try again in a few minutes.',
+        { status: 503 }
+      );
+    }
+
+    return new Response(
+      'Something went wrong while saving your memory. Please copy your text somewhere safe and try again.',
+      { status: 500 }
+    );
   }
 }
