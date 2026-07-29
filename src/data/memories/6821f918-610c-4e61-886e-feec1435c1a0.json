@@ -1,0 +1,10 @@
+{
+  "name": "Test Submitter",
+  "email": "test@example.com",
+  "title": "Branch-scoped test",
+  "body": "Verifying the submission pipeline end to end.",
+  "photos": [],
+  "id": "6821f918-610c-4e61-886e-feec1435c1a0",
+  "created_at": "2026-07-29T15:39:26.853Z",
+  "updated_at": "2026-07-29T15:39:26.853Z"
+}
