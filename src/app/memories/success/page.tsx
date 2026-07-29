@@ -3,20 +3,53 @@ import PageContainer from '@/components/PageContainer';
 import PageHeader from '@/components/PageHeader';
 import PhotoReelHero from '@/components/PhotoReelHero';
 
-export default function MemorySuccessPage() {
+// Every change -- create, edit, delete -- is published by a rebuild, so none
+// of them are visible straight away. Each one lands here so nobody is sent
+// back to a page still showing the old version, thinking it didn't work.
+const COPY = {
+  created: {
+    title: 'Thanks for your contribution',
+    intro: "Your memory means the world to Paul's family and loved ones.",
+    processing: 'to process your contribution and display it on the site.',
+    checkBack: 'Please check back in a few minutes to see your memory published.',
+  },
+  updated: {
+    title: 'Your changes are saved',
+    intro: 'Thanks for keeping your memory up to date.',
+    processing: 'for your changes to appear on the site.',
+    checkBack:
+      'Until then you may still see the previous version. That is expected.',
+  },
+  deleted: {
+    title: 'Your memory has been removed',
+    intro: 'The memory has been deleted and will disappear from the site.',
+    processing: 'for the change to take effect across the site.',
+    checkBack:
+      'Until then it may still appear in the list of memories. That is expected.',
+  },
+} as const;
+
+type Action = keyof typeof COPY;
+
+export default async function MemorySuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ action?: string }>;
+}) {
+  const { action } = await searchParams;
+  const copy = COPY[(action as Action) ?? 'created'] ?? COPY.created;
+  const isDeleted = action === 'deleted';
+
   return (
     <>
       <PhotoReelHero />
       <PageContainer>
         <div className="max-w-2xl mx-auto py-12 text-center">
           <PageHeader
-            title="Thanks for your contribution"
+            title={copy.title}
             description={
               <div className="space-y-8 text-lg text-gray-700">
-                <p>
-                  Your memory means the world to Paul&apos;s family and loved
-                  ones.
-                </p>
+                <p>{copy.intro}</p>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left space-y-3">
                   <h3 className="font-semibold text-blue-900 flex items-center gap-2">
@@ -36,21 +69,19 @@ export default function MemorySuccessPage() {
                     Processing Time
                   </h3>
                   <p className="text-sm text-blue-800">
-                    It usually takes <strong>1-3 minutes</strong> for the system
-                    to process your contribution and display it on the site.
+                    It usually takes <strong>1-3 minutes</strong> {copy.processing}
                   </p>
-                  <p className="text-sm text-blue-800">
-                    Please check back in a few minutes to see your memory
-                    published.
-                  </p>
+                  <p className="text-sm text-blue-800">{copy.checkBack}</p>
                 </div>
 
                 <div className="space-y-4 text-base">
-                  <p>
-                    You can edit or delete the memory and its content (both text
-                    and photos) at any time on this device once it appears on
-                    the site.
-                  </p>
+                  {!isDeleted && (
+                    <p>
+                      You can edit or delete the memory and its content (both
+                      text and photos) at any time on this device once it
+                      appears on the site.
+                    </p>
+                  )}
                   <p>
                     Email{' '}
                     <a

@@ -62,12 +62,14 @@ export default function MemoryActions({
 
       if (res.ok) {
         console.log('Memory deleted successfully, redirecting...');
-        // Force a full page reload to ensure cache is cleared
-        window.location.href = '/memories';
+        // Not straight back to /memories: the deletion isn't published until
+        // the deploy finishes, so the memory is still listed there and it
+        // looks like the delete failed. The success page explains the wait.
+        window.location.replace('/memories/success?action=deleted');
       } else {
         const errorText = await res.text();
         console.error('Delete failed:', errorText);
-        alert('Failed to delete memory');
+        alert(errorText || 'Failed to delete memory');
       }
     } catch (error) {
       console.error('Error deleting memory:', error);
