@@ -3,7 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import type { MemoryDetail, MemoryIndexItem } from '@/types/memory';
-import { saveMemoryToRepo, deleteFileFromRepo } from './github-writer';
+import {
+  saveMemoryToRepo,
+  deleteFileFromRepo,
+  commitFiles,
+} from './github-writer';
 
 const DATA_DIR = path.join(process.cwd(), 'src/data');
 const MEMORIES_DIR = path.join(DATA_DIR, 'memories');
@@ -258,53 +262,35 @@ export async function immutableUpdateMemory(
     ...oldDocWithoutIds
   } = oldDoc;
 
-  // Create new
-  const newDoc = await createMemory({
+  const now = new Date().toISOString();
+  const newDoc: MemoryDetail = {
     ...oldDocWithoutIds,
     ...changes,
+    id: randomUUID(),
     created_at: changes.created_at || oldDoc.created_at,
-  });
+    updated_at: now,
+  };
+  const redirect = { id: newDoc.id, updated_at: now };
 
-  // Write redirect
+  // All three changes in ONE commit: write the new memory, point the old id
+  // at it, and remove the original. Done separately these were three pushes,
+  // and between deploys the site showed the memory twice -- or, if one failed
+  // partway, permanently.
   try {
-    if (!fs.existsSync(REDIRECTS_DIR))
-      await fs.promises.mkdir(REDIRECTS_DIR, { recursive: true });
-    const redirectPath = path.join(REDIRECTS_DIR, `${oldId}.json`);
-    await fs.promises.writeFile(
-      redirectPath,
-      JSON.stringify(
-        {
-          id: newDoc.id,
-          updated_at: newDoc.updated_at,
-        },
-        null,
-        2
-      )
-    );
-  } catch (e) {}
-
-  // Redirect old id -> new id, so links shared before the edit keep working.
-  try {
-    await saveMemoryToRepo(`../redirects/${oldId}.json`, {
-      id: newDoc.id,
-      updated_at: newDoc.updated_at,
+    await commitFiles(`Edit memory: ${oldId} -> ${newDoc.id}`, [
+      { path: `src/data/memories/${newDoc.id}.json`, content: newDoc },
+      { path: `src/data/redirects/${oldId}.json`, content: redirect },
+      { path: `src/data/memories/${oldId}.json`, delete: true },
+    ]);
+  } catch (e) {
+    console.error('Failed to commit edit to GitHub:', e);
+    throw new MemoryStorageError(`Failed to save edit of ${oldId}`, {
+      cause: e,
     });
-  } catch (e) {
-    // Not fatal -- the edit itself succeeded -- but the old URL will 404.
-    console.error('Failed to write redirect for edited memory:', oldId, e);
   }
 
-  // Delete old. If this fails the edit still stands, and reporting failure
-  // here would only tempt a retry, which creates another duplicate.
-  try {
-    await deleteMemory(oldId);
-  } catch (e) {
-    console.error(
-      'Edited memory but could not remove the original -- duplicate left behind:',
-      oldId,
-      e
-    );
-  }
+  invalidateMemoryCache(oldId);
+  invalidateMemoryCache(newDoc.id);
 
   return newDoc;
 }

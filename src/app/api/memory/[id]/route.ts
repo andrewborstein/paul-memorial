@@ -134,6 +134,15 @@ export async function PUT(
     });
   } catch (error) {
     console.error('Error updating memory:', error);
+
+    if (error instanceof MemoryStorageError) {
+      return new Response(
+        "Your changes couldn't be saved right now — this is a problem on our end, not yours. " +
+          'Please copy your text somewhere safe and try again in a few minutes.',
+        { status: 503 }
+      );
+    }
+
     return new Response('Internal server error', { status: 500 });
   }
 }
